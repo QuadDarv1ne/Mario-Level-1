@@ -8,8 +8,7 @@ SCREEN_SIZE = (SCREEN_WIDTH,SCREEN_HEIGHT)
 ORIGINAL_CAPTION = "Super Mario Bros 1-1"
 
 ## COLORS ##
-
-#            R    G    B
+#                R    G    B
 GRAY         = (100, 100, 100)
 NAVYBLUE     = ( 60,  60, 100)
 WHITE        = (255, 255, 255)
@@ -48,9 +47,7 @@ MAX_Y_VEL = 11
 MAX_RUN_SPEED = 800
 MAX_WALK_SPEED = 6
 
-
 #Mario States
-
 STAND = 'standing'
 WALK = 'walk'
 JUMP = 'jump'
@@ -62,20 +59,16 @@ FLAGPOLE = 'flag pole'
 WALKING_TO_CASTLE = 'walking to castle'
 END_OF_LEVEL_FALL = 'end of level fall'
 
-
 #GOOMBA Stuff
-
 LEFT = 'left'
 RIGHT = 'right'
 JUMPED_ON = 'jumped on'
 DEATH_JUMP = 'death jump'
 
 #KOOPA STUFF
-
 SHELL_SLIDE = 'shell slide'
 
 #BRICK STATES
-
 RESTING = 'resting'
 BUMPED = 'bumped'
 
@@ -83,26 +76,21 @@ BUMPED = 'bumped'
 OPENED = 'opened'
 
 #MUSHROOM STATES
-
 REVEAL = 'reveal'
 SLIDE = 'slide'
 
 #COIN STATES
-
 SPIN = 'spin'
 
 #STAR STATES
-
 BOUNCE = 'bounce'
 
 #FIRE STATES
-
 FLYING = 'flying'
 BOUNCING = 'bouncing'
 EXPLODING = 'exploding'
 
 #Brick and coin box contents
-
 MUSHROOM = 'mushroom'
 STAR = 'star'
 FIREFLOWER = 'fireflower'
@@ -113,12 +101,10 @@ LIFE_MUSHROOM = '1up_mushroom'
 FIREBALL = 'fireball'
 
 #LIST of ENEMIES
-
 GOOMBA = 'goomba'
 KOOPA = 'koopa'
 
 #LEVEL STATES
-
 FROZEN = 'frozen'
 NOT_FROZEN = 'not frozen'
 IN_CASTLE = 'in castle'
@@ -144,7 +130,6 @@ GAME_OVER = 'game over'
 FAST_COUNT_DOWN = 'fast count down'
 END_OF_LEVEL = 'end of level'
 
-
 #GAME INFO DICTIONARY KEYS
 COIN_TOTAL = 'coin total'
 SCORE = 'score'
@@ -169,9 +154,3 @@ WORLD_CLEAR = 'world clear'
 TIME_WARNING = 'time warning'
 SPED_UP_NORMAL = 'sped up normal'
 MARIO_INVINCIBLE = 'mario invincible'
-
-
-
-
-
-

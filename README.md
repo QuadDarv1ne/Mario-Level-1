@@ -13,7 +13,6 @@ Arrow keys for direction
 
 's' for action (fireball, run)
 
-
 DEPENDENCIES:
 
 Pygame 1.9.1 (Python 2)
@@ -31,3 +30,6 @@ http://www.youtube.com/watch?v=HBbzYKMfx5Y
 DISCLAIMER:
 
 This project is intended for non-commercial educational purposes.
+
+TODO: Version №1
+Дата проекта: 24.01.2023

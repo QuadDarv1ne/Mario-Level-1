@@ -11,8 +11,11 @@ import pygame as pg
 from data.main import main
 import cProfile
 
-
 if __name__=='__main__':
     main()
     pg.quit()
     sys.exit()
+
+# TODO: Версия №1
+# Дата проекта: 24.01.2023
+# Дуплей Максим Игоревич
