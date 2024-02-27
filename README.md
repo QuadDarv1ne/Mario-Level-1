@@ -23,12 +23,13 @@ To install dependencies for Python 2.x:
 
 	pip install -r requirements.txt
 
+Полный порт платформенной аркады Super Mario Bros. (LVL 1) на Python - BOOSTY:
+https://boosty.to/quadd4rv1n73/posts/a36219fa-5bae-4a34-bf0b-24baf9ff197f?share=post_link
+
 VIDEO DEMO:
-
 http://www.youtube.com/watch?v=HBbzYKMfx5Y
-   
-DISCLAIMER:
 
+DISCLAIMER:
 This project is intended for non-commercial educational purposes.
 
 TODO: Version №1
