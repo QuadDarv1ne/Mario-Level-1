@@ -452,7 +452,7 @@ class Level1(tools._State):
             elif checkpoint.name == '12':
                 self.state = c.IN_CASTLE
                 self.mario.kill()
-                self.mario.state == c.STAND
+                self.mario.state = c.STAND
                 self.mario.in_castle = True
                 self.overhead_info_display.state = c.FAST_COUNT_DOWN
 

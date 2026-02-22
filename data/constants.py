@@ -1,156 +1,237 @@
+"""
+Game constants and configuration values.
+
+This module contains all magic numbers and string constants used throughout
+the game, organized by category for easy reference and modification.
+"""
+from __future__ import annotations
+
 __author__ = 'justinarmstrong'
 
-SCREEN_HEIGHT = 600
-SCREEN_WIDTH = 800
+# =============================================================================
+# SCREEN SETTINGS
+# =============================================================================
+SCREEN_HEIGHT: int = 600
+SCREEN_WIDTH: int = 800
+SCREEN_SIZE: tuple[int, int] = (SCREEN_WIDTH, SCREEN_HEIGHT)
+ORIGINAL_CAPTION: str = "Super Mario Bros 1-1"
 
-SCREEN_SIZE = (SCREEN_WIDTH,SCREEN_HEIGHT)
+# =============================================================================
+# COLORS
+# Format: (Red, Green, Blue) - each value 0-255
+# =============================================================================
+GRAY: tuple[int, int, int] = (100, 100, 100)
+NAVYBLUE: tuple[int, int, int] = (60, 60, 100)
+WHITE: tuple[int, int, int] = (255, 255, 255)
+RED: tuple[int, int, int] = (255, 0, 0)
+GREEN: tuple[int, int, int] = (0, 255, 0)
+FOREST_GREEN: tuple[int, int, int] = (31, 162, 35)
+BLUE: tuple[int, int, int] = (0, 0, 255)
+SKY_BLUE: tuple[int, int, int] = (39, 145, 251)
+YELLOW: tuple[int, int, int] = (255, 255, 0)
+ORANGE: tuple[int, int, int] = (255, 128, 0)
+PURPLE: tuple[int, int, int] = (255, 0, 255)
+CYAN: tuple[int, int, int] = (0, 255, 255)
+BLACK: tuple[int, int, int] = (0, 0, 0)
+NEAR_BLACK: tuple[int, int, int] = (19, 15, 48)
+COMBLUE: tuple[int, int, int] = (233, 232, 255)
+GOLD: tuple[int, int, int] = (255, 215, 0)
 
-ORIGINAL_CAPTION = "Super Mario Bros 1-1"
+BGCOLOR: tuple[int, int, int] = WHITE
 
-## COLORS ##
-#                R    G    B
-GRAY         = (100, 100, 100)
-NAVYBLUE     = ( 60,  60, 100)
-WHITE        = (255, 255, 255)
-RED          = (255,   0,   0)
-GREEN        = (  0, 255,   0)
-FOREST_GREEN = ( 31, 162,  35)
-BLUE         = (  0,   0, 255)
-SKY_BLUE     = ( 39, 145, 251)
-YELLOW       = (255, 255,   0)
-ORANGE       = (255, 128,   0)
-PURPLE       = (255,   0, 255)
-CYAN         = (  0, 255, 255)
-BLACK        = (  0,   0,   0)
-NEAR_BLACK    = ( 19,  15,  48)
-COMBLUE      = (233, 232, 255)
-GOLD         = (255, 215,   0)
+# =============================================================================
+# SCALE MULTIPLIERS
+# Used to scale up sprites from their original pixel art size
+# =============================================================================
+SIZE_MULTIPLIER: float = 2.5
+BRICK_SIZE_MULTIPLIER: float = 2.69
+BACKGROUND_MULTIPLIER: float = 2.679
+GROUND_HEIGHT: int = SCREEN_HEIGHT - 62
 
-BGCOLOR = WHITE
+# =============================================================================
+# MARIO PHYSICS & MOVEMENT
+# =============================================================================
+# Acceleration values
+WALK_ACCEL: float = 0.15
+RUN_ACCEL: float = 20.0
+SMALL_TURNAROUND: float = 0.35
 
-SIZE_MULTIPLIER = 2.5
-BRICK_SIZE_MULTIPLIER = 2.69
-BACKGROUND_MULTIPLER = 2.679
-GROUND_HEIGHT = SCREEN_HEIGHT - 62
+# Gravity and jumping
+GRAVITY: float = 1.01
+JUMP_GRAVITY: float = 0.31
+JUMP_VEL: float = -10.0
+FAST_JUMP_VEL: float = -12.5
+MAX_Y_VEL: float = 11.0
 
-#MARIO FORCES
-WALK_ACCEL = .15
-RUN_ACCEL = 20
-SMALL_TURNAROUND = .35
+# Maximum speeds (pixels per frame)
+MAX_RUN_SPEED: float = 800.0
+MAX_WALK_SPEED: float = 6.0
 
-GRAVITY = 1.01
-JUMP_GRAVITY = .31
-JUMP_VEL = -10
-FAST_JUMP_VEL = -12.5
-MAX_Y_VEL = 11
+# =============================================================================
+# MARIO STATES
+# String constants for Mario's animation/behavior state machine
+# =============================================================================
+STAND: str = 'standing'
+WALK: str = 'walk'
+JUMP: str = 'jump'
+FALL: str = 'fall'
+SMALL_TO_BIG: str = 'small to big'
+BIG_TO_FIRE: str = 'big to fire'
+BIG_TO_SMALL: str = 'big to small'
+FLAGPOLE: str = 'flag pole'
+WALKING_TO_CASTLE: str = 'walking to castle'
+END_OF_LEVEL_FALL: str = 'end of level fall'
+DEATH_JUMP: str = 'death jump'
+BOTTOM_OF_POLE: str = 'bottom of pole'
 
-MAX_RUN_SPEED = 800
-MAX_WALK_SPEED = 6
+# =============================================================================
+# ENEMY STATES (GOOMBA)
+# =============================================================================
+LEFT: str = 'left'
+RIGHT: str = 'right'
+JUMPED_ON: str = 'jumped on'
+DEATH_JUMP: str = 'death jump'
 
-#Mario States
-STAND = 'standing'
-WALK = 'walk'
-JUMP = 'jump'
-FALL = 'fall'
-SMALL_TO_BIG = 'small to big'
-BIG_TO_FIRE = 'big to fire'
-BIG_TO_SMALL = 'big to small'
-FLAGPOLE = 'flag pole'
-WALKING_TO_CASTLE = 'walking to castle'
-END_OF_LEVEL_FALL = 'end of level fall'
+# =============================================================================
+# KOOPA STATES
+# =============================================================================
+SHELL_SLIDE: str = 'shell slide'
 
-#GOOMBA Stuff
-LEFT = 'left'
-RIGHT = 'right'
-JUMPED_ON = 'jumped on'
-DEATH_JUMP = 'death jump'
+# =============================================================================
+# BRICK STATES
+# =============================================================================
+RESTING: str = 'resting'
+BUMPED: str = 'bumped'
 
-#KOOPA STUFF
-SHELL_SLIDE = 'shell slide'
+# =============================================================================
+# COIN STATES
+# =============================================================================
+OPENED: str = 'opened'
+SPIN: str = 'spin'
 
-#BRICK STATES
-RESTING = 'resting'
-BUMPED = 'bumped'
+# =============================================================================
+# MUSHROOM STATES
+# =============================================================================
+REVEAL: str = 'reveal'
+SLIDE: str = 'slide'
 
-#COIN STATES
-OPENED = 'opened'
+# =============================================================================
+# STAR STATES
+# =============================================================================
+BOUNCE: str = 'bounce'
 
-#MUSHROOM STATES
-REVEAL = 'reveal'
-SLIDE = 'slide'
+# =============================================================================
+# FIRE STATES
+# =============================================================================
+FLYING: str = 'flying'
+BOUNCING: str = 'bouncing'
+EXPLODING: str = 'exploding'
 
-#COIN STATES
-SPIN = 'spin'
+# =============================================================================
+# BRICK AND COIN BOX CONTENTS
+# =============================================================================
+MUSHROOM: str = 'mushroom'
+STAR: str = 'star'
+FIREFLOWER: str = 'fireflower'
+SIXCOINS: str = '6coins'
+COIN: str = 'coin'
+LIFE_MUSHROOM: str = '1up_mushroom'
+FIREBALL: str = 'fireball'
 
-#STAR STATES
-BOUNCE = 'bounce'
+# =============================================================================
+# ENEMY TYPES
+# =============================================================================
+GOOMBA: str = 'goomba'
+KOOPA: str = 'koopa'
 
-#FIRE STATES
-FLYING = 'flying'
-BOUNCING = 'bouncing'
-EXPLODING = 'exploding'
+# =============================================================================
+# LEVEL STATES
+# =============================================================================
+FROZEN: str = 'frozen'
+NOT_FROZEN: str = 'not frozen'
+IN_CASTLE: str = 'in castle'
+FLAG_AND_FIREWORKS: str = 'flag and fireworks'
 
-#Brick and coin box contents
-MUSHROOM = 'mushroom'
-STAR = 'star'
-FIREFLOWER = 'fireflower'
-SIXCOINS = '6coins'
-COIN = 'coin'
-LIFE_MUSHROOM = '1up_mushroom'
+# =============================================================================
+# FLAG STATES
+# =============================================================================
+TOP_OF_POLE: str = 'top of pole'
+SLIDE_DOWN: str = 'slide down'
+BOTTOM_OF_POLE: str = 'bottom of pole'
 
-FIREBALL = 'fireball'
+# =============================================================================
+# SCORE VALUES
+# =============================================================================
+ONEUP: str = '379'  # 1UP score display value
 
-#LIST of ENEMIES
-GOOMBA = 'goomba'
-KOOPA = 'koopa'
+# =============================================================================
+# MAIN MENU STATES
+# =============================================================================
+PLAYER1: str = '1 player'
+PLAYER2: str = '2 player'
 
-#LEVEL STATES
-FROZEN = 'frozen'
-NOT_FROZEN = 'not frozen'
-IN_CASTLE = 'in castle'
-FLAG_AND_FIREWORKS = 'flag and fireworks'
+# =============================================================================
+# OVERHEAD INFO STATES
+# =============================================================================
+MAIN_MENU: str = 'main menu'
+LOAD_SCREEN: str = 'loading screen'
+LEVEL: str = 'level'
+GAME_OVER: str = 'game over'
+FAST_COUNT_DOWN: str = 'fast count down'
+END_OF_LEVEL: str = 'end of level'
 
-#FLAG STATE
-TOP_OF_POLE = 'top of pole'
-SLIDE_DOWN = 'slide down'
-BOTTOM_OF_POLE = 'bottom of pole'
+# =============================================================================
+# GAME INFO DICTIONARY KEYS
+# =============================================================================
+COIN_TOTAL: str = 'coin total'
+SCORE: str = 'score'
+TOP_SCORE: str = 'top score'
+LIVES: str = 'lives'
+CURRENT_TIME: str = 'current time'
+LEVEL_STATE: str = 'level state'
+CAMERA_START_X: str = 'camera start x'
+MARIO_DEAD: str = 'mario dead'
 
-#1UP score
-ONEUP = '379'
+# =============================================================================
+# GLOBAL GAME STATES
+# States for the entire game state machine
+# =============================================================================
+MAIN_MENU: str = 'main menu'
+LOAD_SCREEN: str = 'load screen'
+TIME_OUT: str = 'time out'
+GAME_OVER: str = 'game over'
+LEVEL1: str = 'level1'
 
-#MAIN MENU CURSOR STATES
-PLAYER1 = '1 player'
-PLAYER2 = '2 player'
+# =============================================================================
+# SOUND STATES
+# =============================================================================
+NORMAL: str = 'normal'
+STAGE_CLEAR: str = 'stage clear'
+WORLD_CLEAR: str = 'world clear'
+TIME_WARNING: str = 'time warning'
+SPED_UP_NORMAL: str = 'sped up normal'
+MARIO_INVINCIBLE: str = 'mario invincible'
 
-#OVERHEAD INFO STATES
-MAIN_MENU = 'main menu'
-LOAD_SCREEN = 'loading screen'
-LEVEL = 'level'
-GAME_OVER = 'game over'
-FAST_COUNT_DOWN = 'fast count down'
-END_OF_LEVEL = 'end of level'
+# =============================================================================
+# TIMING CONSTANTS (milliseconds)
+# =============================================================================
+ENEMY_ANIMATION_INTERVAL: int = 125  # Enemy frame switch timing
+GOOMBA_DEATH_DELAY: int = 500  # Delay before goomba disappears after being stomped
+FIREBALL_INTERVAL: int = 200  # Minimum time between fireball shots
+INVINCIBLE_DURATION: int = 2000  # Duration of star power invincibility
+HURT_INVINCIBLE_DURATION: int = 1000  # Duration of invincibility after getting hurt
+FLAG_SLIDE_DURATION: int = 1000  # Duration of flag slide animation
 
-#GAME INFO DICTIONARY KEYS
-COIN_TOTAL = 'coin total'
-SCORE = 'score'
-TOP_SCORE = 'top score'
-LIVES = 'lives'
-CURRENT_TIME = 'current time'
-LEVEL_STATE = 'level state'
-CAMERA_START_X = 'camera start x'
-MARIO_DEAD = 'mario dead'
-
-#STATES FOR ENTIRE GAME
-MAIN_MENU = 'main menu'
-LOAD_SCREEN = 'load screen'
-TIME_OUT = 'time out'
-GAME_OVER = 'game over'
-LEVEL1 = 'level1'
-
-#SOUND STATEZ
-NORMAL = 'normal'
-STAGE_CLEAR = 'stage clear'
-WORLD_CLEAR = 'world clear'
-TIME_WARNING = 'time warning'
-SPED_UP_NORMAL = 'sped up normal'
-MARIO_INVINCIBLE = 'mario invincible'
+# =============================================================================
+# SCORE VALUES
+# =============================================================================
+SCORE_GOOMBA_STOMP: int = 100
+SCORE_KOOPA_STOMP: int = 100
+SCORE_STAR: int = 1000
+SCORE_MUSHROOM: int = 1000
+SCORE_1UP: int = 100
+SCORE_FLAG_POLE_LOW: int = 100
+SCORE_FLAG_POLE_MID: int = 400
+SCORE_FLAG_POLE_HIGH: int = 800
+SCORE_FLAG_POLE_HIGHER: int = 2000
+SCORE_FLAG_POLE_TOP: int = 5000

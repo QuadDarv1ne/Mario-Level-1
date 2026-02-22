@@ -1,21 +1,39 @@
-#!/usr/bin/env python
-__author__ = 'justinarmstrong'
-
+#!/usr/bin/env python3
 """
+Super Mario Bros Level 1 - Python/Pygame Recreation
+
 This is an attempt to recreate the first level of
 Super Mario Bros for the NES.
+
+Requirements:
+    - Python 3.10+
+    - pygame>=2.5.0
+
+Controls:
+    - Arrow keys: Move left/right, crouch
+    - 'A' key: Jump
+    - 'S' key: Action (fireball, run)
+    - F5: Toggle FPS display
+
+Author: justinarmstrong (original), Enhanced by community
+License: Educational purposes only
 """
+from __future__ import annotations
 
 import sys
 import pygame as pg
 from data.main import main
 import cProfile
 
-if __name__=='__main__':
+__version__ = '2.0.0'
+__python_version__ = '3.10+'
+
+
+if __name__ == '__main__':
     main()
     pg.quit()
     sys.exit()
 
-# TODO: Версия №1
-# Дата проекта: 24.01.2023
+# TODO: Версия №2 - Modernized Edition
+# Дата обновления: 2026
 # Дуплей Максим Игоревич
