@@ -9,6 +9,7 @@ import pygame as pg
 from .. import setup, tools
 from .. import constants as c
 from .. import game_sound
+from ..event_system import get_event_manager, EventType
 from ..components import mario
 from ..components import collider
 from ..components import bricks
@@ -759,6 +760,12 @@ class Level1(tools._State):
                     coin_box.start_bump(self.moving_score_list)
                     if coin_box.contents == c.COIN:
                         self.game_info[c.COIN_TOTAL] += 1
+                        # Emit coin collect event
+                        events = get_event_manager()
+                        events.emit(EventType.PLAYER_COIN, {
+                            'player': self.mario,
+                            'position': (self.mario.rect.x, self.mario.rect.y),
+                        })
                 else:
                     coin_box.start_bump(self.moving_score_list)
 

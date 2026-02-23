@@ -560,6 +560,15 @@ class Mario(pg.sprite.Sprite):
             if self.fire and self.allow_fireball:
                 self.shoot_fireball(fire_group)
 
+        # Emit jump event for sound/effects systems
+        if self.y_vel < 0:
+            from ..event_system import get_event_manager, EventType
+            events = get_event_manager()
+            events.emit(EventType.PLAYER_JUMP, {
+                'player': self,
+                'y_vel': self.y_vel,
+            })
+
     def falling(self, keys: Tuple[bool, ...], fire_group: pg.sprite.Group) -> None:
         """Called when Mario is in a FALL state"""
         self.check_to_allow_fireball(keys)
@@ -952,7 +961,7 @@ class Mario(pg.sprite.Sprite):
             self.invincible_animation_timer = self.current_time
 
     def check_if_fire(self) -> None:
-        if self.fire and self.invincible == False:
+        if self.fire and not self.invincible:
             self.right_frames = self.fire_frames[0]
             self.left_frames = self.fire_frames[1]
 
