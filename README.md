@@ -12,8 +12,9 @@ An enhanced recreation of the first level of Super Mario Bros for the NES, built
 | `A` | Jump |
 | `S` | Action (fireball, run) |
 | `F5` | Toggle FPS display |
+| `ESC` | Pause menu |
 
-## ✨ New Features (v2.0)
+## ✨ New Features (v2.5)
 
 ### Core Improvements
 - **Modern Python**: Now requires Python 3.10+ with full type hints
@@ -23,8 +24,27 @@ An enhanced recreation of the first level of Super Mario Bros for the NES, built
 - **Performance Optimization**: Object pooling, sprite batching
 - **Visual Effects**: Particle system, parallax scrolling, screen shake
 
+### v2.5 - Latest Additions
+- **Dialogue System**: Typewriter effects, branching dialogues, 17+ Mario dialogues
+- **Screenshot System**: Auto-capture, HTML gallery, metadata tracking
+- **Debug Tools**: FPS overlay, collision visualizer, console, profiler
+- **Statistics System**: Session/lifetime stats, records, persistence
+
+### v2.4 Additions
+- **Weather System**: Dynamic rain, snow, clouds, storms + day/night cycle
+- **Audio Manager**: Multi-channel audio, playlists, category-based volume
+- **Hint System**: Context-sensitive hints, tutorial mode, 17+ built-in hints
+
+### v2.3 Additions
+- **Achievements System**: 20+ achievements with persistence and notifications
+- **Combo System**: Score multipliers for consecutive actions
+- **Advanced Animations**: Interpolated sprites with easing functions
+- **Enhanced UI**: Animated menus, buttons with hover effects, pause menu
+- **Difficulty Settings**: Easy, Normal, Hard, Extreme modes
+- **Settings Manager**: Persistent video, audio, and control settings
+
 ### Developer Tools
-- **Testing**: Full pytest test suite
+- **Testing**: Full pytest test suite (320+ tests)
 - **CI/CD**: GitHub Actions for automated testing and builds
 - **Code Quality**: pre-commit hooks, mypy, flake8, black
 - **Documentation**: Comprehensive docstrings throughout
@@ -87,6 +107,11 @@ Mario-Level-1/
 │   ├── optimization.py  # Object pooling, batching
 │   ├── game_sound.py    # Enhanced audio system
 │   ├── visual_effects.py # Particles, parallax
+│   ├── achievements.py   # Achievements system
+│   ├── combo_system.py   # Combo & multipliers
+│   ├── game_settings.py  # Settings & difficulty
+│   ├── animation_system.py # Interpolated animations
+│   ├── ui.py            # Enhanced UI menus
 │   ├── components/      # Game objects
 │   │   ├── mario.py
 │   │   ├── enemies.py
