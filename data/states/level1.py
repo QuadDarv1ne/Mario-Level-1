@@ -412,8 +412,8 @@ class Level1(tools._State):
         or dies). Checks if he leaves the transition state or dies to
         change the level state back"""
         self.mario.update(keys, self.game_info, self.powerup_group)
-        for score in self.moving_score_list:
-            score.update(self.moving_score_list, self.game_info)
+        for moving_score in self.moving_score_list:
+            moving_score.update(self.moving_score_list, self.game_info)
         if self.flag_score:
             self.flag_score.update(None, self.game_info)
             self.check_to_add_flag_score()
@@ -429,15 +429,15 @@ class Level1(tools._State):
         state"""
         if self.mario.in_transition_state:
             self.game_info[c.LEVEL_STATE] = self.state = c.FROZEN
-        elif self.mario.in_transition_state == False:
+        elif not self.mario.in_transition_state:
             if self.state == c.FROZEN:
                 self.game_info[c.LEVEL_STATE] = self.state = c.NOT_FROZEN
 
     def update_all_sprites(self, keys):
         """Updates the location of all sprites on the screen."""
         self.mario.update(keys, self.game_info, self.powerup_group)
-        for score in self.moving_score_list:
-            score.update(self.moving_score_list, self.game_info)
+        for moving_score in self.moving_score_list:
+            moving_score.update(self.moving_score_list, self.game_info)
         if self.flag_score:
             self.flag_score.update(None, self.game_info)
             self.check_to_add_flag_score()
@@ -536,7 +536,7 @@ class Level1(tools._State):
         self.mario.rect.x += round(self.mario.x_vel)
         self.check_mario_x_collisions()
 
-        if self.mario.in_transition_state == False:
+        if not self.mario.in_transition_state:
             self.mario.rect.y += round(self.mario.y_vel)
             self.check_mario_y_collisions()
 
@@ -620,10 +620,10 @@ class Level1(tools._State):
                     score.Score(self.mario.rect.centerx - self.viewport.x, self.mario.rect.y, 1000)
                 )
 
-                if self.mario.big and self.mario.fire == False:
+                if self.mario.big and not self.mario.fire:
                     self.mario.state = c.BIG_TO_FIRE
                     self.mario.in_transition_state = True
-                elif self.mario.big == False:
+                elif not self.mario.big:
                     self.mario.state = c.SMALL_TO_BIG
                     self.mario.in_transition_state = True
                     self.convert_mushrooms_to_fireflowers()
@@ -637,9 +637,9 @@ class Level1(tools._State):
         for brick in self.brick_group:
             if brick.contents == c.MUSHROOM:
                 brick.contents = c.FIREFLOWER
-        for coin_box in self.coin_box_group:
-            if coin_box.contents == c.MUSHROOM:
-                coin_box.contents = c.FIREFLOWER
+        for box in self.coin_box_group:
+            if box.contents == c.MUSHROOM:
+                box.contents = c.FIREFLOWER
 
     def convert_fireflowers_to_mushrooms(self):
         """When Mario becomes small, converts all mushroom powerups to
@@ -647,9 +647,9 @@ class Level1(tools._State):
         for brick in self.brick_group:
             if brick.contents == c.FIREFLOWER:
                 brick.contents = c.MUSHROOM
-        for coin_box in self.coin_box_group:
-            if coin_box.contents == c.FIREFLOWER:
-                coin_box.contents = c.MUSHROOM
+        for box in self.coin_box_group:
+            if box.contents == c.FIREFLOWER:
+                box.contents = c.MUSHROOM
 
     def adjust_mario_for_x_collisions(self, collider):
         """Puts Mario flush next to the collider after moving on the x axis"""
@@ -1296,7 +1296,7 @@ class Level1(tools._State):
         if self.persist[c.LIVES] == 0:
             self.next = c.GAME_OVER
             self.game_info[c.CAMERA_START_X] = 0
-        elif self.mario.dead == False:
+        elif not self.mario.dead:
             self.next = c.MAIN_MENU
             self.game_info[c.CAMERA_START_X] = 0
         elif self.overhead_info_display.time == 0:
@@ -1326,8 +1326,8 @@ class Level1(tools._State):
 
     def update_while_in_castle(self):
         """Updates while Mario is in castle at the end of the level"""
-        for score in self.moving_score_list:
-            score.update(self.moving_score_list, self.game_info)
+        for moving_score in self.moving_score_list:
+            moving_score.update(self.moving_score_list, self.game_info)
         self.overhead_info_display.update(self.game_info)
 
         if self.overhead_info_display.state == c.END_OF_LEVEL:
@@ -1336,8 +1336,8 @@ class Level1(tools._State):
 
     def update_flag_and_fireworks(self):
         """Updates the level for the fireworks and castle flag"""
-        for score in self.moving_score_list:
-            score.update(self.moving_score_list, self.game_info)
+        for moving_score in self.moving_score_list:
+            moving_score.update(self.moving_score_list, self.game_info)
         self.overhead_info_display.update(self.game_info)
         self.flag_pole_group.update()
 
@@ -1371,5 +1371,5 @@ class Level1(tools._State):
 
         surface.blit(self.level, (0, 0), self.viewport)
         self.overhead_info_display.draw(surface)
-        for score in self.moving_score_list:
-            score.draw(surface)
+        for moving_score in self.moving_score_list:
+            moving_score.draw(surface)
