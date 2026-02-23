@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Callable, Tuple
 import pygame as pg
 
 from . import constants as c
-from .animation_system import Tween, TweenManager, EasingType
+from .animation_system import TweenManager, EasingType
 
 
 class DialogueAlign(Enum):

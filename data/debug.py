@@ -8,11 +8,10 @@ Provides:
 - Console commands
 - Performance profiler
 """
+
 from __future__ import annotations
 
-import os
 import time
-import tracemalloc
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Callable, Any, Tuple
 
@@ -24,6 +23,7 @@ from . import constants as c
 @dataclass
 class DebugStats:
     """Debug statistics."""
+
     fps: float = 0.0
     frame_time: float = 0.0
     memory_mb: float = 0.0
@@ -42,11 +42,7 @@ class DebugOverlay:
         debug.draw(screen)
     """
 
-    def __init__(
-        self,
-        position: Tuple[int, int] = (10, 10),
-        font_size: int = 18
-    ) -> None:
+    def __init__(self, position: Tuple[int, int] = (10, 10), font_size: int = 18) -> None:
         """
         Initialize debug overlay.
 
@@ -93,10 +89,7 @@ class DebugOverlay:
         self.visible = False
 
     def update(
-        self,
-        clock: Optional[pg.time.Clock] = None,
-        sprites: Optional[List] = None,
-        collisions: int = 0
+        self, clock: Optional[pg.time.Clock] = None, sprites: Optional[List] = None, collisions: int = 0
     ) -> None:
         """
         Update debug stats.
@@ -119,6 +112,7 @@ class DebugOverlay:
         # Memory
         try:
             import resource
+
             self.stats.memory_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
         except (ImportError, AttributeError):
             # Windows doesn't have resource module
@@ -187,12 +181,7 @@ class DebugOverlay:
         else:
             return c.RED
 
-    def _draw_frame_graph(
-        self,
-        surface: pg.Surface,
-        width: int,
-        height: int
-    ) -> None:
+    def _draw_frame_graph(self, surface: pg.Surface, width: int, height: int) -> None:
         """Draw frame time graph."""
         if len(self.frame_times) < 10:
             return
@@ -203,8 +192,7 @@ class DebugOverlay:
         graph_y = self.y + height + 5
 
         # Draw background
-        pg.draw.rect(surface, (30, 30, 30),
-                     (graph_x, graph_y, graph_width, graph_height))
+        pg.draw.rect(surface, (30, 30, 30), (graph_x, graph_y, graph_width, graph_height))
 
         # Draw frames
         max_time = max(self.frame_times) if self.frame_times else 1
@@ -241,12 +229,7 @@ class CollisionVisualizer:
         """Toggle visibility."""
         self.enabled = not self.enabled
 
-    def draw(
-        self,
-        surface: pg.Surface,
-        rects: List[pg.Rect],
-        camera_offset: Tuple[int, int] = (0, 0)
-    ) -> None:
+    def draw(self, surface: pg.Surface, rects: List[pg.Rect], camera_offset: Tuple[int, int] = (0, 0)) -> None:
         """
         Draw collision boxes.
 
@@ -261,20 +244,10 @@ class CollisionVisualizer:
         cam_x, cam_y = camera_offset
 
         for rect in rects:
-            draw_rect = pg.Rect(
-                rect.x - cam_x,
-                rect.y - cam_y,
-                rect.width,
-                rect.height
-            )
+            draw_rect = pg.Rect(rect.x - cam_x, rect.y - cam_y, rect.width, rect.height)
             pg.draw.rect(surface, self.color, draw_rect, self.line_width)
 
-    def draw_sprite(
-        self,
-        surface: pg.Surface,
-        sprite: Any,
-        camera_offset: Tuple[int, int] = (0, 0)
-    ) -> None:
+    def draw_sprite(self, surface: pg.Surface, sprite: Any, camera_offset: Tuple[int, int] = (0, 0)) -> None:
         """
         Draw sprite collision box.
 
@@ -412,11 +385,7 @@ class DebugConsole:
         self.register_command("fps", self.cmd_fps)
         self.register_command("quit", self.cmd_quit)
 
-    def register_command(
-        self,
-        name: str,
-        callback: Callable[[str], str]
-    ) -> None:
+    def register_command(self, name: str, callback: Callable[[str], str]) -> None:
         """
         Register console command.
 
@@ -442,6 +411,7 @@ class DebugConsole:
     def cmd_quit(self, args: str) -> str:
         """Quit game."""
         import sys
+
         sys.exit()
 
     def toggle(self) -> None:
@@ -530,8 +500,7 @@ class DebugConsole:
 
         # Input
         input_y = height - 30
-        pg.draw.line(surface, c.WHITE, (10, input_y),
-                     (surface.get_width() - 10, input_y), 1)
+        pg.draw.line(surface, c.WHITE, (10, input_y), (surface.get_width() - 10, input_y), 1)
 
         input_text = f"> {self.input_text}"
         text_surface = self.font.render(input_text, True, c.GREEN)
@@ -667,11 +636,7 @@ class DebugManager:
 
         return False
 
-    def update(
-        self,
-        clock: Optional[pg.time.Clock] = None,
-        sprites: Optional[List] = None
-    ) -> None:
+    def update(self, clock: Optional[pg.time.Clock] = None, sprites: Optional[List] = None) -> None:
         """
         Update debug systems.
 
@@ -688,10 +653,7 @@ class DebugManager:
         self.console.draw(surface)
 
     def draw_collisions(
-        self,
-        surface: pg.Surface,
-        rects: List[pg.Rect],
-        camera_offset: Tuple[int, int] = (0, 0)
+        self, surface: pg.Surface, rects: List[pg.Rect], camera_offset: Tuple[int, int] = (0, 0)
     ) -> None:
         """Draw collision boxes."""
         self.collision_visualizer.draw(surface, rects, camera_offset)

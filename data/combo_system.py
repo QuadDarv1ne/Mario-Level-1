@@ -7,12 +7,13 @@ Provides:
 - Combo decay over time
 - Visual feedback for combo state
 """
+
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Callable, Any
+from typing import Optional, Callable
 
 import pygame as pg
 
@@ -21,6 +22,7 @@ from . import constants as c
 
 class ComboType(Enum):
     """Types of combo actions."""
+
     ENEMY_STOMP = "enemy_stomp"
     COIN_COLLECT = "coin_collect"
     BLOCK_HIT = "block_hit"
@@ -30,6 +32,7 @@ class ComboType(Enum):
 
 class ComboTier(Enum):
     """Combo multiplier tiers."""
+
     NONE = "none"
     BRONZE = "bronze"
     SILVER = "silver"
@@ -41,6 +44,7 @@ class ComboTier(Enum):
 @dataclass
 class ComboConfig:
     """Configuration for combo system."""
+
     # Time in milliseconds before combo decays
     combo_window: int = 3000
     # Time in milliseconds for full combo decay
@@ -60,6 +64,7 @@ class ComboConfig:
 @dataclass
 class ComboState:
     """Current state of combo system."""
+
     count: int = 0
     multiplier: float = 1.0
     tier: ComboTier = ComboTier.NONE
@@ -91,10 +96,7 @@ class ComboManager:
         self._combo_timer: float = 0.0
         self._on_combo_milestone: Optional[Callable[[int, ComboTier], None]] = None
 
-    def set_milestone_callback(
-        self,
-        callback: Callable[[int, ComboTier], None]
-    ) -> None:
+    def set_milestone_callback(self, callback: Callable[[int, ComboTier], None]) -> None:
         """
         Set callback for combo milestones.
 
@@ -139,10 +141,7 @@ class ComboManager:
     def _update_multiplier(self) -> None:
         """Update score multiplier based on combo count."""
         increase = (self.state.count - 1) * self.config.multiplier_per_combo
-        self.state.multiplier = min(
-            self.config.max_multiplier,
-            1.0 + increase
-        )
+        self.state.multiplier = min(self.config.max_multiplier, 1.0 + increase)
 
     def _update_tier(self) -> None:
         """Update combo tier based on count."""
@@ -333,10 +332,7 @@ class ComboUI:
 
             # Apply scale effect
             if self._scale != 1.0:
-                combo_surface = pg.transform.scale_by(
-                    combo_surface,
-                    self._scale
-                )
+                combo_surface = pg.transform.scale_by(combo_surface, self._scale)
 
             combo_rect = combo_surface.get_rect(center=(x + 40, y + 20))
             surface.blit(combo_surface, combo_rect)
@@ -388,11 +384,7 @@ class ScoreManager:
         score_mgr.update(dt)
     """
 
-    def __init__(
-        self,
-        combo_manager: ComboManager,
-        initial_score: int = 0
-    ) -> None:
+    def __init__(self, combo_manager: ComboManager, initial_score: int = 0) -> None:
         """
         Initialize score manager.
 
@@ -406,10 +398,7 @@ class ScoreManager:
         self._pending_scores: list[tuple[int, float]] = []  # (score, time_added)
 
     def add_score(
-        self,
-        base_points: int,
-        combo_type: Optional[ComboType] = None,
-        combo_count: Optional[int] = None
+        self, base_points: int, combo_type: Optional[ComboType] = None, combo_count: Optional[int] = None
     ) -> int:
         """
         Add score with optional combo bonus.
@@ -439,11 +428,7 @@ class ScoreManager:
 
         return multiplied
 
-    def add_score_with_chain(
-        self,
-        base_points: int,
-        chain_count: int
-    ) -> int:
+    def add_score_with_chain(self, base_points: int, chain_count: int) -> int:
         """
         Add score with manual chain bonus.
 
@@ -472,10 +457,7 @@ class ScoreManager:
 
         # Clean old pending scores (after 2 seconds)
         current_time = time.time()
-        self._pending_scores = [
-            (score, t) for score, t in self._pending_scores
-            if current_time - t < 2.0
-        ]
+        self._pending_scores = [(score, t) for score, t in self._pending_scores if current_time - t < 2.0]
 
     def get_display_score(self) -> str:
         """
@@ -531,11 +513,7 @@ class ScoreUI:
         except pg.error:
             self.font = None
 
-    def draw(
-        self,
-        surface: pg.Surface,
-        position: tuple[int, int] = (50, 100)
-    ) -> None:
+    def draw(self, surface: pg.Surface, position: tuple[int, int] = (50, 100)) -> None:
         """
         Draw score display.
 
@@ -555,12 +533,7 @@ class ScoreUI:
             score_surface = self.font.render(score_text, True, c.GOLD)
             surface.blit(score_surface, (x, y + 30))
 
-    def draw_score_increase(
-        self,
-        surface: pg.Surface,
-        position: tuple[int, int],
-        increase: int
-    ) -> None:
+    def draw_score_increase(self, surface: pg.Surface, position: tuple[int, int], increase: int) -> None:
         """
         Draw floating score increase text.
 
