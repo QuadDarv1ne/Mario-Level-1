@@ -4,15 +4,16 @@ Sound management system for Super Mario Bros.
 Handles music playback, sound effects, volume control,
 and dynamic music transitions based on game state.
 """
+
 from __future__ import annotations
 
-from typing import Any, Optional, Dict
+from typing import Any, Dict
 import pygame as pg
 
 from . import setup
 from . import constants as c
 
-__author__ = 'justinarmstrong'
+__author__ = "justinarmstrong"
 
 
 class SoundSettings:
@@ -82,13 +83,13 @@ class Sound:
         """Sets music for level based on current game state."""
         try:
             if self.overhead_info.state == c.LEVEL:
-                if 'main_theme' in self.music_dict:
-                    pg.mixer.music.load(self.music_dict['main_theme'])
+                if "main_theme" in self.music_dict:
+                    pg.mixer.music.load(self.music_dict["main_theme"])
                     pg.mixer.music.play(loops=-1)  # Loop indefinitely
                     self.state = c.NORMAL
             elif self.overhead_info.state == c.GAME_OVER:
-                if 'game_over' in self.music_dict:
-                    pg.mixer.music.load(self.music_dict['game_over'])
+                if "game_over" in self.music_dict:
+                    pg.mixer.music.load(self.music_dict["game_over"])
                     pg.mixer.music.play()
                     self.state = c.GAME_OVER
         except pg.error as e:
@@ -127,55 +128,55 @@ class Sound:
     def _handle_normal_state(self) -> None:
         """Handle sound during normal gameplay."""
         if self.mario.dead:
-            self.play_music('death', c.MARIO_DEAD)
+            self.play_music("death", c.MARIO_DEAD)
         elif self.mario.invincible and not self.mario.losing_invincibility:
-            self.play_music('invincible', c.MARIO_INVINCIBLE)
+            self.play_music("invincible", c.MARIO_INVINCIBLE)
         elif self.mario.state == c.FLAGPOLE:
-            self.play_music('flagpole', c.FLAGPOLE)
+            self.play_music("flagpole", c.FLAGPOLE)
         elif self.overhead_info.time == 100:
-            self.play_music('out_of_time', c.TIME_WARNING)
+            self.play_music("out_of_time", c.TIME_WARNING)
 
     def _handle_flagpole_state(self) -> None:
         """Handle sound during flagpole sequence."""
         if self.mario.state == c.WALKING_TO_CASTLE:
-            self.play_music('stage_clear', c.STAGE_CLEAR)
+            self.play_music("stage_clear", c.STAGE_CLEAR)
 
     def _handle_stage_clear_state(self) -> None:
         """Handle sound during stage clear."""
         if self.mario.in_castle:
-            if 'count_down' in self.sfx_dict:
-                self.sfx_dict['count_down'].play()
+            if "count_down" in self.sfx_dict:
+                self.sfx_dict["count_down"].play()
             self.state = c.FAST_COUNT_DOWN
 
     def _handle_fast_count_down_state(self) -> None:
         """Handle sound during fast countdown."""
         if self.overhead_info.time == 0:
-            if 'count_down' in self.sfx_dict:
-                self.sfx_dict['count_down'].stop()
+            if "count_down" in self.sfx_dict:
+                self.sfx_dict["count_down"].stop()
             self.state = c.WORLD_CLEAR
 
     def _handle_time_warning_state(self) -> None:
         """Handle sound when time is running low."""
         if pg.mixer.music.get_busy() == 0:
-            if 'main_theme_sped_up' in self.music_dict:
-                self.play_music('main_theme_sped_up', c.SPED_UP_NORMAL)
+            if "main_theme_sped_up" in self.music_dict:
+                self.play_music("main_theme_sped_up", c.SPED_UP_NORMAL)
         elif self.mario.dead:
-            self.play_music('death', c.MARIO_DEAD)
+            self.play_music("death", c.MARIO_DEAD)
 
     def _handle_sped_up_normal_state(self) -> None:
         """Handle sound during sped-up normal gameplay."""
         if self.mario.dead:
-            self.play_music('death', c.MARIO_DEAD)
+            self.play_music("death", c.MARIO_DEAD)
         elif self.mario.state == c.FLAGPOLE:
-            self.play_music('flagpole', c.FLAGPOLE)
+            self.play_music("flagpole", c.FLAGPOLE)
 
     def _handle_invincible_state(self) -> None:
         """Handle sound during invincibility power-up."""
         invincible_duration = self.mario.current_time - self.mario.invincible_start_timer
         if invincible_duration > 11000:
-            self.play_music('main_theme', c.NORMAL)
+            self.play_music("main_theme", c.NORMAL)
         elif self.mario.dead:
-            self.play_music('death', c.MARIO_DEAD)
+            self.play_music("death", c.MARIO_DEAD)
 
     def play_music(self, key: str, state: str) -> None:
         """
@@ -188,7 +189,7 @@ class Sound:
         try:
             if key in self.music_dict:
                 pg.mixer.music.load(self.music_dict[key])
-                pg.mixer.music.play(loops=-1 if key.startswith('main_theme') else 0)
+                pg.mixer.music.play(loops=-1 if key.startswith("main_theme") else 0)
                 self.state = state
         except pg.error as e:
             print(f"Music playback error: {e}")
