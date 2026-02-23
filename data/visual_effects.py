@@ -7,10 +7,10 @@ Includes:
 - Screen shake effects
 - Fade transitions
 """
+
 from __future__ import annotations
 
-import math
-from typing import List, Tuple, Optional, Any
+from typing import List, Tuple, Optional
 import pygame as pg
 
 from . import constants as c
@@ -40,7 +40,7 @@ class Particle:
         color: tuple[int, int, int] = c.GOLD,
         size: int = 4,
         gravity: float = 0.5,
-        alpha: int = 255
+        alpha: int = 255,
     ) -> None:
         """Initialize a particle."""
         self.x = x
@@ -91,8 +91,7 @@ class Particle:
 
         # Recreate surface with new alpha
         self.image = pg.Surface((self.size, self.size), pg.SRCALPHA)
-        pg.draw.rect(self.image, (*self.color, self.alpha),
-                     (0, 0, self.size, self.size))
+        pg.draw.rect(self.image, (*self.color, self.alpha), (0, 0, self.size, self.size))
 
         return True
 
@@ -133,7 +132,7 @@ class ParticleSystem:
         lifetime_range: Tuple[int, int] = (300, 600),
         color: tuple[int, int, int] = c.GOLD,
         size_range: Tuple[int, int] = (3, 6),
-        gravity: float = 0.5
+        gravity: float = 0.5,
     ) -> None:
         """
         Emit particles at position.
@@ -165,15 +164,10 @@ class ParticleSystem:
             particle_color = (
                 max(0, min(255, color[0] + color_var)),
                 max(0, min(255, color[1] + color_var)),
-                max(0, min(255, color[2] + color_var))
+                max(0, min(255, color[2] + color_var)),
             )
 
-            particle = Particle(
-                x, y, vx, vy, lifetime,
-                color=particle_color,
-                size=size,
-                gravity=gravity
-            )
+            particle = Particle(x, y, vx, vy, lifetime, color=particle_color, size=size, gravity=gravity)
             self.particles.append(particle)
 
     def emit_brick_break(self, x: float, y: float) -> None:
@@ -182,24 +176,19 @@ class ParticleSystem:
 
     def emit_coin_sparkle(self, x: float, y: float) -> None:
         """Emit particles for coin collection."""
-        self.emit(x, y, count=5, color=c.GOLD,
-                  vx_range=(-2, 2), vy_range=(-4, -1))
+        self.emit(x, y, count=5, color=c.GOLD, vx_range=(-2, 2), vy_range=(-4, -1))
 
     def emit_stomp(self, x: float, y: float) -> None:
         """Emit particles for enemy stomp."""
-        self.emit(x, y, count=6, color=(139, 69, 19),  # Brown
-                  vx_range=(-4, 4), vy_range=(-3, -1))
+        self.emit(x, y, count=6, color=(139, 69, 19), vx_range=(-4, 4), vy_range=(-3, -1))  # Brown
 
     def emit_fireball_trail(self, x: float, y: float) -> None:
         """Emit particles for fireball trail."""
-        self.emit(x, y, count=2, color=c.RED,
-                  size_range=(2, 4), lifetime_range=(100, 200))
+        self.emit(x, y, count=2, color=c.RED, size_range=(2, 4), lifetime_range=(100, 200))
 
     def emit_flag_sparkle(self, x: float, y: float) -> None:
         """Emit sparkle for flag pole."""
-        self.emit(x, y, count=10, color=c.WHITE,
-                  vx_range=(-1, 1), vy_range=(-2, 0),
-                  lifetime_range=(400, 800))
+        self.emit(x, y, count=10, color=c.WHITE, vx_range=(-1, 1), vy_range=(-2, 0), lifetime_range=(400, 800))
 
     def update(self, dt: float, viewport_x: int = 0) -> None:
         """
@@ -209,10 +198,7 @@ class ParticleSystem:
             dt: Delta time in milliseconds
             viewport_x: Camera X offset
         """
-        self.particles = [
-            p for p in self.particles
-            if p.update(dt, viewport_x)
-        ]
+        self.particles = [p for p in self.particles if p.update(dt, viewport_x)]
 
     def draw(self, surface: pg.Surface) -> None:
         """Draw all particles to surface."""
@@ -232,13 +218,7 @@ class ParallaxBackground:
     layers at different speeds.
     """
 
-    def __init__(
-        self,
-        width: int,
-        height: int,
-        layers: int = 3,
-        scroll_speeds: Optional[List[float]] = None
-    ) -> None:
+    def __init__(self, width: int, height: int, layers: int = 3, scroll_speeds: Optional[List[float]] = None) -> None:
         """
         Initialize parallax background.
 
@@ -282,13 +262,11 @@ class ParallaxBackground:
             if i == 0:
                 # Distant clouds/hills
                 for x in range(0, self.width * 2, 200):
-                    pg.draw.circle(surface, (220, 240, 255),
-                                   (x + 100, 100 + (i * 30)), 50)
+                    pg.draw.circle(surface, (220, 240, 255), (x + 100, 100 + (i * 30)), 50)
             elif i == 1:
                 # Mid-ground elements
                 for x in range(0, self.width * 2, 300):
-                    pg.draw.rect(surface, (140, 190, 100),
-                                 (x, 300, 100, 200))
+                    pg.draw.rect(surface, (140, 190, 100), (x, 300, 100, 200))
 
             self.layer_surfaces.append(surface)
 
@@ -328,11 +306,7 @@ class ScreenShake:
     Screen shake effect for impacts and explosions.
     """
 
-    def __init__(
-        self,
-        intensity: float = 10.0,
-        decay: float = 0.9
-    ) -> None:
+    def __init__(self, intensity: float = 10.0, decay: float = 0.9) -> None:
         """
         Initialize screen shake.
 
@@ -367,10 +341,8 @@ class ScreenShake:
         import random
 
         if self.current_intensity > 0.5:
-            self.offset_x = int(random.uniform(-self.current_intensity,
-                                                self.current_intensity))
-            self.offset_y = int(random.uniform(-self.current_intensity,
-                                                self.current_intensity))
+            self.offset_x = int(random.uniform(-self.current_intensity, self.current_intensity))
+            self.offset_y = int(random.uniform(-self.current_intensity, self.current_intensity))
             self.current_intensity *= self.decay
         else:
             self.current_intensity = 0
@@ -408,8 +380,7 @@ class FadeTransition:
         self.speed = speed
         self.alpha = 255
 
-    def fade_out(self, color: tuple[int, int, int] = c.BLACK,
-                 speed: int = 10) -> None:
+    def fade_out(self, color: tuple[int, int, int] = c.BLACK, speed: int = 10) -> None:
         """
         Start fade out effect.
 
