@@ -7,6 +7,7 @@ Provides:
 - Settings persistence
 - Runtime settings adjustment
 """
+
 from __future__ import annotations
 
 import json
@@ -22,6 +23,7 @@ from . import constants as c
 
 class Difficulty(Enum):
     """Game difficulty levels."""
+
     EASY = "easy"
     NORMAL = "normal"
     HARD = "hard"
@@ -31,6 +33,7 @@ class Difficulty(Enum):
 @dataclass
 class DifficultyConfig:
     """Configuration for a specific difficulty level."""
+
     # Enemy behavior
     enemy_speed_multiplier: float = 1.0
     enemy_damage: int = 1
@@ -135,6 +138,7 @@ class DifficultyConfig:
 @dataclass
 class VideoSettings:
     """Video/graphical settings."""
+
     screen_width: int = 800
     screen_height: int = 600
     fullscreen: bool = False
@@ -159,6 +163,7 @@ class VideoSettings:
 @dataclass
 class AudioSettings:
     """Audio settings."""
+
     master_volume: float = 0.7
     music_volume: float = 0.5
     sfx_volume: float = 0.7
@@ -181,6 +186,7 @@ class AudioSettings:
 @dataclass
 class ControlSettings:
     """Control key bindings."""
+
     move_left: int = pg.K_LEFT
     move_right: int = pg.K_RIGHT
     move_up: int = pg.K_UP
@@ -231,6 +237,7 @@ class GameSettings:
         settings.difficulty = Difficulty.HARD
         settings.save()
     """
+
     difficulty: Difficulty = Difficulty.NORMAL
     video: VideoSettings = field(default_factory=VideoSettings)
     audio: AudioSettings = field(default_factory=AudioSettings)
@@ -318,8 +325,15 @@ class GameSettings:
             controls_data = data["controls"]
             settings.controls = ControlSettings(**controls_data)
 
-        for key in ["auto_save", "auto_save_interval", "show_hints",
-                    "skip_intro", "total_playtime", "games_played", "games_won"]:
+        for key in [
+            "auto_save",
+            "auto_save_interval",
+            "show_hints",
+            "skip_intro",
+            "total_playtime",
+            "games_played",
+            "games_won",
+        ]:
             if key in data:
                 setattr(settings, key, data[key])
 
@@ -421,8 +435,8 @@ class SettingsManager:
     def apply_audio_settings(self) -> None:
         """Apply current audio settings to pygame mixer."""
         if pg.mixer.get_init():
-            music_vol = self.settings.audio.get_music_volume()
-            sfx_vol = self.settings.audio.get_sfx_volume()
+            _ = self.settings.audio.get_music_volume()  # music_vol reserved
+            _ = self.settings.audio.get_sfx_volume()  # sfx_vol reserved
             # Note: Actual volume application depends on audio system
 
     def get_difficulty_display(self) -> str:
@@ -497,11 +511,7 @@ class SettingsUI:
             self.font_medium = None
             self.font_small = None
 
-    def draw_settings_menu(
-        self,
-        surface: pg.Surface,
-        position: tuple[int, int] = (100, 50)
-    ) -> None:
+    def draw_settings_menu(self, surface: pg.Surface, position: tuple[int, int] = (100, 50)) -> None:
         """
         Draw settings menu.
 
@@ -510,7 +520,7 @@ class SettingsUI:
             position: (x, y) position
         """
         x, y = position
-        settings = self.settings_mgr.get_settings()
+        _ = self.settings_mgr.get_settings()  # settings reserved
 
         if self.font_large:
             # Title
@@ -568,11 +578,7 @@ class SettingsUI:
 
         return ""
 
-    def draw_difficulty_selector(
-        self,
-        surface: pg.Surface,
-        position: tuple[int, int] = (200, 200)
-    ) -> None:
+    def draw_difficulty_selector(self, surface: pg.Surface, position: tuple[int, int] = (200, 200)) -> None:
         """
         Draw difficulty selection UI.
 

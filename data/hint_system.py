@@ -8,6 +8,7 @@ Provides:
 - Hint display with animations
 - Player skill tracking
 """
+
 from __future__ import annotations
 
 import time
@@ -18,11 +19,12 @@ from typing import Dict, List, Optional, Callable, Set
 import pygame as pg
 
 from . import constants as c
-from .animation_system import Tween, TweenManager, EasingType
+from .animation_system import TweenManager, EasingType
 
 
 class HintCategory(Enum):
     """Categories of hints."""
+
     MOVEMENT = "movement"
     COMBAT = "combat"
     POWERUPS = "powerups"
@@ -34,6 +36,7 @@ class HintCategory(Enum):
 
 class HintPriority(Enum):
     """Hint priority levels."""
+
     LOW = 1
     NORMAL = 2
     HIGH = 3
@@ -42,6 +45,7 @@ class HintPriority(Enum):
 
 class HintState(Enum):
     """Hint display state."""
+
     HIDDEN = "hidden"
     FADE_IN = "fade_in"
     VISIBLE = "visible"
@@ -65,6 +69,7 @@ class Hint:
         prerequisites: Other hint IDs that must be shown first
         conditions: Functions that determine if hint should show
     """
+
     id: str
     title: str
     message: str
@@ -86,6 +91,7 @@ class Hint:
 @dataclass
 class HintTrigger:
     """Tracks trigger conditions for hints."""
+
     hint_id: str
     trigger_type: str
     trigger_data: dict
@@ -245,180 +251,214 @@ class HintManager:
     def register_default_hints(self) -> None:
         """Register all default hints."""
         # Movement hints
-        self.register_hint(Hint(
-            id="move_basic",
-            title="Перемещение",
-            message="Используйте стрелки ← → для движения Марио",
-            category=HintCategory.MOVEMENT,
-            priority=HintPriority.CRITICAL,
-            trigger_count=1,
-            prerequisites=[]
-        ))
+        self.register_hint(
+            Hint(
+                id="move_basic",
+                title="Перемещение",
+                message="Используйте стрелки ← → для движения Марио",
+                category=HintCategory.MOVEMENT,
+                priority=HintPriority.CRITICAL,
+                trigger_count=1,
+                prerequisites=[],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="jump_basic",
-            title="Прыжок",
-            message="Нажмите A для прыжка. Прыгайте на врагов, чтобы победить их!",
-            category=HintCategory.MOVEMENT,
-            priority=HintPriority.CRITICAL,
-            trigger_count=3,
-            prerequisites=["move_basic"]
-        ))
+        self.register_hint(
+            Hint(
+                id="jump_basic",
+                title="Прыжок",
+                message="Нажмите A для прыжка. Прыгайте на врагов, чтобы победить их!",
+                category=HintCategory.MOVEMENT,
+                priority=HintPriority.CRITICAL,
+                trigger_count=3,
+                prerequisites=["move_basic"],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="jump_hold",
-            title="Высокий прыжок",
-            message="Удерживайте A для более высокого прыжка",
-            category=HintCategory.MOVEMENT,
-            priority=HintPriority.NORMAL,
-            trigger_count=5,
-            prerequisites=["jump_basic"]
-        ))
+        self.register_hint(
+            Hint(
+                id="jump_hold",
+                title="Высокий прыжок",
+                message="Удерживайте A для более высокого прыжка",
+                category=HintCategory.MOVEMENT,
+                priority=HintPriority.NORMAL,
+                trigger_count=5,
+                prerequisites=["jump_basic"],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="run_jump",
-            title="Прыжок с разбега",
-            message="Разбегитесь перед прыжком для большей дальности",
-            category=HintCategory.MOVEMENT,
-            priority=HintPriority.LOW,
-            trigger_count=10,
-            prerequisites=["jump_hold"]
-        ))
+        self.register_hint(
+            Hint(
+                id="run_jump",
+                title="Прыжок с разбега",
+                message="Разбегитесь перед прыжком для большей дальности",
+                category=HintCategory.MOVEMENT,
+                priority=HintPriority.LOW,
+                trigger_count=10,
+                prerequisites=["jump_hold"],
+            )
+        )
 
         # Combat hints
-        self.register_hint(Hint(
-            id="stomp_enemy",
-            title="Победа над врагами",
-            message="Прыгайте на врагов сверху, чтобы победить их",
-            category=HintCategory.COMBAT,
-            priority=HintPriority.HIGH,
-            trigger_count=1,
-            prerequisites=["jump_basic"]
-        ))
+        self.register_hint(
+            Hint(
+                id="stomp_enemy",
+                title="Победа над врагами",
+                message="Прыгайте на врагов сверху, чтобы победить их",
+                category=HintCategory.COMBAT,
+                priority=HintPriority.HIGH,
+                trigger_count=1,
+                prerequisites=["jump_basic"],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="koopa_shell",
-            title="Панцирь Купы",
-            message="Нажмите S рядом с панцирем, чтобы пнуть его",
-            category=HintCategory.COMBAT,
-            priority=HintPriority.NORMAL,
-            trigger_count=1,
-            prerequisites=["stomp_enemy"]
-        ))
+        self.register_hint(
+            Hint(
+                id="koopa_shell",
+                title="Панцирь Купы",
+                message="Нажмите S рядом с панцирем, чтобы пнуть его",
+                category=HintCategory.COMBAT,
+                priority=HintPriority.NORMAL,
+                trigger_count=1,
+                prerequisites=["stomp_enemy"],
+            )
+        )
 
         # Power-up hints
-        self.register_hint(Hint(
-            id="mushroom_powerup",
-            title="Супер-гриб",
-            message="Соберите гриб, чтобы стать большим Марио!",
-            category=HintCategory.POWERUPS,
-            priority=HintPriority.HIGH,
-            trigger_count=1,
-            prerequisites=[]
-        ))
+        self.register_hint(
+            Hint(
+                id="mushroom_powerup",
+                title="Супер-гриб",
+                message="Соберите гриб, чтобы стать большим Марио!",
+                category=HintCategory.POWERUPS,
+                priority=HintPriority.HIGH,
+                trigger_count=1,
+                prerequisites=[],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="fireflower_powerup",
-            title="Огненный цветок",
-            message="Огненный цветок позволяет бросать огненные шары!",
-            category=HintCategory.POWERUPS,
-            priority=HintPriority.NORMAL,
-            trigger_count=1,
-            prerequisites=["mushroom_powerup"]
-        ))
+        self.register_hint(
+            Hint(
+                id="fireflower_powerup",
+                title="Огненный цветок",
+                message="Огненный цветок позволяет бросать огненные шары!",
+                category=HintCategory.POWERUPS,
+                priority=HintPriority.NORMAL,
+                trigger_count=1,
+                prerequisites=["mushroom_powerup"],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="star_invincibility",
-            title="Звезда неуязвимости",
-            message="Звезда делает вас неуязвимым на короткое время!",
-            category=HintCategory.POWERUPS,
-            priority=HintPriority.NORMAL,
-            trigger_count=1,
-            prerequisites=["mushroom_powerup"]
-        ))
+        self.register_hint(
+            Hint(
+                id="star_invincibility",
+                title="Звезда неуязвимости",
+                message="Звезда делает вас неуязвимым на короткое время!",
+                category=HintCategory.POWERUPS,
+                priority=HintPriority.NORMAL,
+                trigger_count=1,
+                prerequisites=["mushroom_powerup"],
+            )
+        )
 
         # Collection hints
-        self.register_hint(Hint(
-            id="coin_collection",
-            title="Монеты",
-            message="Собирайте монеты для очков. 100 монет = дополнительная жизнь!",
-            category=HintCategory.COLLECTION,
-            priority=HintPriority.NORMAL,
-            trigger_count=10,
-            prerequisites=[]
-        ))
+        self.register_hint(
+            Hint(
+                id="coin_collection",
+                title="Монеты",
+                message="Собирайте монеты для очков. 100 монет = дополнительная жизнь!",
+                category=HintCategory.COLLECTION,
+                priority=HintPriority.NORMAL,
+                trigger_count=10,
+                prerequisites=[],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="block_hit",
-            title="Блоки с предметами",
-            message="Прыгайте снизу под блоки, чтобы получить предметы",
-            category=HintCategory.COLLECTION,
-            priority=HintPriority.NORMAL,
-            trigger_count=3,
-            prerequisites=[]
-        ))
+        self.register_hint(
+            Hint(
+                id="block_hit",
+                title="Блоки с предметами",
+                message="Прыгайте снизу под блоки, чтобы получить предметы",
+                category=HintCategory.COLLECTION,
+                priority=HintPriority.NORMAL,
+                trigger_count=3,
+                prerequisites=[],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="secret_blocks",
-            title="Секретные блоки",
-            message="Некоторые невидимые блоки содержат секреты!",
-            category=HintCategory.SECRETS,
-            priority=HintPriority.LOW,
-            trigger_count=5,
-            prerequisites=["block_hit"]
-        ))
+        self.register_hint(
+            Hint(
+                id="secret_blocks",
+                title="Секретные блоки",
+                message="Некоторые невидимые блоки содержат секреты!",
+                category=HintCategory.SECRETS,
+                priority=HintPriority.LOW,
+                trigger_count=5,
+                prerequisites=["block_hit"],
+            )
+        )
 
         # Enemy-specific hints
-        self.register_hint(Hint(
-            id="goomba_weakness",
-            title="Гумбы",
-            message="Гумбы медленные. Прыгайте на них сверху!",
-            category=HintCategory.ENEMIES,
-            priority=HintPriority.NORMAL,
-            trigger_count=1,
-            prerequisites=["stomp_enemy"]
-        ))
+        self.register_hint(
+            Hint(
+                id="goomba_weakness",
+                title="Гумбы",
+                message="Гумбы медленные. Прыгайте на них сверху!",
+                category=HintCategory.ENEMIES,
+                priority=HintPriority.NORMAL,
+                trigger_count=1,
+                prerequisites=["stomp_enemy"],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="koopa_weakness",
-            title="Купы",
-            message="Купы отступают в панцирь при прыжке. Осторожно!",
-            category=HintCategory.ENEMIES,
-            priority=HintPriority.NORMAL,
-            trigger_count=1,
-            prerequisites=["stomp_enemy"]
-        ))
+        self.register_hint(
+            Hint(
+                id="koopa_weakness",
+                title="Купы",
+                message="Купы отступают в панцирь при прыжке. Осторожно!",
+                category=HintCategory.ENEMIES,
+                priority=HintPriority.NORMAL,
+                trigger_count=1,
+                prerequisites=["stomp_enemy"],
+            )
+        )
 
         # General hints
-        self.register_hint(Hint(
-            id="flagpole_goal",
-            title="Цель уровня",
-            message="Доберитесь до флага в конце уровня!",
-            category=HintCategory.GENERAL,
-            priority=HintPriority.HIGH,
-            trigger_count=1,
-            prerequisites=[]
-        ))
+        self.register_hint(
+            Hint(
+                id="flagpole_goal",
+                title="Цель уровня",
+                message="Доберитесь до флага в конце уровня!",
+                category=HintCategory.GENERAL,
+                priority=HintPriority.HIGH,
+                trigger_count=1,
+                prerequisites=[],
+            )
+        )
 
-        self.register_hint(Hint(
-            id="time_limit",
-            title="Ограничение времени",
-            message="Не дайте времени истечь, или вы потеряете жизнь!",
-            category=HintCategory.GENERAL,
-            priority=HintPriority.NORMAL,
-            trigger_count=1,
-            display_duration=4000
-        ))
+        self.register_hint(
+            Hint(
+                id="time_limit",
+                title="Ограничение времени",
+                message="Не дайте времени истечь, или вы потеряете жизнь!",
+                category=HintCategory.GENERAL,
+                priority=HintPriority.NORMAL,
+                trigger_count=1,
+                display_duration=4000,
+            )
+        )
 
-        self.register_hint(Hint(
-            id="pit_death",
-            title="Опасные ямы",
-            message="Избегайте падения в ямы!",
-            category=HintCategory.GENERAL,
-            priority=HintPriority.HIGH,
-            trigger_count=1,
-            prerequisites=[]
-        ))
+        self.register_hint(
+            Hint(
+                id="pit_death",
+                title="Опасные ямы",
+                message="Избегайте падения в ямы!",
+                category=HintCategory.GENERAL,
+                priority=HintPriority.HIGH,
+                trigger_count=1,
+                prerequisites=[],
+            )
+        )
 
     def trigger(self, trigger_name: str) -> None:
         """
@@ -561,13 +601,7 @@ class HintManager:
         self.display_timer = hint.display_duration
 
         # Fade in animation
-        self.tween_manager.add_tween(
-            "alpha",
-            self.alpha,
-            255,
-            300,
-            EasingType.EASE_OUT_SINE
-        )
+        self.tween_manager.add_tween("alpha", self.alpha, 255, 300, EasingType.EASE_OUT_SINE)
         self.alpha = 255
         self.state = HintState.VISIBLE
 
@@ -575,13 +609,7 @@ class HintManager:
         """Start fade out animation."""
         self.state = HintState.FADE_OUT
 
-        self.tween_manager.add_tween(
-            "alpha",
-            self.alpha,
-            0,
-            300,
-            EasingType.EASE_IN_SINE
-        )
+        self.tween_manager.add_tween("alpha", self.alpha, 0, 300, EasingType.EASE_IN_SINE)
         self.alpha = 0
 
         # Mark hint as shown
@@ -745,12 +773,7 @@ class HintDisplay:
         # Draw hint icon based on category
         self._draw_icon(surface, hint.category, alpha)
 
-    def _draw_icon(
-        self,
-        surface: pg.Surface,
-        category: HintCategory,
-        alpha: int
-    ) -> None:
+    def _draw_icon(self, surface: pg.Surface, category: HintCategory, alpha: int) -> None:
         """Draw category icon."""
         icon_colors = {
             HintCategory.MOVEMENT: c.SKY_BLUE,
@@ -809,11 +832,7 @@ class HintTriggerSystem:
             for callback in self.listeners[event_name]:
                 callback(data)
 
-    def add_listener(
-        self,
-        event_name: str,
-        callback: Callable[[Optional[dict]], None]
-    ) -> None:
+    def add_listener(self, event_name: str, callback: Callable[[Optional[dict]], None]) -> None:
         """
         Add event listener.
 
