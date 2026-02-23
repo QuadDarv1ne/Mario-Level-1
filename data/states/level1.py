@@ -1,7 +1,11 @@
-from __future__ import division
+"""Level 1 state for Super Mario Bros."""
 
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Tuple
 
 import pygame as pg
+
 from .. import setup, tools
 from .. import constants as c
 from .. import game_sound
@@ -18,10 +22,10 @@ from ..components import castle_flag
 
 
 class Level1(tools._State):
-    def __init__(self):
+    def __init__(self) -> None:
         tools._State.__init__(self)
 
-    def startup(self, current_time, persist):
+    def startup(self, current_time: float, persist: Dict[str, Any]) -> None:
         """Called when the State object is created"""
         self.game_info = persist
         self.persist = self.game_info
@@ -30,14 +34,35 @@ class Level1(tools._State):
         self.game_info[c.MARIO_DEAD] = False
 
         self.state = c.NOT_FROZEN
-        self.death_timer = 0
-        self.flag_timer = 0
-        self.flag_score = None
+        self.death_timer: float = 0
+        self.flag_timer: float = 0
+        self.flag_score: Optional[Any] = None
         self.flag_score_total = 0
 
-        self.moving_score_list = []
+        self.moving_score_list: List[score.Score] = []
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
         self.sound_manager = game_sound.Sound(self.overhead_info_display)
+
+        self.background: Optional[pg.Surface] = None
+        self.back_rect: Optional[pg.Rect] = None
+        self.level: Optional[pg.Surface] = None
+        self.level_rect: Optional[pg.Rect] = None
+        self.viewport: Optional[pg.Rect] = None
+        self.ground_group: Optional[pg.sprite.Group] = None
+        self.pipe_group: Optional[pg.sprite.Group] = None
+        self.step_group: Optional[pg.sprite.Group] = None
+        self.brick_group: Optional[pg.sprite.Group] = None
+        self.coin_box_group: Optional[pg.sprite.Group] = None
+        self.flag_pole_group: Optional[pg.sprite.Group] = None
+        self.enemy_group: Optional[pg.sprite.Group] = None
+        self.mario: Optional[mario.Mario] = None
+        self.checkpoint_group: Optional[pg.sprite.Group] = None
+        self.flag: Optional[flagpole.Flag] = None
+        self.pole: Optional[flagpole.Pole] = None
+        self.finial: Optional[flagpole.Finial] = None
+        self.coin_group: Optional[pg.sprite.Group] = None
+        self.powerup_group: Optional[pg.sprite.Group] = None
+        self.fire_group: Optional[pg.sprite.Group] = None
 
         self.setup_background()
         self.setup_ground()
@@ -51,7 +76,7 @@ class Level1(tools._State):
         self.setup_checkpoints()
         self.setup_spritegroups()
 
-    def setup_background(self):
+    def setup_background(self) -> None:
         """Sets the background image, rect and scales it to the correct
         proportions"""
         self.background = setup.GFX["level_1"]
@@ -69,7 +94,7 @@ class Level1(tools._State):
         self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
         self.viewport.x = self.game_info[c.CAMERA_START_X]
 
-    def setup_ground(self):
+    def setup_ground(self) -> None:
         """Creates collideable, invisible rectangles over top of the ground for
         sprites to walk on"""
         ground_rect1 = collider.Collider(0, c.GROUND_HEIGHT, 2953, 60)
@@ -79,7 +104,7 @@ class Level1(tools._State):
 
         self.ground_group = pg.sprite.Group(ground_rect1, ground_rect2, ground_rect3, ground_rect4)
 
-    def setup_pipes(self):
+    def setup_pipes(self) -> None:
         """Create collideable rects for all the pipes"""
 
         pipe1 = collider.Collider(1202, 452, 83, 82)
@@ -91,7 +116,7 @@ class Level1(tools._State):
 
         self.pipe_group = pg.sprite.Group(pipe1, pipe2, pipe3, pipe4, pipe5, pipe6)
 
-    def setup_steps(self):
+    def setup_steps(self) -> None:
         """Create collideable rects for all the steps"""
         step1 = collider.Collider(5745, 495, 40, 44)
         step2 = collider.Collider(5788, 452, 40, 44)
@@ -156,7 +181,7 @@ class Level1(tools._State):
             step27,
         )
 
-    def setup_bricks(self):
+    def setup_bricks(self) -> None:
         """Creates all the breakable bricks for the level.  Coin and
         powerup groups are created so they can be passed to bricks."""
         self.coin_group = pg.sprite.Group()
@@ -229,7 +254,7 @@ class Level1(tools._State):
             brick31,
         )
 
-    def setup_coin_boxes(self):
+    def setup_coin_boxes(self) -> None:
         """Creates all the coin boxes and puts them in a sprite group"""
         coin_box1 = coin_box.CoinBox(685, 365, c.COIN, self.coin_group)
         coin_box2 = coin_box.CoinBox(901, 365, c.MUSHROOM, self.powerup_group)
@@ -259,7 +284,7 @@ class Level1(tools._State):
             coin_box12,
         )
 
-    def setup_flag_pole(self):
+    def setup_flag_pole(self) -> None:
         """Creates the flag pole at the end of the level"""
         self.flag = flagpole.Flag(8505, 100)
 
@@ -280,7 +305,7 @@ class Level1(tools._State):
             self.flag, finial, pole0, pole1, pole2, pole3, pole4, pole5, pole6, pole7, pole8, pole9
         )
 
-    def setup_enemies(self):
+    def setup_enemies(self) -> None:
         """Creates all the enemies and stores them in a list of lists."""
         goomba0 = enemies.Goomba()
         goomba1 = enemies.Goomba()
@@ -325,13 +350,13 @@ class Level1(tools._State):
             enemy_group10,
         ]
 
-    def setup_mario(self):
+    def setup_mario(self) -> None:
         """Places Mario at the beginning of the level"""
         self.mario = mario.Mario()
         self.mario.rect.x = self.viewport.x + 110
         self.mario.rect.bottom = c.GROUND_HEIGHT
 
-    def setup_checkpoints(self):
+    def setup_checkpoints(self) -> None:
         """Creates invisible checkpoints that when collided will trigger
         the creation of enemies from the self.enemy_group_list"""
         check1 = checkpoint.Checkpoint(510, "1")
@@ -352,7 +377,7 @@ class Level1(tools._State):
             check1, check2, check3, check4, check5, check6, check7, check8, check9, check10, check11, check12, check13
         )
 
-    def setup_spritegroups(self):
+    def setup_spritegroups(self) -> None:
         """Sprite groups created for convenience"""
         self.sprites_about_to_die_group = pg.sprite.Group()
         self.shell_group = pg.sprite.Group()
@@ -362,7 +387,7 @@ class Level1(tools._State):
 
         self.mario_and_enemy_group = pg.sprite.Group(self.mario, self.enemy_group)
 
-    def update(self, surface, keys, current_time):
+    def update(self, surface: pg.Surface, keys: Tuple[bool, ...], current_time: float) -> None:
         """Updates Entire level using states.  Called by the control object"""
         self.game_info[c.CURRENT_TIME] = self.current_time = current_time
         self.handle_states(keys)
@@ -370,7 +395,7 @@ class Level1(tools._State):
         self.blit_everything(surface)
         self.sound_manager.update(self.game_info, self.mario)
 
-    def handle_states(self, keys):
+    def handle_states(self, keys: Tuple[bool, ...]) -> None:
         """If the level is in a FROZEN state, only mario will update"""
         if self.state == c.FROZEN:
             self.update_during_transition_state(keys)
