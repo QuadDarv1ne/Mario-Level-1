@@ -14,21 +14,66 @@ An enhanced recreation of the first level of Super Mario Bros for the NES, built
 | `F5` | Toggle FPS display |
 | `ESC` | Pause menu |
 
-## ✨ New Features (v2.5)
+## ✨ New Features (v2.7)
 
-### Core Improvements
-- **Modern Python**: Now requires Python 3.10+ with full type hints
-- **JSON Level Loader**: Load and create levels from JSON files
-- **Save System**: Persistent game progress with JSON saves
-- **Improved Audio**: Volume control, better mixing, error handling
-- **Performance Optimization**: Object pooling, sprite batching
-- **Visual Effects**: Particle system, parallax scrolling, screen shake
+### v2.7 - Latest Additions (Current)
 
-### v2.5 - Latest Additions
-- **Dialogue System**: Typewriter effects, branching dialogues, 17+ Mario dialogues
-- **Screenshot System**: Auto-capture, HTML gallery, metadata tracking
-- **Debug Tools**: FPS overlay, collision visualizer, console, profiler
-- **Statistics System**: Session/lifetime stats, records, persistence
+#### Player Progression & RPG Elements
+- **Player Level System**: XP, levels, and rank progression
+  - 7 rank tiers: Novice → Apprentice → Warrior → Veteran → Elite → Master → Legend
+  - Persistent stats tracking (coins, enemies, levels, deaths, etc.)
+  - Skill tree with 8+ unlockable abilities
+  - Level-based unlocks and rewards
+
+- **Character Customization**: 14+ unlockable skins
+  - **Classic**: Default, Fire, Ice, Gold Mario
+  - **Modern**: Builder, Sport Mario
+  - **Fantasy**: Knight, Wizard, Dragon Mario
+  - **Retro**: 8-bit, Green Mario
+  - **Event**: Birthday, Halloween, Christmas Mario
+  - Skin bonuses (XP, coins multipliers)
+  - Special visual effects per skin
+
+- **Daily & Weekly Challenges**:
+  - Auto-generated challenges (3 daily, 2 weekly)
+  - 6 categories: Combat, Collection, Exploration, Skill, Speedrun, Special
+  - Coin and XP rewards
+  - Progress tracking and expiration
+
+#### Advanced AI System
+- **Enemy AI Controllers**:
+  - State machine (Idle, Suspicious, Alerted, Combat, Retreating)
+  - Target detection and tracking
+  - Line of sight calculations
+  - Memory system for lost targets
+
+- **AI Behaviors**:
+  - Passive, Aggressive, Defensive
+  - Patrol with waypoints
+  - Ambush tactics
+  - Flee when low health
+  - Guard positions
+
+- **Group Coordination**:
+  - Squad-based AI
+  - Coordinated attacks
+  - Flanking maneuvers
+  - Role assignment (attackers, flankers)
+  - Group strategies: Assault, Flank, Defensive, Patrol
+
+- **AI Director**:
+  - Dynamic difficulty adjustment
+  - Player performance tracking
+  - Tension level system
+  - Adaptive spawn rates
+
+### v2.6 Additions
+- **Combo System 2.0**: Enhanced combo chains with multipliers up to 5x
+- **Boss System**: Bowser, Mega Goomba, Giant Koopa Troopa
+- **4 New Enemies**: Piranha Plant, Bullet Bill, Hammer Bro, Buzzy Beetle
+- **Advanced Particles**: Object pooling, 10+ new particle types
+- **Enhanced Hints**: Smart tutorial system with progress tracking
+- **100+ New Tests**: Full test coverage for new systems
 
 ### v2.4 Additions
 - **Weather System**: Dynamic rain, snow, clouds, storms + day/night cycle
@@ -107,14 +152,28 @@ Mario-Level-1/
 │   ├── optimization.py  # Object pooling, batching
 │   ├── game_sound.py    # Enhanced audio system
 │   ├── visual_effects.py # Particles, parallax
-│   ├── achievements.py   # Achievements system
+│   ├── advanced_particles.py # Advanced particle system
+│   ├── combo_manager.py  # Combo system manager
 │   ├── combo_system.py   # Combo & multipliers
 │   ├── game_settings.py  # Settings & difficulty
 │   ├── animation_system.py # Interpolated animations
 │   ├── ui.py            # Enhanced UI menus
+│   ├── dialogue_system.py # Dialogue management
+│   ├── hint_system.py   # Basic hint system
+│   ├── enhanced_hint_system.py # Enhanced hints
+│   ├── debug.py         # Debug tools
+│   ├── screenshot.py    # Screenshot system
+│   ├── statistics.py    # Game statistics
+│   ├── weather_system.py # Weather effects
+│   ├── audio_manager.py # Audio management
+│   ├── achievements.py   # Achievements system
+│   ├── input_system.py   # Input handling
+│   ├── resource_manager.py # Resource management
 │   ├── components/      # Game objects
 │   │   ├── mario.py
 │   │   ├── enemies.py
+│   │   ├── advanced_enemies.py # New enemies
+│   │   ├── bosses.py     # Boss system
 │   │   ├── bricks.py
 │   │   └── ...
 │   ├── states/          # Game states
@@ -127,12 +186,18 @@ Mario-Level-1/
 │   ├── test_level_loader.py
 │   ├── test_constants.py
 │   ├── test_tools.py
-│   └── test_save_system.py
+│   ├── test_save_system.py
+│   ├── test_new_features.py # Tests for new systems
+│   └── ...
 ├── resources/
 │   ├── graphics/
 │   ├── sound/
 │   └── fonts/
-└── saves/               # Auto-created save directory
+├── saves/               # Auto-created save directory
+│   ├── game.sav
+│   ├── hints.json
+│   └── stats.json
+└── screenshots/         # Auto-created screenshot dir
 ```
 
 ## 🛠️ Configuration
@@ -167,7 +232,45 @@ keybinding = {
 }
 ```
 
+### YAML Configuration (v2.7+)
+
+Edit `config/game.yaml` for comprehensive settings:
+
+```yaml
+display:
+  screen_width: 800
+  screen_height: 600
+  fps: 60
+  fullscreen: false
+
+audio:
+  enabled: true
+  music_volume: 0.5
+  sfx_volume: 0.7
+
+gameplay:
+  difficulty: normal  # easy, normal, hard, extreme
+  starting_lives: 3
+  enable_auto_save: true
+
+graphics:
+  quality_preset: high
+  enable_particles: true
+  max_particles: 1000
+```
+
+Load configuration in code:
+```python
+from data.config_manager import get_config
+
+config = get_config()
+print(f"Screen: {config.display.screen_width}x{config.display.screen_height}")
+print(f"Difficulty: {config.gameplay.difficulty}")
+```
+
 ## 📝 Creating Custom Levels
+
+### JSON Format
 
 Levels can be created in JSON format:
 
@@ -194,6 +297,45 @@ from data.level_loader import load_level_from_json
 level = load_level_from_json("data/levels/my_level.json")
 ```
 
+### Text-Based Level Builder (v2.7+)
+
+Create levels using ASCII art:
+
+```
+# Save as my_level.txt
+................................................................
+................................................................
+........................?.......................................
+....................B?B?B.......................................
+......................................##........................
+....................G...........................................
+====================================================............
+```
+
+Build with:
+```bash
+# Create sample layout
+python scripts/build_level.py --sample
+
+# Build level from layout
+python scripts/build_level.py --name my_level --input my_level.txt
+```
+
+### Legend
+
+| Symbol | Element |
+|--------|---------|
+| `.` | Empty space |
+| `=` | Ground |
+| `B` | Brick block |
+| `?` | Coin box |
+| `!` | Mushroom box |
+| `#` | Pipe |
+| `G` | Goomba |
+| `K` | Koopa |
+| `F` | Flag pole |
+| `S` | Step block |
+
 ## 🧪 Running Tests
 
 ```bash
@@ -205,6 +347,132 @@ pytest --cov=data --cov-report=html
 
 # Run specific test file
 pytest tests/test_level_loader.py -v
+
+# Run benchmarks
+pytest tests/test_benchmark.py --benchmark-only
+
+# Run integration tests
+pytest tests/test_integration.py -v
+```
+
+## 👨‍💻 Developer Examples
+
+### Save/Load System
+
+```python
+from data.save_system import SaveManager, GameData
+
+# Get save manager
+manager = SaveManager()
+
+# Create game data
+game_data = GameData(
+    score=10000,
+    coin_total=50,
+    lives=3,
+    current_level='level1',
+    unlocked_skins=['fire', 'ice'],
+)
+
+# Save to slot 1
+manager.save_game(1, game_data)
+
+# Load from slot 1
+loaded_data = manager.load_game(1)
+print(f"Score: {loaded_data.score}")
+
+# Check if save exists
+if manager.save_exists(1):
+    print(f"Save info: {manager.get_save_summary(1)}")
+```
+
+### Particle System
+
+```python
+from data.advanced_particles import AdvancedParticleSystem
+
+# Create particle system
+particles = AdvancedParticleSystem(max_particles=500)
+
+# Emit particles at position
+particles.emit(400, 300, "jump_dust")
+particles.emit(200, 400, "coin_burst")
+
+# Update in game loop
+while running:
+    particles.update(16)  # 16ms delta time
+    
+    # Render
+    screen.fill((0, 0, 0))
+    particles.draw_batch(screen)
+    pygame.display.flip()
+
+# Get statistics
+stats = particles.get_stats()
+print(f"Active particles: {stats['active']}")
+```
+
+### Configuration
+
+```python
+from data.config_manager import get_config, reload_config
+
+# Get configuration (auto-loads)
+config = get_config()
+
+# Access settings
+print(config.display.screen_width)
+print(config.gameplay.difficulty)
+print(config.graphics.max_particles)
+
+# Modify settings
+config.set('gameplay', 'starting_lives', 5)
+config.save()
+
+# Reload from file
+reload_config()
+```
+
+### Key Bindings
+
+```python
+from data.tools.keybindings import KeyBindings
+import pygame as pg
+
+# Create key bindings
+bindings = KeyBindings()
+
+# Get key for action
+jump_key = bindings.get('jump')
+
+# Check if key matches action
+if bindings.is_action(pg.K_SPACE, 'jump'):
+    print("Space is jump!")
+
+# Rebind
+bindings.set('jump', pg.K_SPACE)
+
+# Reset to defaults
+bindings.reset()
+```
+
+### Image Caching
+
+```python
+from data.tools.resources import ImageCache, LazyImageLoader
+
+# Use global cache
+sprite = ImageCache.get("resources/graphics/mario.png")
+
+# Or use lazy loader for directories
+loader = LazyImageLoader("resources/graphics/enemies")
+goomba_sprite = loader.get("goomba_walk_1")
+
+# Get all images from directory
+all_sprites = loader.get_all()
+
+# Clear cache to free memory
+ImageCache.clear()
 ```
 
 ## 📊 Performance
@@ -245,7 +513,15 @@ Super Mario Bros is a trademark of Nintendo.
 
 ## Version History
 
-### v2.0.0 (2026) - Enhanced Edition
+### v2.6.0 (2026) - Bosses & Enhanced Combat
+- ✅ **Combo System 2.0**: Enhanced chains, 5x multiplier, visual feedback
+- ✅ **Boss System**: Bowser, Mega Goomba, Giant Koopa Troopa
+- ✅ **4 New Enemies**: Piranha Plant, Bullet Bill, Hammer Bro, Buzzy Beetle
+- ✅ **Advanced Particles**: Object pooling, 10+ new particle types
+- ✅ **Enhanced Hints**: Smart tutorial system with progress tracking
+- ✅ **100+ New Tests**: Full test coverage for new systems
+
+### v2.5.0 (2026) - Enhanced Edition
 - ✅ Python 3.10+ with type hints
 - ✅ JSON level loader
 - ✅ Save/load system

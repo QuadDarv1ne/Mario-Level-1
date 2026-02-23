@@ -25,7 +25,7 @@ import pygame as pg
 from data.main import main
 import cProfile
 
-__version__ = '2.0.0'
+__version__ = '2.7.0'
 __python_version__ = '3.10+'
 
 
@@ -34,6 +34,16 @@ if __name__ == '__main__':
     pg.quit()
     sys.exit()
 
-# TODO: Версия №2 - Modernized Edition
-# Дата обновления: 2026
-# Дуплей Максим Игоревич
+# =============================================================================
+# Version 2.7.0 - Player Progression & Advanced AI Edition
+# Release Date: February 2026
+# Author: justinarmstrong (original), Enhanced by community
+# =============================================================================
+#
+# New Features in v2.7:
+# - Player Progression System: XP, levels, 7 rank tiers, persistent stats
+# - Character Customization: 14+ unlockable skins with bonuses
+# - Daily & Weekly Challenges: Auto-generated with 6 categories
+# - Advanced AI System: State machines, group coordination, AI director
+# - Enhanced from v2.6: Bosses, Combo 2.0, 4 new enemies, advanced particles
+#

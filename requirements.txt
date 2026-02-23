@@ -4,6 +4,9 @@
 # Core game library
 pygame>=2.5.0
 
+# Configuration
+PyYAML>=6.0
+
 # Development dependencies
 pytest>=7.4.0
 pytest-cov>=4.1.0
