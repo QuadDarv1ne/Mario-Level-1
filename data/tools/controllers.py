@@ -48,11 +48,12 @@ class Control:
         self.state_dict: Dict[str, "_State"] = {}
         self.state_name: str = ""
         self.state: Optional["_State"] = None
-        
+
         # Profiler integration
         self.profiler = None
         if enable_profiler:
             from ..profiler import Profiler
+
             self.profiler = Profiler()
 
     def setup_states(self, state_dict: Dict[str, "_State"], start_state: str) -> None:
@@ -76,7 +77,7 @@ class Control:
             self.done = True
         elif self.state.done:
             self.flip_state()
-        
+
         if self.profiler:
             with self.profiler.profile("state_update"):
                 self.state.update(self.screen, self.keys, self.current_time)
@@ -125,17 +126,17 @@ class Control:
         """Main game loop - processes events, updates state, renders."""
         if self.profiler:
             self.profiler.start()
-        
+
         while not self.done:
             self.event_loop()
             self.update()
             pg.display.update()
             self.clock.tick(self.fps)
-            
+
             if self.profiler:
                 self.profiler.end_frame()
                 self.profiler.draw_overlay(self.screen)
-            
+
             if self.show_fps:
                 fps = self.clock.get_fps()
                 with_fps = "{} - {:.2f} FPS".format(self.caption, fps)

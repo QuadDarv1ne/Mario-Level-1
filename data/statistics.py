@@ -8,14 +8,15 @@ Provides:
 - Achievements integration
 - Stats persistence
 """
+
 from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 
 from . import constants as c
 
@@ -23,6 +24,7 @@ from . import constants as c
 @dataclass
 class SessionStats:
     """Statistics for current gaming session."""
+
     start_time: str = ""
     duration_seconds: int = 0
     score: int = 0
@@ -42,6 +44,7 @@ class SessionStats:
 @dataclass
 class LifetimeStats:
     """Lifetime statistics across all sessions."""
+
     total_sessions: int = 0
     total_playtime_seconds: int = 0
     total_score: int = 0
@@ -70,6 +73,7 @@ class LifetimeStats:
 @dataclass
 class EnemyStats:
     """Enemy-specific statistics."""
+
     goombas_defeated: int = 0
     koopas_defeated: int = 0
     stomps: int = 0
@@ -81,6 +85,7 @@ class EnemyStats:
 @dataclass
 class PowerUpStats:
     """Power-up statistics."""
+
     mushrooms_collected: int = 0
     fireflowers_collected: int = 0
     stars_collected: int = 0
@@ -323,9 +328,7 @@ class StatisticsManager:
             "coins": self.session.coins_collected,
             "enemies": self.session.enemies_defeated,
             "deaths": self.session.deaths,
-            "kdr": (
-                self.session.enemies_defeated / max(1, self.session.deaths)
-            ),
+            "kdr": (self.session.enemies_defeated / max(1, self.session.deaths)),
         }
 
     def get_lifetime_summary(self) -> dict:
@@ -337,9 +340,7 @@ class StatisticsManager:
             "total_score": self.lifetime.total_score,
             "total_coins": self.lifetime.total_coins,
             "total_enemies": self.lifetime.total_enemies,
-            "avg_score_per_session": (
-                self.lifetime.total_score / max(1, self.lifetime.total_sessions)
-            ),
+            "avg_score_per_session": (self.lifetime.total_score / max(1, self.lifetime.total_sessions)),
             "completion_rate": self._calculate_completion_rate(),
         }
 
@@ -376,15 +377,12 @@ class StatsDisplay:
         """Initialize fonts."""
         try:
             import pygame as pg
+
             self.font = pg.font.Font(None, 24)
         except (ImportError, pg.error):
             self.font = None
 
-    def draw_session_stats(
-        self,
-        surface: "pg.Surface",
-        position: tuple[int, int] = (10, 100)
-    ) -> None:
+    def draw_session_stats(self, surface: "pg.Surface", position: tuple[int, int] = (10, 100)) -> None:
         """
         Draw session statistics.
 
@@ -394,8 +392,6 @@ class StatsDisplay:
         """
         if not self.font:
             return
-
-        import pygame as pg
 
         x, y = position
         lines = [
@@ -411,11 +407,7 @@ class StatsDisplay:
             text_surface = self.font.render(text, True, color)
             surface.blit(text_surface, (x, y + i * 25))
 
-    def draw_lifetime_stats(
-        self,
-        surface: "pg.Surface",
-        position: tuple[int, int] = (10, 250)
-    ) -> None:
+    def draw_lifetime_stats(self, surface: "pg.Surface", position: tuple[int, int] = (10, 250)) -> None:
         """
         Draw lifetime statistics.
 
@@ -425,8 +417,6 @@ class StatsDisplay:
         """
         if not self.font:
             return
-
-        import pygame as pg
 
         summary = self.stats.get_lifetime_summary()
 
