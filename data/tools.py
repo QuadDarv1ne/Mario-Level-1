@@ -2,34 +2,35 @@
 Core tools and base classes for the game.
 Contains the Control class for game loop management and utility functions.
 """
+
 from __future__ import annotations
 
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
 import pygame as pg
 
 if TYPE_CHECKING:
     from pygame.surface import Surface
     from pygame.event import Event
 
-__author__ = 'justinarmstrong'
+__author__ = "justinarmstrong"
 
 keybinding: Dict[str, int] = {
-    'action': pg.K_s,
-    'jump': pg.K_a,
-    'left': pg.K_LEFT,
-    'right': pg.K_RIGHT,
-    'down': pg.K_DOWN
+    "action": pg.K_s,
+    "jump": pg.K_a,
+    "left": pg.K_LEFT,
+    "right": pg.K_RIGHT,
+    "down": pg.K_DOWN,
 }
 
 
 class Control:
     """
     Control class for entire project.
-    
-    Contains the game loop, and contains the event_loop which passes events 
+
+    Contains the game loop, and contains the event_loop which passes events
     to States as needed. Logic for flipping states is also found here.
-    
+
     Attributes:
         screen: Main display surface
         done: Flag to indicate game loop should end
@@ -43,7 +44,7 @@ class Control:
         state_name: Name of current state
         state: Current state object
     """
-    
+
     def __init__(self, caption: str) -> None:
         """Initialize the game controller."""
         self.screen: Surface = pg.display.get_surface()
@@ -55,13 +56,13 @@ class Control:
         self.current_time: float = 0.0
         self.keys: Tuple[bool, ...] = pg.key.get_pressed()
         self.state_dict: Dict[str, _State] = {}
-        self.state_name: str = ''
+        self.state_name: str = ""
         self.state: Optional[_State] = None
 
     def setup_states(self, state_dict: Dict[str, _State], start_state: str) -> None:
         """
         Initialize game states.
-        
+
         Args:
             state_dict: Dictionary mapping state names to State objects
             start_state: Name of the initial state
@@ -107,7 +108,7 @@ class Control:
     def toggle_show_fps(self, key: int) -> None:
         """
         Toggle FPS display on/off.
-        
+
         Args:
             key: The key that was pressed
         """
@@ -132,10 +133,10 @@ class Control:
 class _State:
     """
     Base class for all game states.
-    
+
     Provides common functionality for menu, level, game over screens, etc.
     Subclasses should override: startup, cleanup, update, get_event
-    
+
     Attributes:
         start_time: Time when state was entered
         current_time: Current time within state
@@ -145,7 +146,7 @@ class _State:
         previous: Name of previous state
         persist: Data to pass between states
     """
-    
+
     def __init__(self) -> None:
         """Initialize state with default values."""
         self.start_time: float = 0.0
@@ -159,7 +160,7 @@ class _State:
     def get_event(self, event: Event) -> None:
         """
         Process a single event.
-        
+
         Args:
             event: Pygame event to process
         """
@@ -168,7 +169,7 @@ class _State:
     def startup(self, current_time: float, persistant: Dict[str, Any]) -> None:
         """
         Called when state is first entered.
-        
+
         Args:
             current_time: Current game time in milliseconds
             persistant: Data passed from previous state
@@ -179,7 +180,7 @@ class _State:
     def cleanup(self) -> Dict[str, Any]:
         """
         Called when state is exiting.
-        
+
         Returns:
             Dictionary of data to pass to next state
         """
@@ -189,7 +190,7 @@ class _State:
     def update(self, surface: Surface, keys: Tuple[bool, ...], current_time: float) -> None:
         """
         Update state logic and render.
-        
+
         Args:
             surface: Display surface to render to
             keys: Current keyboard state
@@ -198,9 +199,11 @@ class _State:
         pass
 
 
-
-def load_all_gfx(directory, colorkey=(255,0,255), accept=('.png', 'jpg', 'bmp')):
-    graphics = {}
+def load_all_gfx(
+    directory: str, colorkey: Tuple[int, int, int] = (255, 0, 255), accept: Tuple[str, ...] = (".png", ".jpg", ".bmp")
+) -> Dict[str, pg.Surface]:
+    """Load all graphics from a directory."""
+    graphics: Dict[str, pg.Surface] = {}
     for pic in os.listdir(directory):
         name, ext = os.path.splitext(pic)
         if ext.lower() in accept:
@@ -210,38 +213,32 @@ def load_all_gfx(directory, colorkey=(255,0,255), accept=('.png', 'jpg', 'bmp'))
             else:
                 img = img.convert()
                 img.set_colorkey(colorkey)
-            graphics[name]=img
+            graphics[name] = img
     return graphics
 
 
-def load_all_music(directory, accept=('.wav', '.mp3', '.ogg', '.mdi')):
-    songs = {}
+def load_all_music(directory: str, accept: Tuple[str, ...] = (".wav", ".mp3", ".ogg", ".mdi")) -> Dict[str, str]:
+    """Load all music file paths from a directory."""
+    songs: Dict[str, str] = {}
     for song in os.listdir(directory):
-        name,ext = os.path.splitext(song)
+        name, ext = os.path.splitext(song)
         if ext.lower() in accept:
             songs[name] = os.path.join(directory, song)
     return songs
 
 
-def load_all_fonts(directory, accept=('.ttf')):
+def load_all_fonts(directory: str, accept: Tuple[str, ...] = (".ttf",)) -> Dict[str, str]:
+    """Load all font file paths from a directory."""
     return load_all_music(directory, accept)
 
 
-def load_all_sfx(directory, accept=('.wav','.mpe','.ogg','.mdi')):
-    effects = {}
+def load_all_sfx(
+    directory: str, accept: Tuple[str, ...] = (".wav", ".mpe", ".ogg", ".mdi")
+) -> Dict[str, pg.mixer.Sound]:
+    """Load all sound effects from a directory."""
+    effects: Dict[str, pg.mixer.Sound] = {}
     for fx in os.listdir(directory):
         name, ext = os.path.splitext(fx)
         if ext.lower() in accept:
             effects[name] = pg.mixer.Sound(os.path.join(directory, fx))
     return effects
-
-
-
-
-
-
-
-
-
-
-
