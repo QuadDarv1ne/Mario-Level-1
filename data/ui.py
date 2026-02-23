@@ -9,21 +9,22 @@ Provides:
 - Pause menu
 - HUD improvements
 """
+
 from __future__ import annotations
 
-import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Callable, Any
+from typing import List, Optional, Tuple, Callable
 
 import pygame as pg
 
 from . import constants as c
-from .animation_system import Tween, TweenManager, EasingType
+from .animation_system import TweenManager, EasingType
 
 
 class UIState(Enum):
     """UI state types."""
+
     HIDDEN = "hidden"
     VISIBLE = "visible"
     TRANSITIONING = "transitioning"
@@ -32,6 +33,7 @@ class UIState(Enum):
 
 class MenuAction(Enum):
     """Menu action types."""
+
     START_GAME = "start_game"
     OPTIONS = "options"
     ACHIEVEMENTS = "achievements"
@@ -45,6 +47,7 @@ class MenuAction(Enum):
 @dataclass
 class ButtonStyle:
     """Style configuration for buttons."""
+
     bg_color: tuple[int, int, int] = c.SKY_BLUE
     bg_hover_color: tuple[int, int, int] = c.BLUE
     text_color: tuple[int, int, int] = c.WHITE
@@ -60,6 +63,7 @@ class ButtonStyle:
 @dataclass
 class MenuItem:
     """Menu item data."""
+
     text: str
     action: MenuAction
     callback: Optional[Callable[[], None]] = None
@@ -79,7 +83,7 @@ class UIButton:
         height: int,
         text: str,
         style: Optional[ButtonStyle] = None,
-        callback: Optional[Callable[[], None]] = None
+        callback: Optional[Callable[[], None]] = None,
     ) -> None:
         """
         Initialize button.
@@ -150,13 +154,7 @@ class UIButton:
         target_scale = 1.1 if self.is_hovered else 1.0
 
         if "scale" not in self.tween_manager.tweens:
-            self.tween_manager.add_tween(
-                "scale",
-                self.scale_x,
-                target_scale,
-                150,
-                EasingType.EASE_OUT_QUAD
-            )
+            self.tween_manager.add_tween("scale", self.scale_x, target_scale, 150, EasingType.EASE_OUT_QUAD)
         else:
             tween = self.tween_manager.get_tween("scale")
             if tween and abs(tween.end - target_scale) > 0.01:
@@ -223,23 +221,14 @@ class UIButton:
         offset_x = (self.width - scaled_width) // 2
         offset_y = (self.height - scaled_height) // 2
 
-        draw_rect = pg.Rect(
-            self.x + offset_x,
-            self.y + offset_y,
-            scaled_width,
-            scaled_height
-        )
+        draw_rect = pg.Rect(self.x + offset_x, self.y + offset_y, scaled_width, scaled_height)
 
         # Draw button background with rounded corners
         self._draw_rounded_rect(surface, draw_rect, bg_color)
 
         # Draw border
         pg.draw.rect(
-            surface,
-            self.style.border_color,
-            draw_rect,
-            self.style.border_width,
-            border_radius=self.style.corner_radius
+            surface, self.style.border_color, draw_rect, self.style.border_width, border_radius=self.style.corner_radius
         )
 
         # Draw text
@@ -248,30 +237,15 @@ class UIButton:
             text_rect = text_surface.get_rect(center=draw_rect.center)
             surface.blit(text_surface, text_rect)
 
-    def _draw_rounded_rect(
-        self,
-        surface: pg.Surface,
-        rect: pg.Rect,
-        color: tuple[int, int, int]
-    ) -> None:
+    def _draw_rounded_rect(self, surface: pg.Surface, rect: pg.Rect, color: tuple[int, int, int]) -> None:
         """Draw rounded rectangle."""
-        pg.draw.rect(
-            surface,
-            color,
-            rect,
-            border_radius=self.style.corner_radius
-        )
+        pg.draw.rect(surface, color, rect, border_radius=self.style.corner_radius)
 
     def _draw_disabled(self, surface: pg.Surface) -> None:
         """Draw disabled button state."""
         # Gray out the button
         disabled_color = c.GRAY
-        pg.draw.rect(
-            surface,
-            disabled_color,
-            self.rect,
-            border_radius=self.style.corner_radius
-        )
+        pg.draw.rect(surface, disabled_color, self.rect, border_radius=self.style.corner_radius)
 
         if self.font:
             text_surface = self.font.render(self.text, True, c.NAVYBLUE)
@@ -301,7 +275,7 @@ class UILabel:
         text: str,
         font_size: int = 36,
         color: tuple[int, int, int] = c.WHITE,
-        center: bool = False
+        center: bool = False,
     ) -> None:
         """
         Initialize label.
@@ -368,12 +342,7 @@ class AnimatedMenu:
     Animated menu with transitions.
     """
 
-    def __init__(
-        self,
-        screen_width: int,
-        screen_height: int,
-        title: str = "MENU"
-    ) -> None:
+    def __init__(self, screen_width: int, screen_height: int, title: str = "MENU") -> None:
         """
         Initialize animated menu.
 
@@ -401,21 +370,10 @@ class AnimatedMenu:
 
     def _init_title(self) -> None:
         """Initialize title label."""
-        self.title_label = UILabel(
-            self.screen_width // 2,
-            80,
-            self.title,
-            font_size=72,
-            color=c.GOLD,
-            center=True
-        )
+        self.title_label = UILabel(self.screen_width // 2, 80, self.title, font_size=72, color=c.GOLD, center=True)
 
     def add_button(
-        self,
-        text: str,
-        action: MenuAction,
-        callback: Optional[Callable[[], None]] = None,
-        y_offset: int = 0
+        self, text: str, action: MenuAction, callback: Optional[Callable[[], None]] = None, y_offset: int = 0
     ) -> UIButton:
         """
         Add button to menu.
@@ -437,24 +395,13 @@ class AnimatedMenu:
         # Calculate y position based on number of buttons
         y = base_y + y_offset + len(self.buttons) * 70
 
-        button = UIButton(
-            button_x,
-            y,
-            button_width,
-            button_height,
-            text,
-            callback=callback
-        )
+        button = UIButton(button_x, y, button_width, button_height, text, callback=callback)
 
         self.buttons.append(button)
         return button
 
     def add_label(
-        self,
-        text: str,
-        font_size: int = 24,
-        color: tuple[int, int, int] = c.GRAY,
-        y_offset: int = 0
+        self, text: str, font_size: int = 24, color: tuple[int, int, int] = c.GRAY, y_offset: int = 0
     ) -> UILabel:
         """Add label to menu."""
         label = UILabel(
@@ -463,7 +410,7 @@ class AnimatedMenu:
             text,
             font_size=font_size,
             color=color,
-            center=True
+            center=True,
         )
         self.labels.append(label)
         return label
@@ -584,7 +531,7 @@ class MainMenu(AnimatedMenu):
         screen_height: int,
         on_start: Optional[Callable[[], None]] = None,
         on_options: Optional[Callable[[], None]] = None,
-        on_quit: Optional[Callable[[], None]] = None
+        on_quit: Optional[Callable[[], None]] = None,
     ) -> None:
         """
         Initialize main menu.
@@ -608,23 +555,11 @@ class MainMenu(AnimatedMenu):
         """Setup main menu buttons."""
         # Title with shadow
         self.title_label = UILabel(
-            self.screen_width // 2,
-            60,
-            "SUPER MARIO BROS",
-            font_size=64,
-            color=c.RED,
-            center=True
+            self.screen_width // 2, 60, "SUPER MARIO BROS", font_size=64, color=c.RED, center=True
         )
 
         # Subtitle
-        subtitle = UILabel(
-            self.screen_width // 2,
-            120,
-            "Level 1-1",
-            font_size=32,
-            color=c.WHITE,
-            center=True
-        )
+        subtitle = UILabel(self.screen_width // 2, 120, "Level 1-1", font_size=32, color=c.WHITE, center=True)
         self.labels.append(subtitle)
 
         # Menu buttons
@@ -647,7 +582,7 @@ class PauseMenu(AnimatedMenu):
         screen_height: int,
         on_resume: Optional[Callable[[], None]] = None,
         on_restart: Optional[Callable[[], None]] = None,
-        on_quit: Optional[Callable[[], None]] = None
+        on_quit: Optional[Callable[[], None]] = None,
     ) -> None:
         """Initialize pause menu."""
         super().__init__(screen_width, screen_height, "ПАУЗА")
@@ -670,11 +605,7 @@ class HUD:
     Heads-up display for game information.
     """
 
-    def __init__(
-        self,
-        screen_width: int,
-        screen_height: int
-    ) -> None:
+    def __init__(self, screen_width: int, screen_height: int) -> None:
         """
         Initialize HUD.
 
@@ -824,7 +755,7 @@ class UIManager:
             self.screen_height,
             on_start=self._on_start_game,
             on_options=self._on_options,
-            on_quit=self._on_quit
+            on_quit=self._on_quit,
         )
 
         self.pause_menu = PauseMenu(
@@ -832,7 +763,7 @@ class UIManager:
             self.screen_height,
             on_resume=self._on_resume,
             on_restart=self._on_restart,
-            on_quit=self._on_quit_to_menu
+            on_quit=self._on_quit_to_menu,
         )
 
         self.hud = HUD(self.screen_width, self.screen_height)
