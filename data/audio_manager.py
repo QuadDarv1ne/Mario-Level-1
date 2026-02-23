@@ -9,21 +9,21 @@ Provides:
 - Audio fade effects
 - Sound categories (SFX, Music, Voice, Ambient)
 """
+
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Callable, Any
+from typing import Dict, List, Optional, Callable
 
 import pygame as pg
-
-from . import constants as c
 
 
 class AudioCategory(Enum):
     """Audio channel categories."""
+
     MUSIC = "music"
     SFX = "sfx"
     VOICE = "voice"
@@ -33,6 +33,7 @@ class AudioCategory(Enum):
 
 class AudioState(Enum):
     """Audio playback state."""
+
     STOPPED = "stopped"
     PLAYING = "playing"
     PAUSED = "paused"
@@ -43,6 +44,7 @@ class AudioState(Enum):
 @dataclass
 class SoundConfig:
     """Configuration for a sound effect."""
+
     volume: float = 1.0
     pitch: float = 1.0
     loops: int = 0
@@ -54,6 +56,7 @@ class SoundConfig:
 @dataclass
 class MusicTrack:
     """Music track information."""
+
     name: str
     file_path: str
     duration_ms: int = 0
@@ -65,6 +68,7 @@ class MusicTrack:
 @dataclass
 class AudioStats:
     """Audio system statistics."""
+
     total_sounds_played: int = 0
     total_music_tracks: int = 0
     sounds_active: int = 0
@@ -116,13 +120,7 @@ class SoundPool:
             print(f"Warning: Could not load sound {name}: {e}")
             return False
 
-    def play(
-        self,
-        name: str,
-        volume: float = 1.0,
-        loops: int = 0,
-        priority: int = 5
-    ) -> bool:
+    def play(self, name: str, volume: float = 1.0, loops: int = 0, priority: int = 5) -> bool:
         """
         Play sound effect.
 
@@ -166,7 +164,7 @@ class SoundPool:
                 return channel
 
         # If all busy, steal lowest priority channel
-        lowest_priority = 10
+        _ = 10  # lowest_priority reserved for future use
         lowest_idx = -1
 
         for i, channel in enumerate(self.channels):
@@ -257,13 +255,7 @@ class MusicManager:
         """Add multiple tracks to playlist."""
         self.playlist.extend(tracks)
 
-    def load_track(
-        self,
-        name: str,
-        file_path: str,
-        volume: float = 0.7,
-        loops: int = -1
-    ) -> bool:
+    def load_track(self, name: str, file_path: str, volume: float = 0.7, loops: int = -1) -> bool:
         """
         Load and add track to playlist.
 
@@ -280,23 +272,14 @@ class MusicManager:
             if not os.path.exists(file_path):
                 return False
 
-            track = MusicTrack(
-                name=name,
-                file_path=file_path,
-                volume=volume,
-                loops=loops
-            )
+            track = MusicTrack(name=name, file_path=file_path, volume=volume, loops=loops)
             self.add_track(track)
             return True
         except Exception as e:
             print(f"Warning: Could not load music {name}: {e}")
             return False
 
-    def play(
-        self,
-        track_name: Optional[str] = None,
-        fade_ms: int = 1000
-    ) -> bool:
+    def play(self, track_name: Optional[str] = None, fade_ms: int = 1000) -> bool:
         """
         Play music.
 
@@ -327,11 +310,7 @@ class MusicManager:
         try:
             pg.mixer.music.load(self.current_track.file_path)
             pg.mixer.music.set_volume(self.current_track.volume * self.volume)
-            pg.mixer.music.play(
-                self.current_track.loops,
-                0.0,
-                fade_ms
-            )
+            pg.mixer.music.play(self.current_track.loops, 0.0, fade_ms)
             self.state = AudioState.PLAYING
             return True
         except pg.error as e:
@@ -353,6 +332,7 @@ class MusicManager:
 
         if self.shuffle:
             import random
+
             self.current_index = random.randint(0, len(self.playlist) - 1)
         else:
             self.current_index = (self.current_index + 1) % len(self.playlist)
@@ -399,11 +379,7 @@ class MusicManager:
         pg.mixer.music.fadeout(duration_ms)
         self.state = AudioState.FADE_OUT
 
-    def fade_in(
-        self,
-        duration_ms: int = 1000,
-        start_volume: float = 0.0
-    ) -> None:
+    def fade_in(self, duration_ms: int = 1000, start_volume: float = 0.0) -> None:
         """
         Fade in music.
 
@@ -450,11 +426,7 @@ class AudioManager:
     Central audio management system.
     """
 
-    def __init__(
-        self,
-        sound_channels: int = 16,
-        frequency: int = 44100
-    ) -> None:
+    def __init__(self, sound_channels: int = 16, frequency: int = 44100) -> None:
         """
         Initialize audio manager.
 
@@ -492,12 +464,7 @@ class AudioManager:
             True if initialization successful
         """
         try:
-            pg.mixer.init(
-                frequency=self.frequency,
-                size=-16,
-                channels=2,
-                buffer=512
-            )
+            pg.mixer.init(frequency=self.frequency, size=-16, channels=2, buffer=512)
 
             self.sound_pool = SoundPool(self.sound_channels)
             self.music_manager = MusicManager()
@@ -517,12 +484,7 @@ class AudioManager:
         pg.mixer.quit()
         self._initialized = False
 
-    def load_sound(
-        self,
-        name: str,
-        file_path: str,
-        category: AudioCategory = AudioCategory.SFX
-    ) -> bool:
+    def load_sound(self, name: str, file_path: str, category: AudioCategory = AudioCategory.SFX) -> bool:
         """
         Load sound effect.
 
@@ -539,11 +501,7 @@ class AudioManager:
 
         return self.sound_pool.load_sound(name, file_path)
 
-    def load_sounds_from_directory(
-        self,
-        directory: str,
-        category: AudioCategory = AudioCategory.SFX
-    ) -> int:
+    def load_sounds_from_directory(self, directory: str, category: AudioCategory = AudioCategory.SFX) -> int:
         """
         Load all sounds from directory.
 
@@ -573,11 +531,7 @@ class AudioManager:
         return count
 
     def play_sound(
-        self,
-        name: str,
-        volume: float = 1.0,
-        category: AudioCategory = AudioCategory.SFX,
-        priority: int = 5
+        self, name: str, volume: float = 1.0, category: AudioCategory = AudioCategory.SFX, priority: int = 5
     ) -> bool:
         """
         Play sound effect.
@@ -601,17 +555,9 @@ class AudioManager:
         category_vol = self.category_volumes.get(category, 1.0)
         final_volume = volume * category_vol * self.master_volume
 
-        return self.sound_pool.play(
-            name,
-            volume=final_volume,
-            priority=priority
-        )
+        return self.sound_pool.play(name, volume=final_volume, priority=priority)
 
-    def play_music(
-        self,
-        track_name: Optional[str] = None,
-        fade_ms: int = 1000
-    ) -> bool:
+    def play_music(self, track_name: Optional[str] = None, fade_ms: int = 1000) -> bool:
         """
         Play background music.
 
@@ -663,11 +609,7 @@ class AudioManager:
         """
         self.master_volume = max(0.0, min(1.0, volume))
 
-    def set_category_volume(
-        self,
-        category: AudioCategory,
-        volume: float
-    ) -> None:
+    def set_category_volume(self, category: AudioCategory, volume: float) -> None:
         """
         Set category volume.
 
@@ -734,11 +676,9 @@ SOUND_NAMES = {
     "boss_fireball": "boss_fireball",
     "explosion": "explosion",
     "bump": "bump",
-
     # Enemy sounds
     "goomba_appears": "goomba_appears",
     "koopa_appears": "koopa_appears",
-
     # UI sounds
     "button_click": "button_click",
     "menu_move": "menu_move",
@@ -787,53 +727,28 @@ class GameAudioPreset:
 
     def play_coin(self) -> bool:
         """Play coin collection sound."""
-        return self.audio.play_sound(
-            SOUND_NAMES["coin"],
-            category=AudioCategory.SFX,
-            priority=7
-        )
+        return self.audio.play_sound(SOUND_NAMES["coin"], category=AudioCategory.SFX, priority=7)
 
     def play_stomp(self) -> bool:
         """Play enemy stomp sound."""
-        return self.audio.play_sound(
-            SOUND_NAMES["stomp"],
-            category=AudioCategory.SFX
-        )
+        return self.audio.play_sound(SOUND_NAMES["stomp"], category=AudioCategory.SFX)
 
     def play_powerup(self) -> bool:
         """Play powerup collection sound."""
-        return self.audio.play_sound(
-            SOUND_NAMES["powerup"],
-            category=AudioCategory.SFX,
-            priority=8
-        )
+        return self.audio.play_sound(SOUND_NAMES["powerup"], category=AudioCategory.SFX, priority=8)
 
     def play_game_over(self) -> bool:
         """Play game over sound."""
-        return self.audio.play_sound(
-            SOUND_NAMES["game_over"],
-            category=AudioCategory.SFX,
-            priority=10
-        )
+        return self.audio.play_sound(SOUND_NAMES["game_over"], category=AudioCategory.SFX, priority=10)
 
     def play_stage_clear(self) -> bool:
         """Play stage clear sound."""
-        return self.audio.play_sound(
-            SOUND_NAMES["stage_clear"],
-            category=AudioCategory.SFX,
-            priority=10
-        )
+        return self.audio.play_sound(SOUND_NAMES["stage_clear"], category=AudioCategory.SFX, priority=10)
 
     def play_ui_click(self) -> bool:
         """Play UI click sound."""
-        return self.audio.play_sound(
-            SOUND_NAMES["button_click"],
-            category=AudioCategory.UI
-        )
+        return self.audio.play_sound(SOUND_NAMES["button_click"], category=AudioCategory.UI)
 
     def play_menu_move(self) -> bool:
         """Play menu navigation sound."""
-        return self.audio.play_sound(
-            SOUND_NAMES["menu_move"],
-            category=AudioCategory.UI
-        )
+        return self.audio.play_sound(SOUND_NAMES["menu_move"], category=AudioCategory.UI)
