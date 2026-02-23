@@ -8,9 +8,9 @@ Provides:
 - EXIF metadata
 - Batch export
 """
+
 from __future__ import annotations
 
-import os
 import json
 from datetime import datetime
 from pathlib import Path
@@ -23,6 +23,7 @@ import pygame as pg
 @dataclass
 class ScreenshotInfo:
     """Screenshot metadata."""
+
     filename: str
     filepath: str
     timestamp: str
@@ -45,11 +46,7 @@ class ScreenshotManager:
     DEFAULT_DIR = "screenshots"
     SUPPORTED_FORMATS = ["png", "jpg", "bmp"]
 
-    def __init__(
-        self,
-        save_dir: Optional[str] = None,
-        auto_number: bool = True
-    ) -> None:
+    def __init__(self, save_dir: Optional[str] = None, auto_number: bool = True) -> None:
         """
         Initialize screenshot manager.
 
@@ -100,12 +97,7 @@ class ScreenshotManager:
             return f"{timestamp}_{tag}.{self.format}"
         return f"{timestamp}.{self.format}"
 
-    def capture(
-        self,
-        surface: pg.Surface,
-        tag: str = "",
-        metadata: Optional[dict] = None
-    ) -> Optional[ScreenshotInfo]:
+    def capture(self, surface: pg.Surface, tag: str = "", metadata: Optional[dict] = None) -> Optional[ScreenshotInfo]:
         """
         Capture screenshot.
 
@@ -148,7 +140,7 @@ class ScreenshotManager:
                 width=surface.get_width(),
                 height=surface.get_height(),
                 game_state=metadata or {},
-                tags=[tag] if tag else []
+                tags=[tag] if tag else [],
             )
 
             self.screenshots.append(info)
@@ -164,11 +156,7 @@ class ScreenshotManager:
             return None
 
     def capture_scaled(
-        self,
-        surface: pg.Surface,
-        scale: float = 1.0,
-        tag: str = "",
-        metadata: Optional[dict] = None
+        self, surface: pg.Surface, scale: float = 1.0, tag: str = "", metadata: Optional[dict] = None
     ) -> Optional[ScreenshotInfo]:
         """
         Capture scaled screenshot.
@@ -188,10 +176,7 @@ class ScreenshotManager:
         new_width = int(surface.get_width() * scale)
         new_height = int(surface.get_height() * scale)
 
-        scaled_surface = pg.transform.smoothscale(
-            surface,
-            (new_width, new_height)
-        )
+        scaled_surface = pg.transform.smoothscale(surface, (new_width, new_height))
 
         return self.capture(scaled_surface, tag, metadata)
 
@@ -213,10 +198,7 @@ class ScreenshotManager:
         Returns:
             List of screenshots from that date
         """
-        return [
-            ss for ss in self.screenshots
-            if ss.timestamp.startswith(date)
-        ]
+        return [ss for ss in self.screenshots if ss.timestamp.startswith(date)]
 
     def delete_screenshot(self, filename: str) -> bool:
         """
@@ -274,7 +256,7 @@ class ScreenshotManager:
                     "tags": ss.tags,
                 }
                 for ss in self.screenshots
-            ]
+            ],
         }
 
         try:
@@ -299,15 +281,17 @@ class ScreenshotManager:
             self.screenshot_count = data.get("count", 0)
 
             for ss_data in data.get("screenshots", []):
-                self.screenshots.append(ScreenshotInfo(
-                    filename=ss_data["filename"],
-                    filepath=ss_data["filepath"],
-                    timestamp=ss_data["timestamp"],
-                    width=ss_data["width"],
-                    height=ss_data["height"],
-                    game_state=ss_data.get("game_state", {}),
-                    tags=ss_data.get("tags", [])
-                ))
+                self.screenshots.append(
+                    ScreenshotInfo(
+                        filename=ss_data["filename"],
+                        filepath=ss_data["filepath"],
+                        timestamp=ss_data["timestamp"],
+                        width=ss_data["width"],
+                        height=ss_data["height"],
+                        game_state=ss_data.get("game_state", {}),
+                        tags=ss_data.get("tags", []),
+                    )
+                )
 
         except (json.JSONDecodeError, KeyError) as e:
             print(f"Warning: Could not load screenshot index: {e}")
@@ -439,9 +423,7 @@ class AutoScreenshot:
         self.counters[event] = self.counters.get(event, 0) + 1
 
         return self.manager.capture(
-            surface,
-            tag=f"auto_{event}",
-            metadata={"event": event, "count": self.counters[event]}
+            surface, tag=f"auto_{event}", metadata={"event": event, "count": self.counters[event]}
         )
 
 
