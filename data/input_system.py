@@ -8,11 +8,12 @@ Provides:
 - Configurable buffer windows
 - Queue-based input processing
 """
+
 from __future__ import annotations
 
 import time
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Callable, Deque
 
@@ -21,6 +22,7 @@ import pygame as pg
 
 class InputType(Enum):
     """Types of input actions."""
+
     MOVE_LEFT = "move_left"
     MOVE_RIGHT = "move_right"
     MOVE_UP = "move_up"
@@ -44,6 +46,7 @@ class InputEvent:
         duration: How long input was held (ms)
         consumed: Whether input was processed
     """
+
     input_type: InputType
     timestamp: float
     duration: int = 0
@@ -54,6 +57,7 @@ class InputEvent:
 @dataclass
 class InputConfig:
     """Configuration for input buffering."""
+
     # Buffer window in milliseconds
     buffer_window: int = 150
     # Max buffered inputs
@@ -90,11 +94,7 @@ class InputBuffer:
         self._current_time = 0.0
         self._hold_timers: Dict[InputType, float] = {}
 
-    def add(
-        self,
-        input_type: InputType,
-        position: tuple[int, int] = (0, 0)
-    ) -> InputEvent:
+    def add(self, input_type: InputType, position: tuple[int, int] = (0, 0)) -> InputEvent:
         """
         Add input to buffer.
 
@@ -107,11 +107,7 @@ class InputBuffer:
         """
         self._current_time = time.time() * 1000
 
-        event = InputEvent(
-            input_type=input_type,
-            timestamp=self._current_time,
-            position=position
-        )
+        event = InputEvent(input_type=input_type, timestamp=self._current_time, position=position)
 
         self.buffer.append(event)
         self.combo_queue.append(event)
@@ -192,10 +188,7 @@ class InputBuffer:
         self._current_time = time.time() * 1000
         cutoff = self._current_time - window_ms
 
-        return [
-            event for event in self.buffer
-            if event.timestamp >= cutoff and not event.consumed
-        ]
+        return [event for event in self.buffer if event.timestamp >= cutoff and not event.consumed]
 
     def consume(self, input_type: InputType) -> bool:
         """
@@ -508,11 +501,7 @@ class ComboDetector:
         self.last_triggered: Dict[str, float] = {}
 
     def register_combo(
-        self,
-        name: str,
-        sequence: List[InputType],
-        callback: Optional[Callable[[], None]] = None,
-        cooldown: int = 500
+        self, name: str, sequence: List[InputType], callback: Optional[Callable[[], None]] = None, cooldown: int = 500
     ) -> None:
         """
         Register a combo.
@@ -564,22 +553,10 @@ class ComboDetector:
 
 # Default Mario combos
 MARIO_COMBOS = {
-    "jump_attack": (
-        [InputType.JUMP, InputType.ACTION],
-        "Jump attack combo"
-    ),
-    "run_jump": (
-        [InputType.MOVE_RIGHT, InputType.JUMP],
-        "Running jump"
-    ),
-    "backflip": (
-        [InputType.MOVE_LEFT, InputType.JUMP],
-        "Backflip"
-    ),
-    "ground_pound": (
-        [InputType.JUMP, InputType.MOVE_DOWN],
-        "Ground pound"
-    ),
+    "jump_attack": ([InputType.JUMP, InputType.ACTION], "Jump attack combo"),
+    "run_jump": ([InputType.MOVE_RIGHT, InputType.JUMP], "Running jump"),
+    "backflip": ([InputType.MOVE_LEFT, InputType.JUMP], "Backflip"),
+    "ground_pound": ([InputType.JUMP, InputType.MOVE_DOWN], "Ground pound"),
 }
 
 
