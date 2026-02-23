@@ -7,22 +7,24 @@ Provides:
 - Weather-based gameplay modifiers
 - Seasonal themes
 """
+
 from __future__ import annotations
 
 import math
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import pygame as pg
 
 from . import constants as c
-from .animation_system import Tween, TweenManager, EasingType
+from .animation_system import TweenManager, EasingType
 
 
 class WeatherType(Enum):
     """Types of weather conditions."""
+
     CLEAR = "clear"
     CLOUDY = "cloudy"
     RAINY = "rainy"
@@ -33,6 +35,7 @@ class WeatherType(Enum):
 
 class TimeOfDay(Enum):
     """Time of day periods."""
+
     DAWN = "dawn"
     MORNING = "morning"
     NOON = "noon"
@@ -46,6 +49,7 @@ class TimeOfDay(Enum):
 @dataclass
 class WeatherConfig:
     """Configuration for weather effects."""
+
     # Rain settings
     rain_drop_count: int = 100
     rain_speed: float = 5.0
@@ -73,6 +77,7 @@ class WeatherConfig:
 @dataclass
 class TimeConfig:
     """Configuration for day/night cycle."""
+
     # Cycle duration in real seconds
     full_cycle_duration: int = 300  # 5 minutes
     # Start time (0-24 hours)
@@ -86,6 +91,7 @@ class TimeConfig:
 @dataclass
 class Drop:
     """Rain drop or snowflake."""
+
     x: float
     y: float
     speed: float
@@ -96,6 +102,7 @@ class Drop:
 @dataclass
 class Cloud:
     """Cloud particle."""
+
     x: float
     y: float
     speed: float
@@ -108,12 +115,7 @@ class WeatherEffect:
     Weather effect renderer.
     """
 
-    def __init__(
-        self,
-        screen_width: int,
-        screen_height: int,
-        config: Optional[WeatherConfig] = None
-    ) -> None:
+    def __init__(self, screen_width: int, screen_height: int, config: Optional[WeatherConfig] = None) -> None:
         """
         Initialize weather effect.
 
@@ -147,33 +149,39 @@ class WeatherEffect:
         """Initialize weather particles."""
         # Initialize rain drops
         for _ in range(self.config.rain_drop_count):
-            self.rain_drops.append(Drop(
-                x=random.randint(0, self.screen_width),
-                y=random.randint(0, self.screen_height),
-                speed=self.config.rain_speed + random.uniform(-1, 1),
-                length=random.randint(10, 20),
-                width=random.randint(1, 2)
-            ))
+            self.rain_drops.append(
+                Drop(
+                    x=random.randint(0, self.screen_width),
+                    y=random.randint(0, self.screen_height),
+                    speed=self.config.rain_speed + random.uniform(-1, 1),
+                    length=random.randint(10, 20),
+                    width=random.randint(1, 2),
+                )
+            )
 
         # Initialize snowflakes
         for _ in range(self.config.snowflake_count):
-            self.snowflakes.append(Drop(
-                x=random.randint(0, self.screen_width),
-                y=random.randint(0, self.screen_height),
-                speed=self.config.snow_speed * 0.5 + random.uniform(-0.5, 0.5),
-                length=random.randint(4, 8),
-                width=random.randint(2, 4)
-            ))
+            self.snowflakes.append(
+                Drop(
+                    x=random.randint(0, self.screen_width),
+                    y=random.randint(0, self.screen_height),
+                    speed=self.config.snow_speed * 0.5 + random.uniform(-0.5, 0.5),
+                    length=random.randint(4, 8),
+                    width=random.randint(2, 4),
+                )
+            )
 
         # Initialize clouds
         for _ in range(self.config.cloud_count):
-            self.clouds.append(Cloud(
-                x=random.randint(0, self.screen_width),
-                y=random.randint(0, self.screen_height // 3),
-                speed=self.config.cloud_speed + random.uniform(-0.2, 0.2),
-                size=random.randint(50, 150),
-                opacity=random.randint(100, 200)
-            ))
+            self.clouds.append(
+                Cloud(
+                    x=random.randint(0, self.screen_width),
+                    y=random.randint(0, self.screen_height // 3),
+                    speed=self.config.cloud_speed + random.uniform(-0.2, 0.2),
+                    size=random.randint(50, 150),
+                    opacity=random.randint(100, 200),
+                )
+            )
 
     def set_weather(self, weather_type: WeatherType, intensity: float = 1.0) -> None:
         """
@@ -304,34 +312,21 @@ class WeatherEffect:
         count = int(self.config.rain_drop_count * self.intensity)
 
         for drop in self.rain_drops[:count]:
-            pg.draw.line(
-                surface,
-                self.config.rain_color,
-                (drop.x, drop.y),
-                (drop.x, drop.y + drop.length),
-                drop.width
-            )
+            pg.draw.line(surface, self.config.rain_color, (drop.x, drop.y), (drop.x, drop.y + drop.length), drop.width)
 
     def _draw_snow(self, surface: pg.Surface) -> None:
         """Draw snowflakes."""
         count = int(self.config.snowflake_count * self.intensity)
 
         for flake in self.snowflakes[:count]:
-            pg.draw.circle(
-                surface,
-                self.config.snow_color,
-                (int(flake.x), int(flake.y)),
-                flake.width
-            )
+            pg.draw.circle(surface, self.config.snow_color, (int(flake.x), int(flake.y)), flake.width)
 
     def _draw_clouds(self, surface: pg.Surface) -> None:
         """Draw clouds."""
         for cloud in self.clouds:
             cloud_surface = pg.Surface((cloud.size, cloud.size // 2), pg.SRCALPHA)
             pg.draw.ellipse(
-                cloud_surface,
-                (*self.config.cloud_color, cloud.opacity),
-                (0, 0, cloud.size, cloud.size // 2)
+                cloud_surface, (*self.config.cloud_color, cloud.opacity), (0, 0, cloud.size, cloud.size // 2)
             )
             surface.blit(cloud_surface, (cloud.x, cloud.y))
 
@@ -353,12 +348,7 @@ class DayNightCycle:
         TimeOfDay.EVENING: (150, 100, 80),
     }
 
-    def __init__(
-        self,
-        screen_width: int,
-        screen_height: int,
-        config: Optional[TimeConfig] = None
-    ) -> None:
+    def __init__(self, screen_width: int, screen_height: int, config: Optional[TimeConfig] = None) -> None:
         """
         Initialize day/night cycle.
 
@@ -430,11 +420,7 @@ class DayNightCycle:
 
         if "overlay" not in self.tween_manager.tweens:
             self.tween_manager.add_tween(
-                "overlay",
-                self.sky_overlay_alpha,
-                target_alpha,
-                1000,
-                EasingType.EASE_IN_OUT_SINE
+                "overlay", self.sky_overlay_alpha, target_alpha, 1000, EasingType.EASE_IN_OUT_SINE
             )
         else:
             tween = self.tween_manager.get_tween("overlay")
@@ -452,10 +438,7 @@ class DayNightCycle:
         Returns:
             RGB color tuple
         """
-        return self.SKY_COLORS.get(
-            self.current_time_of_day,
-            self.SKY_COLORS[TimeOfDay.NOON]
-        )
+        return self.SKY_COLORS.get(self.current_time_of_day, self.SKY_COLORS[TimeOfDay.NOON])
 
     def draw(self, surface: pg.Surface) -> None:
         """
@@ -508,18 +491,11 @@ class DayNightCycle:
 
     def is_daytime(self) -> bool:
         """Check if it's currently daytime."""
-        return self.current_time_of_day in (
-            TimeOfDay.MORNING,
-            TimeOfDay.NOON,
-            TimeOfDay.AFTERNOON
-        )
+        return self.current_time_of_day in (TimeOfDay.MORNING, TimeOfDay.NOON, TimeOfDay.AFTERNOON)
 
     def is_nighttime(self) -> bool:
         """Check if it's currently nighttime."""
-        return self.current_time_of_day in (
-            TimeOfDay.NIGHT,
-            TimeOfDay.MIDNIGHT
-        )
+        return self.current_time_of_day in (TimeOfDay.NIGHT, TimeOfDay.MIDNIGHT)
 
 
 class WeatherManager:
@@ -527,11 +503,7 @@ class WeatherManager:
     Central manager for weather and day/night cycle.
     """
 
-    def __init__(
-        self,
-        screen_width: int,
-        screen_height: int
-    ) -> None:
+    def __init__(self, screen_width: int, screen_height: int) -> None:
         """
         Initialize weather manager.
 
@@ -574,11 +546,7 @@ class WeatherManager:
         if self.weather_enabled:
             self.weather.draw(surface)
 
-    def set_weather(
-        self,
-        weather_type: WeatherType,
-        intensity: float = 1.0
-    ) -> None:
+    def set_weather(self, weather_type: WeatherType, intensity: float = 1.0) -> None:
         """
         Set weather type.
 
@@ -627,30 +595,26 @@ class SeasonalTheme:
         "spring": {
             "weather": [WeatherType.CLEAR, WeatherType.RAINY],
             "colors": {"grass": (100, 200, 100), "sky": (135, 206, 235)},
-            "particles": "flowers"
+            "particles": "flowers",
         },
         "summer": {
             "weather": [WeatherType.CLEAR],
             "colors": {"grass": (80, 180, 80), "sky": (100, 180, 255)},
-            "particles": "butterflies"
+            "particles": "butterflies",
         },
         "autumn": {
             "weather": [WeatherType.CLOUDY, WeatherType.WINDY],
             "colors": {"grass": (180, 140, 80), "sky": (200, 180, 150)},
-            "particles": "leaves"
+            "particles": "leaves",
         },
         "winter": {
             "weather": [WeatherType.SNOWY, WeatherType.CLOUDY],
             "colors": {"grass": (220, 220, 220), "sky": (200, 210, 220)},
-            "particles": "snow"
-        }
+            "particles": "snow",
+        },
     }
 
-    def __init__(
-        self,
-        weather_manager: WeatherManager,
-        season: str = "spring"
-    ) -> None:
+    def __init__(self, weather_manager: WeatherManager, season: str = "spring") -> None:
         """
         Initialize seasonal theme.
 
@@ -685,7 +649,4 @@ class SeasonalTheme:
 
     def get_season_colors(self) -> dict:
         """Get color palette for current season."""
-        return self.THEMES.get(
-            self.season,
-            self.THEMES["spring"]
-        )["colors"]
+        return self.THEMES.get(self.season, self.THEMES["spring"])["colors"]
