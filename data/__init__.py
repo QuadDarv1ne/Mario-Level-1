@@ -4,7 +4,7 @@ Super Mario Bros Level 1 - Data Package
 This package contains all game data, states, and components.
 """
 __author__ = 'justinarmstrong'
-__version__ = '2.5.1'
+__version__ = '2.5.2'
 
 from . import level_loader
 from . import constants as c
@@ -25,6 +25,7 @@ from . import screenshot
 from . import debug
 from . import statistics
 from . import input_system
+from . import resource_manager
 
 __all__ = [
     'level_loader',
@@ -46,4 +47,5 @@ __all__ = [
     'debug',
     'statistics',
     'input_system',
+    'resource_manager',
 ]
