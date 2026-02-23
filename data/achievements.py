@@ -7,11 +7,11 @@ Provides:
 - Unlock notifications
 - Statistics tracking
 """
+
 from __future__ import annotations
 
 import json
-import os
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -24,6 +24,7 @@ from . import constants as c
 
 class AchievementTier(Enum):
     """Achievement difficulty tiers."""
+
     BRONZE = "bronze"
     SILVER = "silver"
     GOLD = "gold"
@@ -48,6 +49,7 @@ class Achievement:
         requirement: Required amount to unlock
         unlocked_at: Timestamp when unlocked
     """
+
     id: str
     name: str
     description: str
@@ -71,7 +73,7 @@ class Achievement:
             "unlocked": self.unlocked,
             "progress": self.progress,
             "requirement": self.requirement,
-            "unlocked_at": self.unlocked_at
+            "unlocked_at": self.unlocked_at,
         }
 
     @classmethod
@@ -87,7 +89,7 @@ class Achievement:
             unlocked=data.get("unlocked", False),
             progress=data.get("progress", 0),
             requirement=data.get("requirement", 1),
-            unlocked_at=data.get("unlocked_at")
+            unlocked_at=data.get("unlocked_at"),
         )
 
     def add_progress(self, amount: int = 1) -> bool:
@@ -120,6 +122,7 @@ class Achievement:
 @dataclass
 class AchievementNotification:
     """Pending achievement notification to display."""
+
     achievement: Achievement
     timer: int = 3000  # Display for 3 seconds
     alpha: int = 255
@@ -147,7 +150,7 @@ class AchievementsManager:
             tier=AchievementTier.BRONZE,
             points=5,
             icon="coin",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="coin_collector",
@@ -156,7 +159,7 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=15,
             icon="coin_bag",
-            requirement=50
+            requirement=50,
         ),
         Achievement(
             id="coin_master",
@@ -165,7 +168,7 @@ class AchievementsManager:
             tier=AchievementTier.GOLD,
             points=25,
             icon="crown",
-            requirement=100
+            requirement=100,
         ),
         Achievement(
             id="millionaire",
@@ -174,9 +177,8 @@ class AchievementsManager:
             tier=AchievementTier.PLATINUM,
             points=50,
             icon="diamond",
-            requirement=500
+            requirement=500,
         ),
-
         # Enemy stomp achievements
         Achievement(
             id="first_stomp",
@@ -185,7 +187,7 @@ class AchievementsManager:
             tier=AchievementTier.BRONZE,
             points=5,
             icon="boot",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="goomba_hunter",
@@ -194,7 +196,7 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=15,
             icon="goomba_mask",
-            requirement=20
+            requirement=20,
         ),
         Achievement(
             id="koopa_crusher",
@@ -203,7 +205,7 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=15,
             icon="shell",
-            requirement=10
+            requirement=10,
         ),
         Achievement(
             id="enemy_slayer",
@@ -212,7 +214,7 @@ class AchievementsManager:
             tier=AchievementTier.GOLD,
             points=30,
             icon="sword",
-            requirement=100
+            requirement=100,
         ),
         Achievement(
             id="unstoppable",
@@ -221,9 +223,8 @@ class AchievementsManager:
             tier=AchievementTier.PLATINUM,
             points=50,
             icon="fire",
-            requirement=10
+            requirement=10,
         ),
-
         # Power-up achievements
         Achievement(
             id="super_mario",
@@ -232,7 +233,7 @@ class AchievementsManager:
             tier=AchievementTier.BRONZE,
             points=10,
             icon="mushroom",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="fire_power",
@@ -241,7 +242,7 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=15,
             icon="fireflower",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="star_power",
@@ -250,9 +251,8 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=20,
             icon="star",
-            requirement=1
+            requirement=1,
         ),
-
         # Score achievements
         Achievement(
             id="high_scorer",
@@ -261,7 +261,7 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=20,
             icon="trophy",
-            requirement=10000
+            requirement=10000,
         ),
         Achievement(
             id="score_master",
@@ -270,9 +270,8 @@ class AchievementsManager:
             tier=AchievementTier.GOLD,
             points=35,
             icon="golden_trophy",
-            requirement=50000
+            requirement=50000,
         ),
-
         # Level completion
         Achievement(
             id="level_complete",
@@ -281,7 +280,7 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=25,
             icon="flag",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="speedrunner",
@@ -290,7 +289,7 @@ class AchievementsManager:
             tier=AchievementTier.GOLD,
             points=40,
             icon="clock",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="no_damage_run",
@@ -299,7 +298,7 @@ class AchievementsManager:
             tier=AchievementTier.PLATINUM,
             points=75,
             icon="shield",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="perfect_run",
@@ -308,9 +307,8 @@ class AchievementsManager:
             tier=AchievementTier.LEGENDARY,
             points=100,
             icon="rainbow_star",
-            requirement=1
+            requirement=1,
         ),
-
         # Combo achievements
         Achievement(
             id="double_kill",
@@ -319,7 +317,7 @@ class AchievementsManager:
             tier=AchievementTier.BRONZE,
             points=10,
             icon="double",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="combo_master",
@@ -328,9 +326,8 @@ class AchievementsManager:
             tier=AchievementTier.GOLD,
             points=40,
             icon="combo",
-            requirement=1
+            requirement=1,
         ),
-
         # Miscellaneous
         Achievement(
             id="explorer",
@@ -339,7 +336,7 @@ class AchievementsManager:
             tier=AchievementTier.BRONZE,
             points=10,
             icon="question",
-            requirement=1
+            requirement=1,
         ),
         Achievement(
             id="lucky",
@@ -348,7 +345,7 @@ class AchievementsManager:
             tier=AchievementTier.SILVER,
             points=20,
             icon="clover",
-            requirement=1
+            requirement=1,
         ),
     ]
 
@@ -429,10 +426,7 @@ class AchievementsManager:
                     self.statistics[key] = value
 
             # Calculate total points
-            self.total_points = sum(
-                ach.points for ach in self.achievements.values()
-                if ach.unlocked
-            )
+            self.total_points = sum(ach.points for ach in self.achievements.values() if ach.unlocked)
 
         except (json.JSONDecodeError, KeyError) as e:
             print(f"Warning: Could not load achievements: {e}")
@@ -440,12 +434,10 @@ class AchievementsManager:
     def save(self) -> None:
         """Save achievements and statistics to file."""
         data = {
-            "achievements": [
-                ach.to_dict() for ach in self.achievements.values()
-            ],
+            "achievements": [ach.to_dict() for ach in self.achievements.values()],
             "statistics": self.statistics,
             "total_points": self.total_points,
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
         try:
@@ -476,9 +468,7 @@ class AchievementsManager:
             stat_name: Statistic that was updated
         """
         achievement_map = {
-            "coins_collected": [
-                "first_coin", "coin_collector", "coin_master", "millionaire"
-            ],
+            "coins_collected": ["first_coin", "coin_collector", "coin_master", "millionaire"],
             "goombas_defeated": ["goomba_hunter"],
             "koopas_defeated": ["koopa_crusher"],
             "enemies_defeated": ["enemy_slayer", "unstoppable"],
@@ -551,17 +541,11 @@ class AchievementsManager:
 
     def get_unlocked_achievements(self) -> List[Achievement]:
         """Get all unlocked achievements."""
-        return [
-            ach for ach in self.achievements.values()
-            if ach.unlocked
-        ]
+        return [ach for ach in self.achievements.values() if ach.unlocked]
 
     def get_locked_achievements(self) -> List[Achievement]:
         """Get all locked achievements."""
-        return [
-            ach for ach in self.achievements.values()
-            if not ach.unlocked
-        ]
+        return [ach for ach in self.achievements.values() if not ach.unlocked]
 
     def get_completion_percentage(self) -> float:
         """Get overall completion percentage."""
@@ -687,9 +671,9 @@ class AchievementsUI:
             surface: Surface to draw to
         """
         for i, notification in enumerate(self.manager.notifications):
-            offset_y = i * 90
+            _ = i * 90  # offset_y reserved for future use
             # Temporarily adjust position
-            original_y = notification.timer
+            _ = notification.timer  # original_y reserved for future use
             self.draw_notification(surface, notification)
 
     def draw_achievements_screen(self, surface: pg.Surface) -> None:
