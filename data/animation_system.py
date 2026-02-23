@@ -8,21 +8,20 @@ Provides:
 - Animation blending
 - Frame interpolation for higher FPS
 """
+
 from __future__ import annotations
 
 import math
-import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Callable, Any
+from typing import Dict, List, Optional, Tuple, Callable
 
 import pygame as pg
-
-from . import constants as c
 
 
 class EasingType(Enum):
     """Easing function types for smooth animations."""
+
     LINEAR = "linear"
     EASE_IN_QUAD = "ease_in_quad"
     EASE_OUT_QUAD = "ease_out_quad"
@@ -39,6 +38,7 @@ class EasingType(Enum):
 
 class AnimationBlendMode(Enum):
     """Animation blending modes."""
+
     NONE = "none"
     CROSSFADE = "crossfade"
     ADDITIVE = "additive"
@@ -59,11 +59,7 @@ def lerp(start: float, end: float, t: float) -> float:
     return start + (end - start) * t
 
 
-def lerp_vector(
-    start: Tuple[float, float],
-    end: Tuple[float, float],
-    t: float
-) -> Tuple[float, float]:
+def lerp_vector(start: Tuple[float, float], end: Tuple[float, float], t: float) -> Tuple[float, float]:
     """
     Linear interpolation between two 2D vectors.
 
@@ -186,6 +182,7 @@ class EasingFunctions:
 @dataclass
 class AnimationFrame:
     """Single frame in an animation."""
+
     image: Optional[pg.Surface] = None
     duration: int = 100  # milliseconds
     offset: Tuple[int, int] = (0, 0)
@@ -195,6 +192,7 @@ class AnimationFrame:
 @dataclass
 class AnimationState:
     """State of an animation."""
+
     name: str
     frames: List[AnimationFrame] = field(default_factory=list)
     loop: bool = True
@@ -354,13 +352,7 @@ class InterpolatedSprite:
         self.vx = vx
         self.vy = vy
 
-    def add_animation(
-        self,
-        name: str,
-        frames: List[pg.Surface],
-        fps: int = 12,
-        loop: bool = True
-    ) -> None:
+    def add_animation(self, name: str, frames: List[pg.Surface], fps: int = 12, loop: bool = True) -> None:
         """
         Add animation sequence.
 
@@ -370,17 +362,9 @@ class InterpolatedSprite:
             fps: Frames per second
             loop: Whether to loop animation
         """
-        animation_frames = [
-            AnimationFrame(image=frame, duration=1000 // fps)
-            for frame in frames
-        ]
+        animation_frames = [AnimationFrame(image=frame, duration=1000 // fps) for frame in frames]
 
-        self.animations[name] = AnimationState(
-            name=name,
-            frames=animation_frames,
-            loop=loop,
-            fps=fps
-        )
+        self.animations[name] = AnimationState(name=name, frames=animation_frames, loop=loop, fps=fps)
 
     def play_animation(self, name: str, force: bool = False) -> bool:
         """
@@ -446,10 +430,7 @@ class InterpolatedSprite:
         # Apply transformations
         self.image = self._apply_transformations(frame.image)
 
-    def _apply_transformations(
-        self,
-        surface: pg.Surface
-    ) -> pg.Surface:
+    def _apply_transformations(self, surface: pg.Surface) -> pg.Surface:
         """
         Apply flip, rotation, scale, and alpha to surface.
 
@@ -463,18 +444,11 @@ class InterpolatedSprite:
 
         # Flip
         if self.flip_x or self.flip_y:
-            result = pg.transform.flip(
-                result,
-                self.flip_x,
-                self.flip_y
-            )
+            result = pg.transform.flip(result, self.flip_x, self.flip_y)
 
         # Scale
         if self.scale_x != 1.0 or self.scale_y != 1.0:
-            new_size = (
-                int(result.get_width() * self.scale_x),
-                int(result.get_height() * self.scale_y)
-            )
+            new_size = (int(result.get_width() * self.scale_x), int(result.get_height() * self.scale_y))
             result = pg.transform.scale(result, new_size)
 
         # Rotation
@@ -500,11 +474,7 @@ class InterpolatedSprite:
         """Get interpolated position."""
         return (self.get_interpolated_x(), self.get_interpolated_y())
 
-    def draw(
-        self,
-        surface: pg.Surface,
-        camera_offset: Tuple[int, int] = (0, 0)
-    ) -> None:
+    def draw(self, surface: pg.Surface, camera_offset: Tuple[int, int] = (0, 0)) -> None:
         """
         Draw sprite with interpolation.
 
@@ -597,11 +567,7 @@ class AnimationManager:
         for sprite in self.sprites:
             sprite.update(dt)
 
-    def draw(
-        self,
-        surface: pg.Surface,
-        camera_offset: Tuple[int, int] = (0, 0)
-    ) -> None:
+    def draw(self, surface: pg.Surface, camera_offset: Tuple[int, int] = (0, 0)) -> None:
         """
         Draw all sprites.
 
@@ -610,10 +576,7 @@ class AnimationManager:
             camera_offset: Camera offset
         """
         # Sort by Y position for depth sorting
-        sorted_sprites = sorted(
-            self.sprites,
-            key=lambda s: s.y
-        )
+        sorted_sprites = sorted(self.sprites, key=lambda s: s.y)
 
         for sprite in sorted_sprites:
             sprite.draw(surface, camera_offset)
@@ -629,11 +592,7 @@ class Tween:
     """
 
     def __init__(
-        self,
-        start: float,
-        end: float,
-        duration: int,
-        easing: EasingType = EasingType.EASE_IN_OUT_QUAD
+        self, start: float, end: float, duration: int, easing: EasingType = EasingType.EASE_IN_OUT_QUAD
     ) -> None:
         """
         Initialize tween.
@@ -715,12 +674,7 @@ class TweenManager:
         self.tweens: Dict[str, Tween] = {}
 
     def add_tween(
-        self,
-        name: str,
-        start: float,
-        end: float,
-        duration: int,
-        easing: EasingType = EasingType.EASE_IN_OUT_QUAD
+        self, name: str, start: float, end: float, duration: int, easing: EasingType = EasingType.EASE_IN_OUT_QUAD
     ) -> Tween:
         """
         Add tween to manager.
@@ -760,10 +714,7 @@ class TweenManager:
             results[name] = value
 
         # Remove completed tweens
-        completed = [
-            name for name, tween in self.tweens.items()
-            if tween.is_complete
-        ]
+        completed = [name for name, tween in self.tweens.items() if tween.is_complete]
         for name in completed:
             del self.tweens[name]
 
