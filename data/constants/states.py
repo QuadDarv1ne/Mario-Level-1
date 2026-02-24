@@ -102,6 +102,10 @@ LOAD_SCREEN_STATE: str = "load screen"
 TIME_OUT: str = "time out"
 GAME_OVER_STATE: str = "game over"
 LEVEL1: str = "level1"
+LEVEL2: str = "level2"
+LEVEL3: str = "level3"
+LEVEL4: str = "level4"
+LEVEL5: str = "level5"
 
 # =============================================================================
 # SOUND STATES

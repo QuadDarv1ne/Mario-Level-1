@@ -48,6 +48,10 @@ def main() -> int:
             c.TIME_OUT: setup.create_timeout_screen(),
             c.GAME_OVER: setup.create_game_over(),
             c.LEVEL1: setup.create_level1(),
+            c.LEVEL2: setup.create_level2(),
+            c.LEVEL3: setup.create_level3(),
+            c.LEVEL4: setup.create_level4(),
+            c.LEVEL5: setup.create_level5(),
         }
 
         # Validate states

@@ -1,0 +1,464 @@
+"""Level 2 state for Super Mario Bros."""
+
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
+
+import pygame as pg
+
+from .. import setup, tools
+from .. import constants as c
+from .. import game_sound
+from ..event_system import get_event_manager, EventType
+from ..components import mario
+from ..components import collider
+from ..components import bricks
+from ..components import coin_box
+from ..components import enemies
+from ..components import advanced_enemies
+from ..components import checkpoint
+from ..components import flagpole
+from ..components import info
+from ..components import score
+from ..components import castle_flag
+from .. import level_loader
+
+
+class Level2(tools._State):
+    def __init__(self) -> None:
+        tools._State.__init__(self)
+
+    def startup(self, current_time: float, persist: Dict[str, Any]) -> None:
+        """Called when the State object is created"""
+        self.game_info = persist
+        self.persist = self.game_info
+        self.game_info[c.CURRENT_TIME] = current_time
+        self.game_info[c.LEVEL_STATE] = c.NOT_FROZEN
+        self.game_info[c.MARIO_DEAD] = False
+
+        self.state = c.NOT_FROZEN
+        self.death_timer: float = 0
+        self.flag_timer: float = 0
+        self.flag_score: Optional[Any] = None
+        self.flag_score_total = 0
+
+        self.moving_score_list: List[score.Score] = []
+        self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
+        self.sound_manager = game_sound.Sound(self.overhead_info_display)
+
+        self.background: Optional[pg.Surface] = None
+        self.back_rect: Optional[pg.Rect] = None
+        self.level: Optional[pg.Surface] = None
+        self.level_rect: Optional[pg.Rect] = None
+        self.viewport: Optional[pg.Rect] = None
+        self.ground_group: Optional[pg.sprite.Group] = None
+        self.pipe_group: Optional[pg.sprite.Group] = None
+        self.step_group: Optional[pg.sprite.Group] = None
+        self.brick_group: Optional[pg.sprite.Group] = None
+        self.coin_box_group: Optional[pg.sprite.Group] = None
+        self.flag_pole_group: Optional[pg.sprite.Group] = None
+        self.enemy_group: Optional[pg.sprite.Group] = None
+        self.mario: Optional[mario.Mario] = None
+        self.checkpoint_group: Optional[pg.sprite.Group] = None
+        self.flag: Optional[flagpole.Flag] = None
+        self.pole: Optional[flagpole.Pole] = None
+        self.finial: Optional[flagpole.Finial] = None
+        self.coin_group: Optional[pg.sprite.Group] = None
+        self.powerup_group: Optional[pg.sprite.Group] = None
+        self.fire_group: Optional[pg.sprite.Group] = None
+
+        # Load level data from JSON
+        self.level_data = level_loader.load_level_from_json("data/levels/level_2_1.json")
+
+        self.setup_background()
+        self.setup_ground()
+        self.setup_pipes()
+        self.setup_steps()
+        self.setup_bricks()
+        self.setup_coin_boxes()
+        self.setup_flag_pole()
+        self.setup_enemies()
+        self.setup_mario()
+        self.setup_checkpoints()
+        self.setup_spritegroups()
+
+    def setup_background(self) -> None:
+        """Sets the background image, rect and scales it to the correct proportions"""
+        self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
+        self.background.fill(self.level_data.background_color)
+        self.back_rect = self.background.get_rect()
+        width = self.back_rect.width
+        height = self.back_rect.height
+
+        self.level = pg.Surface((width, height)).convert()
+        self.level_rect = self.level.get_rect()
+        self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
+        self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
+
+    def setup_ground(self) -> None:
+        """Creates collideable, invisible rectangles over top of the ground for sprites to walk on"""
+        ground_sections = self.level_data.ground_sections if hasattr(self.level_data, 'ground_sections') else []
+        
+        if ground_sections:
+            ground_group = []
+            for section in ground_sections:
+                ground_rect = collider.Collider(section['x'], section['y'], section['width'], section['height'])
+                ground_group.append(ground_rect)
+            self.ground_group = pg.sprite.Group(ground_group)
+        else:
+            # Fallback to default ground
+            ground_rect1 = collider.Collider(0, c.GROUND_HEIGHT, 2000, 60)
+            ground_rect2 = collider.Collider(2200, c.GROUND_HEIGHT, 1500, 60)
+            ground_rect3 = collider.Collider(3900, c.GROUND_HEIGHT, 2000, 60)
+            ground_rect4 = collider.Collider(6100, c.GROUND_HEIGHT, 1800, 60)
+            ground_rect5 = collider.Collider(8100, c.GROUND_HEIGHT, 1200, 60)
+            self.ground_group = pg.sprite.Group(ground_rect1, ground_rect2, ground_rect3, ground_rect4, ground_rect5)
+
+    def setup_pipes(self) -> None:
+        """Create collideable rects for all the pipes"""
+        pipe_data = self.level_data.pipes if hasattr(self.level_data, 'pipes') else []
+        
+        if pipe_data:
+            pipe_group = []
+            for pipe in pipe_data:
+                pipe_rect = collider.Collider(pipe['x'], pipe['y'], pipe['width'], pipe['height'])
+                pipe_group.append(pipe_rect)
+            self.pipe_group = pg.sprite.Group(pipe_group)
+        else:
+            self.pipe_group = pg.sprite.Group()
+
+    def setup_steps(self) -> None:
+        """Create collideable rects for all the steps"""
+        step_data = self.level_data.steps if hasattr(self.level_data, 'steps') else []
+        
+        if step_data:
+            step_group = []
+            for step in step_data:
+                step_rect = collider.Collider(step['x'], step['y'], step['width'], step['height'])
+                step_group.append(step_rect)
+            self.step_group = pg.sprite.Group(step_group)
+        else:
+            self.step_group = pg.sprite.Group()
+
+    def setup_bricks(self) -> None:
+        """Creates all the breakable bricks for the level."""
+        self.coin_group = pg.sprite.Group()
+        self.powerup_group = pg.sprite.Group()
+        self.brick_pieces_group = pg.sprite.Group()
+
+        brick_data = self.level_data.bricks if hasattr(self.level_data, 'bricks') else []
+        
+        if brick_data:
+            for brick_info in brick_data:
+                brick = bricks.Brick(brick_info['x'], brick_info['y'], contents=brick_info.get('contents'))
+                self.brick_group.add(brick)
+        else:
+            self.brick_group = pg.sprite.Group()
+
+    def setup_coin_boxes(self) -> None:
+        """Creates all the coin boxes"""
+        coin_box_data = self.level_data.coin_boxes if hasattr(self.level_data, 'coin_boxes') else []
+        
+        if coin_box_data:
+            for box_info in coin_box_data:
+                coin_box_obj = coin_box.CoinBox(box_info['x'], box_info['y'], contents=box_info.get('contents'))
+                self.coin_box_group.add(coin_box_obj)
+        else:
+            self.coin_box_group = pg.sprite.Group()
+
+    def setup_flag_pole(self) -> None:
+        """Creates the flag pole at the end of the level"""
+        flag_pole_data = self.level_data.flag_pole if hasattr(self.level_data, 'flag_pole') else {}
+        
+        if flag_pole_data:
+            self.flag = flagpole.Flag(flag_pole_data['x'], flag_pole_data['y'])
+            self.pole = flagpole.Pole(flag_pole_data['x'], flag_pole_data['y'])
+            self.finial = flagpole.Finial(flag_pole_data['x'], flag_pole_data['y'])
+            
+            self.flag_pole_group = pg.sprite.Group(self.flag, self.pole, self.finial)
+        else:
+            self.flag_pole_group = pg.sprite.Group()
+
+    def setup_enemies(self) -> None:
+        """Setup all enemies"""
+        enemy_data = self.level_data.enemies if hasattr(self.level_data, 'enemies') else []
+
+        if enemy_data:
+            for enemy_info in enemy_data:
+                enemy_type = enemy_info.get('type', 'goomba')
+                x = enemy_info.get('x', 0)
+                y = enemy_info.get('y', c.GROUND_HEIGHT)
+                direction = enemy_info.get('direction', 'left')
+
+                if enemy_type == 'goomba':
+                    enemy = enemies.Goomba(x, y, direction)
+                elif enemy_type == 'koopa':
+                    enemy = enemies.Koopa(x, y, direction)
+                elif enemy_type == 'piranha':
+                    enemy = advanced_enemies.PiranhaPlant(x, y, direction)
+                elif enemy_type == 'bullet_bill':
+                    enemy = advanced_enemies.BulletBill(x, y, direction)
+                elif enemy_type == 'hammer_bro':
+                    enemy = advanced_enemies.HammerBro(x, y, direction)
+                else:
+                    enemy = enemies.Goomba(x, y, direction)
+
+                self.enemy_group.add(enemy)
+        else:
+            self.enemy_group = pg.sprite.Group()
+
+    def setup_mario(self) -> None:
+        """Setup Mario player sprite"""
+        mario_start = self.level_data.mario_start if hasattr(self.level_data, 'mario_start') else {'x': 110, 'y': c.GROUND_HEIGHT}
+        self.mario = mario.Mario()
+        if self.mario:
+            self.mario.rect.x = mario_start.get('x', 110)
+            self.mario.rect.y = mario_start.get('y', c.GROUND_HEIGHT)
+
+    def setup_checkpoints(self) -> None:
+        """Setup checkpoints for enemy spawning"""
+        checkpoint_data = self.level_data.checkpoints if hasattr(self.level_data, 'checkpoints') else []
+        
+        if checkpoint_data:
+            for cp_info in checkpoint_data:
+                cp = checkpoint.Checkpoint(
+                    cp_info['x'],
+                    cp_info.get('y', 0),
+                    cp_info.get('width', 10),
+                    cp_info.get('height', 600),
+                    cp_info['name']
+                )
+                self.checkpoint_group.add(cp)
+        else:
+            self.checkpoint_group = pg.sprite.Group()
+
+    def setup_spritegroups(self) -> None:
+        """Initialize sprite groups"""
+        if not hasattr(self, 'ground_group') or self.ground_group is None:
+            self.ground_group = pg.sprite.Group()
+        if not hasattr(self, 'pipe_group') or self.pipe_group is None:
+            self.pipe_group = pg.sprite.Group()
+        if not hasattr(self, 'step_group') or self.step_group is None:
+            self.step_group = pg.sprite.Group()
+        if not hasattr(self, 'brick_group') or self.brick_group is None:
+            self.brick_group = pg.sprite.Group()
+        if not hasattr(self, 'coin_box_group') or self.coin_box_group is None:
+            self.coin_box_group = pg.sprite.Group()
+        if not hasattr(self, 'flag_pole_group') or self.flag_pole_group is None:
+            self.flag_pole_group = pg.sprite.Group()
+        if not hasattr(self, 'enemy_group') or self.enemy_group is None:
+            self.enemy_group = pg.sprite.Group()
+        if not hasattr(self, 'checkpoint_group') or self.checkpoint_group is None:
+            self.checkpoint_group = pg.sprite.Group()
+        if not hasattr(self, 'coin_group') or self.coin_group is None:
+            self.coin_group = pg.sprite.Group()
+        if not hasattr(self, 'powerup_group') or self.powerup_group is None:
+            self.powerup_group = pg.sprite.Group()
+        if not hasattr(self, 'fire_group') or self.fire_group is None:
+            self.fire_group = pg.sprite.Group()
+
+    def update(self, surface: pg.Surface, keys: tuple, current_time: float) -> None:
+        """Update level state"""
+        self.current_time = current_time
+
+        if self.state == c.FROZEN:
+            self.draw(surface)
+            return
+
+        if self.state == c.NOT_FROZEN:
+            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []
+            
+            if self.game_info.get(c.MARIO_DEAD):
+                self.check_mario_dead()
+            elif self.game_info.get(c.FLAG_AND_FIREWORKS):
+                self.check_flag_timer(current_time)
+            else:
+                self.update_entities(current_time)
+                self.check_collisions()
+                self.check_checkpoints()
+                self.check_state_triggers()
+                
+                if self.mario and not self.mario.dead:
+                    self.update_viewport()
+
+        self.draw(surface)
+
+    def check_mario_dead(self) -> None:
+        """Check if Mario is dead and handle death sequence"""
+        if self.mario and self.mario.dead:
+            self.death_timer += 1
+            if self.death_timer == 90:
+                self.mario.update((), self.current_time)
+            elif self.death_timer == 120:
+                self.next = c.GAME_OVER
+                self.done = True
+
+    def check_flag_timer(self, current_time: float) -> None:
+        """Check flag timer for level completion"""
+        self.flag_timer = current_time - self.flag_score.start_time
+        if self.flag_timer < 200:
+            self.flag_score = None
+        else:
+            self.game_info['current_level'] = c.LEVEL2
+            self.next = c.LOAD_SCREEN
+            self.done = True
+
+    def update_entities(self, current_time: float) -> None:
+        """Update all game entities"""
+        if self.mario:
+            self.mario.update(keys, current_time)
+
+        if self.enemy_group:
+            self.enemy_group.update(current_time)
+
+        if self.powerup_group:
+            self.powerup_group.update(current_time)
+
+        if self.fire_group:
+            self.fire_group.update(current_time)
+
+        if self.brick_group:
+            self.brick_group.update()
+
+        if self.coin_box_group:
+            self.coin_box_group.update()
+
+    def check_collisions(self) -> None:
+        """Check all collisions"""
+        if not self.mario:
+            return
+
+        # Ground collisions
+        if self.ground_group:
+            ground_collide = pg.sprite.spritecollideany(self.mario, self.ground_group)
+            if ground_collide:
+                self.mario.adjust_for_collisions(ground_collide)
+
+        # Pipe collisions
+        if self.pipe_group:
+            pipe_collide = pg.sprite.spritecollideany(self.mario, self.pipe_group)
+            if pipe_collide:
+                self.mario.adjust_for_collisions(pipe_collide)
+
+        # Step collisions
+        if self.step_group:
+            step_collide = pg.sprite.spritecollideany(self.mario, self.step_group)
+            if step_collide:
+                self.mario.adjust_for_collisions(step_collide)
+
+        # Brick collisions
+        if self.brick_group:
+            brick_collide = pg.sprite.spritecollideany(self.mario, self.brick_group)
+            if brick_collide:
+                self.mario.adjust_for_collisions(brick_collide)
+
+        # Coin box collisions
+        if self.coin_box_group:
+            coin_box_collide = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
+            if coin_box_collide:
+                self.mario.adjust_for_collisions(coin_box_collide)
+
+        # Enemy collisions
+        if self.enemy_group:
+            enemy_collide = pg.sprite.spritecollideany(self.mario, self.enemy_group)
+            if enemy_collide:
+                self.mario.adjust_for_collisions(enemy_collide)
+
+        # Powerup collisions
+        if self.powerup_group:
+            powerup_collide = pg.sprite.spritecollideany(self.mario, self.powerup_group)
+            if powerup_collide:
+                powerup_collide.collide_action(self.mario, self.game_info, self.current_time)
+
+        # Coin collisions
+        if self.coin_group:
+            coin_collide = pg.sprite.spritecollideany(self.mario, self.coin_group)
+            if coin_collide:
+                coin_collide.kill()
+                self.game_info[c.SCORE] += 200
+                self.game_info[c.COIN_TOTAL] += 1
+
+    def check_checkpoints(self) -> None:
+        """Check for enemy spawn checkpoints"""
+        if not self.mario or not self.checkpoint_group:
+            return
+
+        checkpoint = pg.sprite.spritecollideany(self.mario, self.checkpoint_group)
+        if checkpoint:
+            checkpoint.kill()
+            # Handle enemy spawning based on checkpoint
+            # This is simplified - full implementation would spawn specific enemies
+
+    def check_state_triggers(self) -> None:
+        """Check for state transition triggers"""
+        if self.mario and self.mario.dead:
+            self.state = c.FROZEN
+            self.game_info[c.MARIO_DEAD] = True
+
+        # Check for flag pole collision
+        if self.mario and self.flag_pole_group:
+            flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)
+            if flag_pole and hasattr(flag_pole, 'state') and flag_pole.state == c.TOP_OF_POLE:
+                self.state = c.FLAG_AND_FIREWORKS
+                self.flag_score = score.Score(self.mario.rect.centerx, self.mario.rect.y, c.SCORE_FLAG_POLE_TOP)
+                self.moving_score_list.append(self.flag_score)
+                self.flag_score_total = 5000
+
+    def update_viewport(self) -> None:
+        """Update camera viewport based on Mario position"""
+        if not self.mario or not self.viewport:
+            return
+
+        _ = self.game_info
+        level_rect = self.level_rect
+
+        if self.mario.rect.right > self.viewport.centerx:
+            self.viewport.centerx = self.mario.rect.centerx
+            if self.mario.rect.right > level_rect.right:
+                self.viewport.right = level_rect.right
+            else:
+                self.viewport.right = level_rect.right if self.viewport.right > level_rect.right else self.viewport.right
+
+        if self.mario.rect.left < self.viewport.x:
+            self.mario.rect.left = self.viewport.x
+
+        if self.viewport.x < 0:
+            self.viewport.x = 0
+        elif self.viewport.right > level_rect.right:
+            self.viewport.right = level_rect.right
+
+    def draw(self, surface: pg.Surface) -> None:
+        """Render the level"""
+        if self.level is None or self.background is None:
+            return
+
+        self.level.blit(self.background, self.back_rect, self.viewport)
+
+        for group in [
+            self.ground_group,
+            self.pipe_group,
+            self.step_group,
+            self.brick_group,
+            self.coin_box_group,
+            self.flag_pole_group,
+            self.enemy_group,
+            self.flag_group if hasattr(self, 'flag_group') else None,
+            self.powerup_group,
+            self.coin_group,
+            self.fire_group,
+        ]:
+            if group:
+                group.draw(self.level)
+
+        if self.mario:
+            self.mario.draw(self.level)
+
+        if self.overhead_info_display:
+            self.overhead_info_display.draw(self.level)
+
+        surface.blit(self.level, (0, 0), self.viewport)
+
+    def get_event(self, event: pg.event.Event) -> None:
+        """Handle pygame events"""
+        if self.mario:
+            self.mario.get_event(event)

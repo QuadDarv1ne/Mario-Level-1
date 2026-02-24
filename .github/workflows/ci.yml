@@ -41,7 +41,7 @@ jobs:
 
     - name: Type check with mypy
       run: |
-        mypy data/ --ignore-missing-imports || true
+        mypy data/ tests/ --ignore-missing-imports --no-error-summary
 
     - name: Run tests with pytest
       run: |
