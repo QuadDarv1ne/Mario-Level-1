@@ -2,6 +2,7 @@
 Tests for advanced animation system.
 """
 import math
+import pygame as pg
 
 import pytest
 

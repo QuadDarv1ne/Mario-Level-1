@@ -119,26 +119,47 @@ class EasingFunctions:
     @staticmethod
     def ease_in_sine(t: float) -> float:
         """Sine easing in."""
+        # clamp input and handle boundaries exactly
+        if t <= 0:
+            return 0.0
+        if t >= 1:
+            return 1.0
         return 1 - math.cos((t * math.pi) / 2)
 
     @staticmethod
     def ease_out_sine(t: float) -> float:
         """Sine easing out."""
+        if t <= 0:
+            return 0.0
+        if t >= 1:
+            return 1.0
         return math.sin((t * math.pi) / 2)
 
     @staticmethod
     def ease_in_out_sine(t: float) -> float:
         """Sine easing in/out."""
+        if t <= 0:
+            return 0.0
+        if t >= 1:
+            return 1.0
         return -(math.cos(math.pi * t) - 1) / 2
 
     @staticmethod
     def ease_in_bounce(t: float) -> float:
         """Bounce easing in."""
+        if t <= 0:
+            return 0.0
+        if t >= 1:
+            return 1.0
         return 1 - EasingFunctions.ease_out_bounce(1 - t)
 
     @staticmethod
     def ease_out_bounce(t: float) -> float:
         """Bounce easing out."""
+        if t <= 0:
+            return 0.0
+        if t >= 1:
+            return 1.0
         n1 = 7.5625
         d1 = 2.75
 

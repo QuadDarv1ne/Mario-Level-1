@@ -37,14 +37,25 @@ class Control:
 
     def __init__(self, caption: str, enable_profiler: bool = False) -> None:
         """Initialize the game controller."""
+        # ensure pygame modules are initialized (tests may not have done so)
+        pg.init()
         self.screen: Surface = pg.display.get_surface()
+        if not self.screen:
+            try:
+                # create a tiny hidden surface to allow key functions
+                self.screen = pg.display.set_mode((1, 1))
+            except pg.error:
+                self.screen = None  # headless environment
         self.done: bool = False
         self.clock: pg.time.Clock = pg.time.Clock()
         self.caption: str = caption
         self.fps: int = 60
         self.show_fps: bool = False
         self.current_time: float = 0.0
-        self.keys: Tuple[bool, ...] = pg.key.get_pressed()
+        try:
+            self.keys: Tuple[bool, ...] = pg.key.get_pressed()
+        except pg.error:
+            self.keys = tuple()
         self.state_dict: Dict[str, "_State"] = {}
         self.state_name: str = ""
         self.state: Optional["_State"] = None

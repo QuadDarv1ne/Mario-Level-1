@@ -369,9 +369,13 @@ class AchievementsManager:
 
     def _initialize(self) -> None:
         """Initialize achievements and load saved data."""
-        # Create achievements from defaults
+        # Create fresh achievements from defaults.  We can't reuse the
+        # same objects because managers may be created multiple times (e.g.
+        # during testing) and sharing would lead to unlocked/progress state
+        # leaking between instances.
         for achievement in self.DEFAULT_ACHIEVEMENTS:
-            self.achievements[achievement.id] = achievement
+            # serialize+deserialize to make a deep copy
+            self.achievements[achievement.id] = Achievement.from_dict(achievement.to_dict())
 
         # Initialize statistics
         self._init_statistics()
@@ -471,7 +475,8 @@ class AchievementsManager:
             "coins_collected": ["first_coin", "coin_collector", "coin_master", "millionaire"],
             "goombas_defeated": ["goomba_hunter"],
             "koopas_defeated": ["koopa_crusher"],
-            "enemies_defeated": ["enemy_slayer", "unstoppable"],
+            # first_stomp unlocks on any enemy defeat
+            "enemies_defeated": ["first_stomp", "enemy_slayer", "unstoppable"],
             "mushrooms_collected": ["super_mario"],
             "fireflowers_collected": ["fire_power"],
             "stars_collected": ["star_power"],

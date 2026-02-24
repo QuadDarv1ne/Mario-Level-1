@@ -2,6 +2,7 @@
 Tests for hint and tutorial system.
 """
 import time
+from typing import Optional
 
 import pytest
 import pygame as pg

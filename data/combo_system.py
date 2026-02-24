@@ -421,6 +421,8 @@ class ScoreManager:
 
         # Add to total
         self.score += multiplied
+        # update base_score as well (for reset logic)
+        self.base_score += multiplied
 
         # Store for animation
         current_time = time.time()

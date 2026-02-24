@@ -546,9 +546,8 @@ class ComboDetector:
 
     def reset(self) -> None:
         """Reset combo detector."""
+        # clear any history; combos may be re-registered later if needed
         self.last_triggered.clear()
-        for name in self.combos:
-            self.last_triggered[name] = 0
 
 
 # Default Mario combos
