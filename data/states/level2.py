@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, List, Optional
 
 import pygame as pg
@@ -22,6 +23,8 @@ from ..components import info
 from ..components import score
 from ..components import castle_flag
 from .. import level_loader
+
+logger = logging.getLogger(__name__)
 
 
 class Level2(tools._State):
@@ -199,28 +202,25 @@ class Level2(tools._State):
     def setup_enemies(self) -> None:
         """Setup all enemies"""
         enemy_data = self.level_data.enemies if hasattr(self.level_data, 'enemies') else []
+        enemy_map = {
+            'goomba': enemies.Goomba,
+            'koopa': enemies.Koopa,
+            'piranha': advanced_enemies.PiranhaPlant,
+            'bullet_bill': advanced_enemies.BulletBill,
+            'hammer_bro': advanced_enemies.HammerBro,
+        }
 
         if enemy_data:
             for enemy_info in enemy_data:
                 enemy_type = enemy_info.get('type', 'goomba')
+                enemy_class = enemy_map.get(enemy_type)
+                if enemy_class is None:
+                    logger.warning(f"Unknown enemy type: {enemy_type}, using Goomba")
+                    enemy_class = enemies.Goomba
                 x = enemy_info.get('x', 0)
                 y = enemy_info.get('y', c.GROUND_HEIGHT)
                 direction = enemy_info.get('direction', 'left')
-
-                if enemy_type == 'goomba':
-                    enemy = enemies.Goomba(x, y, direction)
-                elif enemy_type == 'koopa':
-                    enemy = enemies.Koopa(x, y, direction)
-                elif enemy_type == 'piranha':
-                    enemy = advanced_enemies.PiranhaPlant(x, y, direction)
-                elif enemy_type == 'bullet_bill':
-                    enemy = advanced_enemies.BulletBill(x, y, direction)
-                elif enemy_type == 'hammer_bro':
-                    enemy = advanced_enemies.HammerBro(x, y, direction)
-                else:
-                    enemy = enemies.Goomba(x, y, direction)
-
-                self.enemy_group.add(enemy)
+                self.enemy_group.add(enemy_class(x, y, direction))
         else:
             self.enemy_group = pg.sprite.Group()
 

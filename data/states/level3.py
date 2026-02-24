@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, List, Optional
 
 import pygame as pg
@@ -20,6 +21,8 @@ from ..components import flagpole
 from ..components import info
 from ..components import score
 from .. import level_loader
+
+logger = logging.getLogger(__name__)
 
 
 class Level3(tools._State):
@@ -164,7 +167,10 @@ class Level3(tools._State):
         }
         for enemy_info in enemy_data:
             enemy_type = enemy_info.get('type', 'goomba')
-            enemy_class = enemy_map.get(enemy_type, enemies.Goomba)
+            enemy_class = enemy_map.get(enemy_type)
+            if enemy_class is None:
+                logger.warning(f"Unknown enemy type: {enemy_type}, using Goomba")
+                enemy_class = enemies.Goomba
             x = enemy_info.get('x', 0)
             y = enemy_info.get('y', c.GROUND_HEIGHT)
             direction = enemy_info.get('direction', 'left')
