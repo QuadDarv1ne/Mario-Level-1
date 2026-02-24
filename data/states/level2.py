@@ -331,6 +331,6 @@ class Level2(tools._State):
         surface.blit(self.level, (0, 0), self.viewport)
 
     def get_event(self, event: pg.event.Event) -> None:
-        """Handle pygame events"""
+        """Handle events"""
         if self.mario:
             self.mario.get_event(event)
