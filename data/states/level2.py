@@ -44,7 +44,6 @@ class Level2(tools._State):
         self.flag_score: Optional[Any] = None
 
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
-        self.sound_manager = game_sound.Sound(self.overhead_info_display)
 
         self.background: Optional[pg.Surface] = None
         self.back_rect: Optional[pg.Rect] = None
