@@ -104,7 +104,7 @@ class Level2(tools._State):
         self.setup_checkpoints()
 
     def setup_background(self) -> None:
-        """Sets the background image, rect and scales it to the correct proportions"""
+        """Sets the background"""
         self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
