@@ -106,7 +106,7 @@ class Challenge:
             reward_coins=data.get("reward_coins", 0),
             reward_xp=data.get("reward_xp", 0),
             reward_item=data.get("reward_item"),
-            status=ChallengeStatus.get(data.get("status", "IN_PROGRESS"), ChallengeStatus.IN_PROGRESS),
+            status=ChallengeStatus[data.get("status", "IN_PROGRESS")],
             created_at=data.get("created_at", time.time()),
             expires_at=data.get("expires_at"),
             completed_at=data.get("completed_at"),
