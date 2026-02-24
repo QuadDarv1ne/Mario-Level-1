@@ -238,7 +238,7 @@ class Level2(tools._State):
     def update_entities(self, current_time: float) -> None:
         """Update all game entities"""
         if self.mario:
-            self.mario.update(keys, current_time)
+            self.mario.update((), current_time)
 
         if self.enemy_group:
             self.enemy_group.update(current_time)
