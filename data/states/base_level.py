@@ -13,7 +13,6 @@ import pygame as pg
 from .. import tools
 from .. import constants as c
 from ..components import mario as mario_module
-from .. import game_sound
 
 if TYPE_CHECKING:
     from ..components.info import OverheadInfo
@@ -46,7 +45,6 @@ class BaseLevel(tools._State):
         # Sprite groups
         self.moving_score_list: List[Any] = []
         self.overhead_info_display: Optional[OverheadInfo] = None
-        self.sound_manager: Optional[game_sound.Sound] = None
 
         # Display
         self.background: Optional[pg.Surface] = None
@@ -88,7 +86,6 @@ class BaseLevel(tools._State):
         from ..components.info import OverheadInfo
 
         self.overhead_info_display = OverheadInfo(self.game_info, c.LEVEL)
-        self.sound_manager = game_sound.Sound(self.overhead_info_display)
 
     def setup_background(self) -> None:
         """Set up background image and rect."""
