@@ -119,88 +119,45 @@ class Level2(tools._State):
         self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
 
     def setup_ground(self) -> None:
-        """Creates collideable, invisible rectangles over top of the ground for sprites to walk on"""
-        ground_sections = self.level_data.ground_sections if hasattr(self.level_data, 'ground_sections') else []
-        
-        if ground_sections:
-            ground_group = []
-            for section in ground_sections:
-                ground_rect = collider.Collider(section['x'], section['y'], section['width'], section['height'])
-                ground_group.append(ground_rect)
-            self.ground_group = pg.sprite.Group(ground_group)
-        else:
-            # Fallback to default ground
-            ground_rect1 = collider.Collider(0, c.GROUND_HEIGHT, 2000, 60)
-            ground_rect2 = collider.Collider(2200, c.GROUND_HEIGHT, 1500, 60)
-            ground_rect3 = collider.Collider(3900, c.GROUND_HEIGHT, 2000, 60)
-            ground_rect4 = collider.Collider(6100, c.GROUND_HEIGHT, 1800, 60)
-            ground_rect5 = collider.Collider(8100, c.GROUND_HEIGHT, 1200, 60)
-            self.ground_group = pg.sprite.Group(ground_rect1, ground_rect2, ground_rect3, ground_rect4, ground_rect5)
+        """Creates ground collision rectangles"""
+        for section in getattr(self.level_data, 'ground_sections', []):
+            self.ground_group.add(collider.Collider(
+                section['x'], section['y'], section['width'], section['height']
+            ))
 
     def setup_pipes(self) -> None:
-        """Create collideable rects for all the pipes"""
-        pipe_data = self.level_data.pipes if hasattr(self.level_data, 'pipes') else []
-        
-        if pipe_data:
-            pipe_group = []
-            for pipe in pipe_data:
-                pipe_rect = collider.Collider(pipe['x'], pipe['y'], pipe['width'], pipe['height'])
-                pipe_group.append(pipe_rect)
-            self.pipe_group = pg.sprite.Group(pipe_group)
-        else:
-            self.pipe_group = pg.sprite.Group()
+        """Create pipe obstacles"""
+        for p in getattr(self.level_data, 'pipes', []):
+            self.pipe_group.add(collider.Collider(p['x'], p['y'], p['width'], p['height']))
 
     def setup_steps(self) -> None:
-        """Create collideable rects for all the steps"""
-        step_data = self.level_data.steps if hasattr(self.level_data, 'steps') else []
-        
-        if step_data:
-            step_group = []
-            for step in step_data:
-                step_rect = collider.Collider(step['x'], step['y'], step['width'], step['height'])
-                step_group.append(step_rect)
-            self.step_group = pg.sprite.Group(step_group)
-        else:
-            self.step_group = pg.sprite.Group()
+        """Create step obstacles"""
+        for s in getattr(self.level_data, 'steps', []):
+            self.step_group.add(collider.Collider(s['x'], s['y'], s['width'], s['height']))
 
     def setup_bricks(self) -> None:
-        """Creates all the breakable bricks for the level."""
-        self.coin_group = pg.sprite.Group()
-        self.powerup_group = pg.sprite.Group()
+        """Creates breakable bricks"""
         self.brick_pieces_group = pg.sprite.Group()
-
-        brick_data = self.level_data.bricks if hasattr(self.level_data, 'bricks') else []
-        
-        if brick_data:
-            for brick_info in brick_data:
-                brick = bricks.Brick(brick_info['x'], brick_info['y'], contents=brick_info.get('contents'))
-                self.brick_group.add(brick)
-        else:
-            self.brick_group = pg.sprite.Group()
+        for brick_info in getattr(self.level_data, 'bricks', []):
+            self.brick_group.add(bricks.Brick(
+                brick_info['x'], brick_info['y'], contents=brick_info.get('contents')
+            ))
 
     def setup_coin_boxes(self) -> None:
-        """Creates all the coin boxes"""
-        coin_box_data = self.level_data.coin_boxes if hasattr(self.level_data, 'coin_boxes') else []
-        
-        if coin_box_data:
-            for box_info in coin_box_data:
-                coin_box_obj = coin_box.CoinBox(box_info['x'], box_info['y'], contents=box_info.get('contents'))
-                self.coin_box_group.add(coin_box_obj)
-        else:
-            self.coin_box_group = pg.sprite.Group()
+        """Creates coin boxes"""
+        for box_info in getattr(self.level_data, 'coin_boxes', []):
+            self.coin_box_group.add(coin_box.CoinBox(
+                box_info['x'], box_info['y'], contents=box_info.get('contents')
+            ))
 
     def setup_flag_pole(self) -> None:
-        """Creates the flag pole at the end of the level"""
-        flag_pole_data = self.level_data.flag_pole if hasattr(self.level_data, 'flag_pole') else {}
-        
+        """Creates flag pole"""
+        flag_pole_data = getattr(self.level_data, 'flag_pole', {})
         if flag_pole_data:
             self.flag = flagpole.Flag(flag_pole_data['x'], flag_pole_data['y'])
             self.pole = flagpole.Pole(flag_pole_data['x'], flag_pole_data['y'])
             self.finial = flagpole.Finial(flag_pole_data['x'], flag_pole_data['y'])
-            
-            self.flag_pole_group = pg.sprite.Group(self.flag, self.pole, self.finial)
-        else:
-            self.flag_pole_group = pg.sprite.Group()
+            self.flag_pole_group.add(self.flag, self.pole, self.finial)
 
     def setup_enemies(self) -> None:
         """Setup all enemies"""
