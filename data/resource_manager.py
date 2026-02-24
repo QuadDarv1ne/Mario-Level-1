@@ -22,6 +22,7 @@ import pygame as pg
 
 class AssetType(Enum):
     """Types of assets."""
+
     IMAGE = "image"
     SOUND = "sound"
     MUSIC = "music"
@@ -31,6 +32,7 @@ class AssetType(Enum):
 
 class AssetState(Enum):
     """Asset loading state."""
+
     PENDING = "pending"
     LOADING = "loading"
     LOADED = "loaded"
@@ -53,6 +55,7 @@ class AssetInfo:
         ref_count: Reference count
         metadata: Additional metadata
     """
+
     name: str
     asset_type: AssetType
     file_path: str
@@ -67,6 +70,7 @@ class AssetInfo:
 @dataclass
 class AssetConfig:
     """Configuration for asset manager."""
+
     # Cache settings
     max_cache_size_mb: int = 500
     # Auto-unload unused assets after (seconds)
@@ -89,11 +93,7 @@ class ResourceLoader:
     """
 
     @staticmethod
-    def load_image(
-        path: str,
-        alpha_convert: bool = True,
-        compress: bool = False
-    ) -> pg.Surface:
+    def load_image(path: str, alpha_convert: bool = True, compress: bool = False) -> pg.Surface:
         """
         Load image from file.
 
@@ -113,10 +113,7 @@ class ResourceLoader:
 
             if compress:
                 # Scale down for compression
-                new_size = (
-                    surface.get_width() // 2,
-                    surface.get_height() // 2
-                )
+                new_size = (surface.get_width() // 2, surface.get_height() // 2)
                 surface = pg.transform.smoothscale(surface, new_size)
 
             return surface
@@ -251,11 +248,7 @@ class AssetManager:
         """
         self.base_path = Path(path)
 
-    def set_directory(
-        self,
-        asset_type: AssetType,
-        path: Union[str, Path]
-    ) -> None:
+    def set_directory(self, asset_type: AssetType, path: Union[str, Path]) -> None:
         """
         Set directory for asset type.
 
@@ -267,18 +260,9 @@ class AssetManager:
 
     def get_directory(self, asset_type: AssetType) -> Path:
         """Get directory for asset type."""
-        return self.directories.get(
-            asset_type,
-            self.base_path
-        )
+        return self.directories.get(asset_type, self.base_path)
 
-    def load(
-        self,
-        name: str,
-        file_path: str,
-        asset_type: AssetType,
-        **kwargs
-    ) -> AssetInfo:
+    def load(self, name: str, file_path: str, asset_type: AssetType, **kwargs) -> AssetInfo:
         """
         Load asset.
 
@@ -301,11 +285,7 @@ class AssetManager:
         full_path = self.base_path / dir_path / file_path
 
         # Create asset info
-        info = AssetInfo(
-            name=name,
-            asset_type=asset_type,
-            file_path=str(full_path)
-        )
+        info = AssetInfo(name=name, asset_type=asset_type, file_path=str(full_path))
 
         # Load asset
         start_time = __import__("time").time()
@@ -321,22 +301,16 @@ class AssetManager:
                 info.data = ResourceLoader.load_image(
                     str(full_path),
                     alpha_convert=kwargs.get("alpha_convert", self.config.alpha_convert),
-                    compress=kwargs.get("compress", self.config.compress_images)
+                    compress=kwargs.get("compress", self.config.compress_images),
                 )
             elif asset_type == AssetType.SOUND:
                 info.data = ResourceLoader.load_sound(str(full_path))
             elif asset_type == AssetType.MUSIC:
                 info.data = ResourceLoader.load_music(str(full_path))
             elif asset_type == AssetType.FONT:
-                info.data = ResourceLoader.load_font(
-                    str(full_path),
-                    kwargs.get("size", 24)
-                )
+                info.data = ResourceLoader.load_font(str(full_path), kwargs.get("size", 24))
             elif asset_type == AssetType.DATA:
-                info.data = ResourceLoader.load_data(
-                    str(full_path),
-                    kwargs.get("format", "json")
-                )
+                info.data = ResourceLoader.load_data(str(full_path), kwargs.get("format", "json"))
 
             info.state = AssetState.LOADED
             info.ref_count = 1
@@ -376,11 +350,7 @@ class AssetManager:
 
         return info
 
-    def load_batch(
-        self,
-        assets: List[tuple[str, str, AssetType]],
-        **kwargs
-    ) -> Dict[str, AssetInfo]:
+    def load_batch(self, assets: List[tuple[str, str, AssetType]], **kwargs) -> Dict[str, AssetInfo]:
         """
         Load multiple assets.
 
@@ -399,12 +369,7 @@ class AssetManager:
 
         return results
 
-    def load_directory(
-        self,
-        asset_type: AssetType,
-        pattern: str = "*",
-        prefix: str = ""
-    ) -> Dict[str, AssetInfo]:
+    def load_directory(self, asset_type: AssetType, pattern: str = "*", prefix: str = "") -> Dict[str, AssetInfo]:
         """
         Load all assets from directory.
 
@@ -427,11 +392,7 @@ class AssetManager:
         for file_path in full_path.glob(pattern):
             if file_path.is_file():
                 name = f"{prefix}{file_path.stem}"
-                info = self.load(
-                    name,
-                    file_path.name,
-                    asset_type
-                )
+                info = self.load(name, file_path.name, asset_type)
                 results[name] = info
 
         return results
@@ -457,13 +418,7 @@ class AssetManager:
         info.ref_count += 1
         return info.data
 
-    def get_or_load(
-        self,
-        name: str,
-        file_path: str,
-        asset_type: AssetType,
-        **kwargs
-    ) -> Any:
+    def get_or_load(self, name: str, file_path: str, asset_type: AssetType, **kwargs) -> Any:
         """
         Get asset or load if not loaded.
 
@@ -567,10 +522,7 @@ class AssetManager:
             "cache_size_mb": self._cache_size_bytes / (1024 * 1024),
             "max_cache_mb": self.config.max_cache_size_mb,
             "total_load_time_ms": self._total_load_time,
-            "avg_load_time_ms": (
-                self._total_load_time / len(self.assets)
-                if self.assets else 0
-            ),
+            "avg_load_time_ms": (self._total_load_time / len(self.assets) if self.assets else 0),
         }
 
     def check_hot_reload(self) -> List[str]:
@@ -607,11 +559,10 @@ class AssetManager:
                     self.unload(name, force=True)
                     self.load(
                         name,
-                        info.file_path.replace(
-                            str(self.base_path / self.get_directory(info.asset_type)),
-                            ""
-                        ).lstrip("/"),
-                        info.asset_type
+                        info.file_path.replace(str(self.base_path / self.get_directory(info.asset_type)), "").lstrip(
+                            "/"
+                        ),
+                        info.asset_type,
                     )
                     self.assets[name].ref_count = old_ref_count
                     reloaded.append(name)
@@ -625,7 +576,7 @@ class AssetManager:
         self,
         on_load_start: Optional[Callable[[str], None]] = None,
         on_load_complete: Optional[Callable[[str], None]] = None,
-        on_load_error: Optional[Callable[[str, str], None]] = None
+        on_load_error: Optional[Callable[[str, str], None]] = None,
     ) -> None:
         """Set loading callbacks."""
         self._on_load_start = on_load_start
@@ -638,13 +589,7 @@ class SpriteSheet:
     Sprite sheet helper.
     """
 
-    def __init__(
-        self,
-        image: pg.Surface,
-        tile_size: tuple[int, int],
-        margin: int = 0,
-        spacing: int = 0
-    ) -> None:
+    def __init__(self, image: pg.Surface, tile_size: tuple[int, int], margin: int = 0, spacing: int = 0) -> None:
         """
         Initialize sprite sheet.
 
@@ -685,18 +630,9 @@ class SpriteSheet:
         offset_x = self.margin + x * (self.tile_size[0] + self.spacing)
         offset_y = self.margin + y * (self.tile_size[1] + self.spacing)
 
-        return pg.Rect(
-            offset_x,
-            offset_y,
-            self.tile_size[0],
-            self.tile_size[1]
-        )
+        return pg.Rect(offset_x, offset_y, self.tile_size[0], self.tile_size[1])
 
-    def get_sprites_in_row(
-        self,
-        row: int,
-        count: int
-    ) -> List[pg.Surface]:
+    def get_sprites_in_row(self, row: int, count: int) -> List[pg.Surface]:
         """
         Get multiple sprites from row.
 
@@ -709,13 +645,7 @@ class SpriteSheet:
         """
         return [self.get_sprite(x, row) for x in range(count)]
 
-    def get_animation_frames(
-        self,
-        start_x: int,
-        start_y: int,
-        count: int,
-        horizontal: bool = True
-    ) -> List[pg.Surface]:
+    def get_animation_frames(self, start_x: int, start_y: int, count: int, horizontal: bool = True) -> List[pg.Surface]:
         """
         Get animation frames.
 
@@ -764,10 +694,7 @@ PRESET_CONFIGS = {
 }
 
 
-def create_asset_manager(
-    preset: str = "production",
-    base_path: Optional[Union[str, Path]] = None
-) -> AssetManager:
+def create_asset_manager(preset: str = "production", base_path: Optional[Union[str, Path]] = None) -> AssetManager:
     """
     Create asset manager with preset config.
 

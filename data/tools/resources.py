@@ -158,9 +158,16 @@ class LazyImageLoader:
 
         available = self._scan_directory()
         if name not in available:
-            return None
-
-        img = pg.image.load(available[name])
+            # Fallback: try constructing a path using accepted extensions
+            for ext in self.accept:
+                candidate = os.path.join(self.directory, name + ext)
+                if os.path.exists(candidate):
+                    img = pg.image.load(candidate)
+                    break
+            else:
+                return None
+        else:
+            img = pg.image.load(available[name])
         if img.get_alpha():
             img = img.convert_alpha()
         else:

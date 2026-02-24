@@ -300,19 +300,12 @@ class TestSettingsManager:
         """Create settings manager with temp file."""
         return SettingsManager(save_path=temp_settings_path)
 
-    def test_init_creates_default_settings(
-        self,
-        settings_manager: SettingsManager
-    ) -> None:
+    def test_init_creates_default_settings(self, settings_manager: SettingsManager) -> None:
         """Test initialization creates default settings."""
         settings = settings_manager.get_settings()
         assert settings.difficulty == Difficulty.NORMAL
 
-    def test_save_and_load_settings(
-        self,
-        settings_manager: SettingsManager,
-        temp_settings_path: str
-    ) -> None:
+    def test_save_and_load_settings(self, settings_manager: SettingsManager, temp_settings_path: str) -> None:
         """Test saving and loading settings."""
         # Modify settings
         settings = settings_manager.get_settings()
@@ -391,19 +384,12 @@ class TestSettingsUI:
         """Create settings UI."""
         return SettingsUI(settings_manager)
 
-    def test_ui_creation(
-        self,
-        settings_ui: SettingsUI,
-        settings_manager: SettingsManager
-    ) -> None:
+    def test_ui_creation(self, settings_ui: SettingsUI, settings_manager: SettingsManager) -> None:
         """Test UI creation."""
         assert settings_ui.settings_mgr == settings_manager
         assert len(settings_ui.options) > 0
 
-    def test_navigation(
-        self,
-        settings_ui: SettingsUI
-    ) -> None:
+    def test_navigation(self, settings_ui: SettingsUI) -> None:
         """Test menu navigation."""
         initial = settings_ui.selected_option
 
@@ -413,20 +399,13 @@ class TestSettingsUI:
         settings_ui.navigate_up()
         assert settings_ui.selected_option == initial
 
-    def test_select_option(
-        self,
-        settings_ui: SettingsUI
-    ) -> None:
+    def test_select_option(self, settings_ui: SettingsUI) -> None:
         """Test selecting option."""
         settings_ui.selected_option = 0
         selected = settings_ui.select_option()
         assert selected == settings_ui.options[0]
 
-    def test_get_option_value(
-        self,
-        settings_ui: SettingsUI,
-        settings_manager: SettingsManager
-    ) -> None:
+    def test_get_option_value(self, settings_ui: SettingsUI, settings_manager: SettingsManager) -> None:
         """Test getting option value."""
         settings = settings_manager.get_settings()
         settings.set_difficulty(Difficulty.HARD)
@@ -434,13 +413,11 @@ class TestSettingsUI:
         value = settings_ui._get_option_value("Сложность")
         assert value == "Сложно"
 
-    def test_draw_methods_no_crash(
-        self,
-        settings_ui: SettingsUI
-    ) -> None:
+    def test_draw_methods_no_crash(self, settings_ui: SettingsUI) -> None:
         """Test that draw methods don't crash without pygame init."""
         # These should handle uninitialized fonts gracefully
         import pygame as pg
+
         pg.init()
 
         surface = pg.Surface((800, 600))

@@ -17,12 +17,13 @@ from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, TypeVar
 
 import pygame as pg
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 @dataclass
 class FrameStats:
     """Statistics for a single frame."""
+
     frame_number: int
     frame_time: float  # ms
     fps: float
@@ -46,6 +47,7 @@ class FrameStats:
 @dataclass
 class ProfilerStats:
     """Aggregated profiler statistics."""
+
     fps_avg: float = 0.0
     fps_min: float = 0.0
     fps_max: float = 0.0
@@ -61,15 +63,15 @@ class ProfilerStats:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'fps_avg': round(self.fps_avg, 2),
-            'fps_min': round(self.fps_min, 2),
-            'fps_max': round(self.fps_max, 2),
-            'frame_time_avg': round(self.frame_time_avg, 2),
-            'frame_time_max': round(self.frame_time_max, 2),
-            'total_frames': self.total_frames,
-            'slow_frames': self.slow_frames,
-            'update_time_avg': round(self.update_time_avg, 2),
-            'render_time_avg': round(self.render_time_avg, 2),
+            "fps_avg": round(self.fps_avg, 2),
+            "fps_min": round(self.fps_min, 2),
+            "fps_max": round(self.fps_max, 2),
+            "frame_time_avg": round(self.frame_time_avg, 2),
+            "frame_time_max": round(self.frame_time_max, 2),
+            "total_frames": self.total_frames,
+            "slow_frames": self.slow_frames,
+            "update_time_avg": round(self.update_time_avg, 2),
+            "render_time_avg": round(self.render_time_avg, 2),
         }
 
 
@@ -86,7 +88,7 @@ class FunctionTimer:
         self.name = name
         self.total_time: float = 0.0
         self.call_count: int = 0
-        self.min_time: float = float('inf')
+        self.min_time: float = float("inf")
         self.max_time: float = 0.0
         self._start_time: float = 0.0
 
@@ -119,7 +121,7 @@ class FunctionTimer:
         """Reset timer."""
         self.total_time = 0.0
         self.call_count = 0
-        self.min_time = float('inf')
+        self.min_time = float("inf")
         self.max_time = 0.0
 
 
@@ -194,7 +196,7 @@ class Profiler:
         """Stop profiling."""
         self._running = False
 
-    def profile(self, name: str) -> 'ProfilerSection':
+    def profile(self, name: str) -> "ProfilerSection":
         """
         Profile a code section.
 
@@ -247,6 +249,7 @@ class Profiler:
         Returns:
             Decorated function
         """
+
         def decorator(func: Callable) -> Callable:
             def wrapper(*args, **kwargs):
                 if name not in self._timers:
@@ -258,7 +261,9 @@ class Profiler:
                     return func(*args, **kwargs)
                 finally:
                     timer.stop()
+
             return wrapper
+
         return decorator
 
     def end_frame(
@@ -340,9 +345,7 @@ class Profiler:
         result.frame_time_avg = sum(frame_times) / len(frame_times)
         result.frame_time_max = max(frame_times)
 
-        result.slow_frames = sum(
-            1 for f in self._frame_history if f.frame_time > self.slow_frame_threshold
-        )
+        result.slow_frames = sum(1 for f in self._frame_history if f.frame_time > self.slow_frame_threshold)
 
         if self._frame_history:
             result.update_time_avg = sum(f.update_time for f in self._frame_history) / len(self._frame_history)
@@ -357,11 +360,11 @@ class Profiler:
 
         timer = self._timers[name]
         return {
-            'avg_ms': round(timer.avg_time, 3),
-            'min_ms': round(timer.min_time, 3) if timer.min_time != float('inf') else 0,
-            'max_ms': round(timer.max_time, 3),
-            'total_ms': round(timer.total_time, 3),
-            'calls': timer.call_count,
+            "avg_ms": round(timer.avg_time, 3),
+            "min_ms": round(timer.min_time, 3) if timer.min_time != float("inf") else 0,
+            "max_ms": round(timer.max_time, 3),
+            "total_ms": round(timer.total_time, 3),
+            "calls": timer.call_count,
         }
 
     def on_slow_frame(self, callback: Callable[[FrameStats], None]) -> None:
@@ -429,7 +432,7 @@ class ProfilerSection:
         self.profiler = profiler
         self.name = name
 
-    def __enter__(self) -> 'ProfilerSection':
+    def __enter__(self) -> "ProfilerSection":
         """Enter context."""
         self.profiler._begin_section(self.name)
         return self

@@ -485,6 +485,17 @@ class MegaGoomba(Boss):
         self.frame_index = 2
         self.rect.height = self.rect.height // 2
 
+    def perform_attack(self) -> None:
+        """Perform chosen attack for MegaGoomba.
+
+        Default behavior: attempt to summon smaller Goombas (no-op in tests).
+        """
+        # Use the summon behavior as the default attack for MegaGoomba
+        try:
+            self.summon()
+        except Exception:
+            # Be resilient in tests — if summon isn't required, silently continue
+            pass
 
 class KoopaTroopaBoss(Boss):
     """

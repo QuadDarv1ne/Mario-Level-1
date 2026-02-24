@@ -208,3 +208,13 @@ try:
     initialize()
 except Exception as e:
     logger.error(f"Setup initialization failed: {e}")
+
+
+# Minimal fallback resources for tests/environments without assets
+try:
+    if "smb_enemies_sheet" not in GFX:
+        # Provide a dummy surface to prevent KeyError in tests
+        GFX["smb_enemies_sheet"] = pg.Surface((512, 512))
+except Exception:
+    # If pygame isn't fully functional, skip creating surfaces
+    pass

@@ -15,7 +15,7 @@ import pygame as pg
 
 from . import constants as c
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ObjectPool(Generic[T]):
@@ -33,10 +33,7 @@ class ObjectPool(Generic[T]):
     """
 
     def __init__(
-        self,
-        factory: Callable[[], T],
-        reset_func: Optional[Callable[[T], None]] = None,
-        max_size: int = 10
+        self, factory: Callable[[], T], reset_func: Optional[Callable[[T], None]] = None, max_size: int = 10
     ) -> None:
         """
         Initialize object pool.
@@ -197,7 +194,7 @@ class SpriteBatch:
         self._batches: dict[str, pg.sprite.Group] = {}
         self._sprite_to_batch: dict[int, str] = {}
 
-    def add(self, sprite: pg.sprite.Sprite, batch_name: str = 'default') -> None:
+    def add(self, sprite: pg.sprite.Sprite, batch_name: str = "default") -> None:
         """
         Add sprite to a batch.
 
@@ -267,7 +264,7 @@ class PerformanceTimer:
         self.start_time: float = 0.0
         self.elapsed_ms: float = 0.0
 
-    def __enter__(self) -> 'PerformanceTimer':
+    def __enter__(self) -> "PerformanceTimer":
         """Start timing."""
         self.start_time = time.perf_counter()
         return self

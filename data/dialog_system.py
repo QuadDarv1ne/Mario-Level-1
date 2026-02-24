@@ -22,6 +22,7 @@ import pygame as pg
 
 class DialogPosition(Enum):
     """Dialog box positions."""
+
     TOP = auto()
     CENTER = auto()
     BOTTOM = auto()
@@ -33,6 +34,7 @@ class DialogPosition(Enum):
 
 class DialogSpeed(Enum):
     """Text display speeds."""
+
     INSTANT = 0
     FAST = 30  # chars per second
     NORMAL = 60
@@ -42,6 +44,7 @@ class DialogSpeed(Enum):
 @dataclass
 class DialogChoice:
     """Dialog choice option."""
+
     text: str
     next_dialog: str
     condition: Optional[str] = None  # Condition ID to show choice
@@ -49,25 +52,26 @@ class DialogChoice:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'text': self.text,
-            'next_dialog': self.next_dialog,
-            'condition': self.condition,
-            'on_select': self.on_select,
+            "text": self.text,
+            "next_dialog": self.next_dialog,
+            "condition": self.condition,
+            "on_select": self.on_select,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DialogChoice':
+    def from_dict(cls, data: Dict[str, Any]) -> "DialogChoice":
         return cls(
-            text=data.get('text', ''),
-            next_dialog=data.get('next_dialog', ''),
-            condition=data.get('condition'),
-            on_select=data.get('on_select'),
+            text=data.get("text", ""),
+            next_dialog=data.get("next_dialog", ""),
+            condition=data.get("condition"),
+            on_select=data.get("on_select"),
         )
 
 
 @dataclass
 class DialogEntry:
     """Single dialog entry."""
+
     id: str
     speaker: str
     text: str
@@ -84,47 +88,48 @@ class DialogEntry:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'id': self.id,
-            'speaker': self.speaker,
-            'text': self.text,
-            'portrait': self.portrait,
-            'choices': [c.to_dict() for c in self.choices],
-            'next_dialog': self.next_dialog,
-            'conditions': self.conditions,
-            'actions': self.actions,
-            'sound': self.sound,
-            'music': self.music,
-            'position': self.position.name,
-            'speed': self.speed.name,
-            'background': self.background,
+            "id": self.id,
+            "speaker": self.speaker,
+            "text": self.text,
+            "portrait": self.portrait,
+            "choices": [c.to_dict() for c in self.choices],
+            "next_dialog": self.next_dialog,
+            "conditions": self.conditions,
+            "actions": self.actions,
+            "sound": self.sound,
+            "music": self.music,
+            "position": self.position.name,
+            "speed": self.speed.name,
+            "background": self.background,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DialogEntry':
-        choices = [DialogChoice.from_dict(c) for c in data.get('choices', [])]
-        position = DialogPosition[data.get('position', 'BOTTOM')]
-        speed = DialogSpeed[data.get('speed', 'NORMAL')]
+    def from_dict(cls, data: Dict[str, Any]) -> "DialogEntry":
+        choices = [DialogChoice.from_dict(c) for c in data.get("choices", [])]
+        position = DialogPosition[data.get("position", "BOTTOM")]
+        speed = DialogSpeed[data.get("speed", "NORMAL")]
 
         return cls(
-            id=data.get('id', ''),
-            speaker=data.get('speaker', ''),
-            text=data.get('text', ''),
-            portrait=data.get('portrait'),
+            id=data.get("id", ""),
+            speaker=data.get("speaker", ""),
+            text=data.get("text", ""),
+            portrait=data.get("portrait"),
             choices=choices,
-            next_dialog=data.get('next_dialog'),
-            conditions=data.get('conditions', []),
-            actions=data.get('actions', []),
-            sound=data.get('sound'),
-            music=data.get('music'),
+            next_dialog=data.get("next_dialog"),
+            conditions=data.get("conditions", []),
+            actions=data.get("actions", []),
+            sound=data.get("sound"),
+            music=data.get("music"),
             position=position,
             speed=speed,
-            background=data.get('background'),
+            background=data.get("background"),
         )
 
 
 @dataclass
 class DialogState:
     """Current dialog state."""
+
     active: bool = False
     current_dialog: Optional[str] = None
     displayed_text: str = ""
@@ -226,7 +231,7 @@ class DialogManager:
         self.on_choice_made: Optional[Callable[[str, str], None]] = None
 
         # Localization
-        self.language: str = 'en'
+        self.language: str = "en"
         self.translations: Dict[str, Dict[str, Any]] = {}
 
     def _init_fonts(self, font_size: int) -> None:
@@ -252,16 +257,16 @@ class DialogManager:
             return False
 
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            for entry_data in data.get('dialogs', []):
+            for entry_data in data.get("dialogs", []):
                 entry = DialogEntry.from_dict(entry_data)
                 self.dialogs[entry.id] = entry
 
             # Load translations if present
-            if 'translations' in data:
-                self.translations = data['translations']
+            if "translations" in data:
+                self.translations = data["translations"]
 
             return True
 
@@ -271,7 +276,7 @@ class DialogManager:
 
     def load_from_dict(self, data: Dict[str, Any]) -> None:
         """Load dialogs from dictionary."""
-        for entry_data in data.get('dialogs', []):
+        for entry_data in data.get("dialogs", []):
             entry = DialogEntry.from_dict(entry_data)
             self.dialogs[entry.id] = entry
 
@@ -364,7 +369,7 @@ class DialogManager:
                     self.state.char_index = len(self.state.full_text)
                     self.state.waiting_for_input = True
 
-            self.state.displayed_text = self.state.full_text[:self.state.char_index]
+            self.state.displayed_text = self.state.full_text[: self.state.char_index]
 
     def advance(self) -> bool:
         """
@@ -552,7 +557,7 @@ class DialogManager:
         if not self.font:
             return [text]
 
-        words = text.split(' ')
+        words = text.split(" ")
         lines = []
         current_line = ""
 

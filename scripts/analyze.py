@@ -22,7 +22,7 @@ def analyze_file(filepath: str) -> None:
         print(f"File not found: {filepath}")
         return
 
-    with open(path, encoding='utf-8') as f:
+    with open(path, encoding="utf-8") as f:
         source = f.read()
 
     tree = ast.parse(source)
@@ -33,15 +33,11 @@ def analyze_file(filepath: str) -> None:
 
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
-            method_count = sum(
-                1 for n in node.body if isinstance(n, ast.FunctionDef)
-            )
+            method_count = sum(1 for n in node.body if isinstance(n, ast.FunctionDef))
             classes.append(node.name)
             methods_per_class[node.name] = method_count
 
-        if isinstance(node, ast.FunctionDef) and not any(
-            isinstance(parent, ast.ClassDef) for parent in ast.walk(tree)
-        ):
+        if isinstance(node, ast.FunctionDef) and not any(isinstance(parent, ast.ClassDef) for parent in ast.walk(tree)):
             functions.append(node.name)
 
     print(f"\n{'=' * 60}")
@@ -57,7 +53,7 @@ def analyze_file(filepath: str) -> None:
     print("\nLong methods (>50 lines):")
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
-            lines = node.end_lineno - node.lineno if hasattr(node, 'end_lineno') else 0
+            lines = node.end_lineno - node.lineno if hasattr(node, "end_lineno") else 0
             if lines > 50:
                 print(f"  - {node.name}: {lines} lines")
 
@@ -71,5 +67,5 @@ def main() -> None:
     analyze_file(sys.argv[1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

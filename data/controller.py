@@ -20,34 +20,35 @@ import pygame as pg
 
 # Default button mappings
 DEFAULT_MAPPINGS: Dict[str, int] = {
-    'jump': 0,  # A button (Xbox) / Cross (PS)
-    'action': 1,  # B button (Xbox) / Circle (PS)
-    'start': 7,  # Start button
-    'select': 6,  # Back button
-    'dpad_up': 0,
-    'dpad_down': 1,
-    'dpad_left': 2,
-    'dpad_right': 3,
+    "jump": 0,  # A button (Xbox) / Cross (PS)
+    "action": 1,  # B button (Xbox) / Circle (PS)
+    "start": 7,  # Start button
+    "select": 6,  # Back button
+    "dpad_up": 0,
+    "dpad_down": 1,
+    "dpad_left": 2,
+    "dpad_right": 3,
 }
 
 # Axis mappings
 DEFAULT_AXIS_MAPPINGS: Dict[str, Tuple[int, int]] = {
-    'left_stick_x': (0, 0.3),  # axis_index, deadzone
-    'left_stick_y': (1, 0.3),
-    'right_stick_x': (2, 0.3),
-    'right_stick_y': (3, 0.3),
+    "left_stick_x": (0, 0.3),  # axis_index, deadzone
+    "left_stick_y": (1, 0.3),
+    "right_stick_x": (2, 0.3),
+    "right_stick_y": (3, 0.3),
 }
 
 # Trigger mappings
 DEFAULT_TRIGGER_MAPPINGS: Dict[str, int] = {
-    'left_trigger': 2,
-    'right_trigger': 5,
+    "left_trigger": 2,
+    "right_trigger": 5,
 }
 
 
 @dataclass
 class ControllerConfig:
     """Controller configuration."""
+
     button_mappings: Dict[str, int] = field(default_factory=lambda: DEFAULT_MAPPINGS.copy())
     axis_mappings: Dict[str, Tuple[int, float]] = field(default_factory=lambda: DEFAULT_AXIS_MAPPINGS.copy())
     trigger_mappings: Dict[str, int] = field(default_factory=lambda: DEFAULT_TRIGGER_MAPPINGS.copy())
@@ -58,32 +59,33 @@ class ControllerConfig:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
-            'button_mappings': self.button_mappings,
-            'axis_mappings': {k: list(v) for k, v in self.axis_mappings.items()},
-            'trigger_mappings': self.trigger_mappings,
-            'vibration_enabled': self.vibration_enabled,
-            'vibration_strength': self.vibration_strength,
-            'deadzone': self.deadzone,
+            "button_mappings": self.button_mappings,
+            "axis_mappings": {k: list(v) for k, v in self.axis_mappings.items()},
+            "trigger_mappings": self.trigger_mappings,
+            "vibration_enabled": self.vibration_enabled,
+            "vibration_strength": self.vibration_strength,
+            "deadzone": self.deadzone,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ControllerConfig':
+    def from_dict(cls, data: Dict[str, Any]) -> "ControllerConfig":
         """Create from dictionary."""
         config = cls()
-        config.button_mappings = data.get('button_mappings', DEFAULT_MAPPINGS.copy())
-        config.axis_mappings = {
-            k: tuple(v) for k, v in data.get('axis_mappings', DEFAULT_AXIS_MAPPINGS.items()).items()
-        }
-        config.trigger_mappings = data.get('trigger_mappings', DEFAULT_TRIGGER_MAPPINGS.copy())
-        config.vibration_enabled = data.get('vibration_enabled', True)
-        config.vibration_strength = data.get('vibration_strength', 1.0)
-        config.deadzone = data.get('deadzone', 0.15)
+        config.button_mappings = data.get("button_mappings", DEFAULT_MAPPINGS.copy())
+        axis_data = data.get("axis_mappings", DEFAULT_AXIS_MAPPINGS)
+        # Ensure we have a mapping dict; convert values to tuples
+        config.axis_mappings = {k: tuple(v) for k, v in axis_data.items()}
+        config.trigger_mappings = data.get("trigger_mappings", DEFAULT_TRIGGER_MAPPINGS.copy())
+        config.vibration_enabled = data.get("vibration_enabled", True)
+        config.vibration_strength = data.get("vibration_strength", 1.0)
+        config.deadzone = data.get("deadzone", 0.15)
         return config
 
 
 @dataclass
 class ControllerState:
     """Current controller state."""
+
     connected: bool = False
     button_states: Dict[str, bool] = field(default_factory=dict)
     axis_values: Dict[str, float] = field(default_factory=dict)
@@ -193,10 +195,10 @@ class GameController:
         # Read D-pad (as hat or buttons)
         try:
             hat = self._controller.get_hat(0)
-            self._state.button_states['dpad_up'] = hat[1] > 0
-            self._state.button_states['dpad_down'] = hat[1] < 0
-            self._state.button_states['dpad_left'] = hat[0] < 0
-            self._state.button_states['dpad_right'] = hat[0] > 0
+            self._state.button_states["dpad_up"] = hat[1] > 0
+            self._state.button_states["dpad_down"] = hat[1] < 0
+            self._state.button_states["dpad_left"] = hat[0] < 0
+            self._state.button_states["dpad_right"] = hat[0] > 0
         except (pg.error, IndexError):
             pass
 
@@ -218,7 +220,7 @@ class GameController:
 
         try:
             # Check for rumble support
-            if hasattr(self._controller, 'rumble'):
+            if hasattr(self._controller, "rumble"):
                 self._controller.rumble(
                     0.0,
                     strength * self.config.vibration_strength,
@@ -246,8 +248,8 @@ class GameController:
             return False
 
         try:
-            if hasattr(self._controller, 'trigger_motor'):
-                motor_id = 0 if trigger == 'left_trigger' else 1
+            if hasattr(self._controller, "trigger_motor"):
+                motor_id = 0 if trigger == "left_trigger" else 1
                 self._controller.trigger_motor(
                     motor_id,
                     strength * self.config.vibration_strength,
@@ -288,8 +290,8 @@ class ControllerManager:
         self.configs: Dict[str, ControllerConfig] = {}
         self.config_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            'config',
-            'controllers.json',
+            "config",
+            "controllers.json",
         )
         self._load_configs()
 
@@ -301,7 +303,7 @@ class ControllerManager:
         """Load controller configurations."""
         if os.path.exists(self.config_path):
             try:
-                with open(self.config_path, 'r', encoding='utf-8') as f:
+                with open(self.config_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 for guid, config_data in data.items():
                     self.configs[guid] = ControllerConfig.from_dict(config_data)
@@ -312,7 +314,7 @@ class ControllerManager:
         """Save controller configurations."""
         try:
             os.makedirs(os.path.dirname(self.config_path), exist_ok=True)
-            with open(self.config_path, 'w', encoding='utf-8') as f:
+            with open(self.config_path, "w", encoding="utf-8") as f:
                 json.dump(
                     {guid: config.to_dict() for guid, config in self.configs.items()},
                     f,

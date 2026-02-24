@@ -383,7 +383,7 @@ class ProgressionManager:
             if self.profile.stats.level >= skill.required_level:
                 # Check prerequisites
                 prereqs_met = all(
-                    self.profile.skills.get(p, Skill("", "", SkillType.PASSIVE, 0)).unlocked
+                    self.profile.skills.get(p, Skill("", "", "", SkillType.PASSIVE, 0)).unlocked
                     for p in skill.prerequisites
                 )
 
@@ -440,7 +440,7 @@ class ProgressionManager:
             return PlayerRank.LEGEND
         elif level >= 76:
             return PlayerRank.MASTER
-        elif level >= 51:
+        elif level >= 50:
             return PlayerRank.ELITE
         elif level >= 31:
             return PlayerRank.VETERAN
@@ -462,7 +462,7 @@ class ProgressionManager:
             return (0, 0, 0.0)
 
         current_level = self.profile.stats.level
-        prev_level_xp = self._get_xp_for_level(current_level)
+        prev_level_xp = self._get_xp_for_level(max(0, current_level - 1))
         next_level_xp = self._get_xp_for_level(current_level + 1)
 
         current_xp = self.profile.stats.total_xp - prev_level_xp

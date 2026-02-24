@@ -96,6 +96,8 @@ from .states import (
     END_OF_LEVEL_FALL,
     EXPLODING,
     FALL,
+    UP,
+    DOWN,
     FAST_COUNT_DOWN,
     FLAGPOLE,
     FLAG_AND_FIREWORKS,
@@ -140,6 +142,10 @@ from .states import (
     WALK,
     WALKING_TO_CASTLE,
     WORLD_CLEAR,
+    HIDDEN,
+    EMERGING,
+    EMERGED,
+    RETRACTING,
 )
 
 __all__ = [
@@ -190,6 +196,8 @@ __all__ = [
     "BOTTOM_OF_POLE",
     "LEFT",
     "RIGHT",
+    "UP",
+    "DOWN",
     "JUMPED_ON",
     "SHELL_SLIDE",
     "RESTING",

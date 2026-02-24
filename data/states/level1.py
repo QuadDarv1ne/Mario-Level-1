@@ -762,10 +762,13 @@ class Level1(tools._State):
                         self.game_info[c.COIN_TOTAL] += 1
                         # Emit coin collect event
                         events = get_event_manager()
-                        events.emit(EventType.PLAYER_COIN, {
-                            'player': self.mario,
-                            'position': (self.mario.rect.x, self.mario.rect.y),
-                        })
+                        events.emit(
+                            EventType.PLAYER_COIN,
+                            {
+                                "player": self.mario,
+                                "position": (self.mario.rect.x, self.mario.rect.y),
+                            },
+                        )
                 else:
                     coin_box.start_bump(self.moving_score_list)
 
@@ -962,7 +965,6 @@ class Level1(tools._State):
                 enemy.rect.top = collider.rect.bottom
                 enemy.state = c.FALL
             elif enemy.rect.bottom < collider.rect.bottom:
-
                 enemy.y_vel = 0
                 enemy.rect.bottom = collider.rect.top
                 enemy.state = c.WALK

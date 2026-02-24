@@ -64,11 +64,7 @@ class TestHint:
 
     def test_hint_creation(self) -> None:
         """Test creating hint."""
-        hint = Hint(
-            id="test_hint",
-            title="Test Title",
-            message="Test message content"
-        )
+        hint = Hint(id="test_hint", title="Test Title", message="Test message content")
 
         assert hint.id == "test_hint"
         assert hint.title == "Test Title"
@@ -88,7 +84,7 @@ class TestHint:
             priority=HintPriority.HIGH,
             trigger_count=3,
             cooldown=60000,
-            prerequisites=["basic_hint"]
+            prerequisites=["basic_hint"],
         )
 
         assert hint.category == HintCategory.SECRETS
@@ -103,11 +99,7 @@ class TestHintTrigger:
 
     def test_trigger_creation(self) -> None:
         """Test creating hint trigger."""
-        trigger = HintTrigger(
-            hint_id="test",
-            trigger_type="player_jump",
-            trigger_data={"height": 100}
-        )
+        trigger = HintTrigger(hint_id="test", trigger_type="player_jump", trigger_data={"height": 100})
 
         assert trigger.hint_id == "test"
         assert trigger.trigger_type == "player_jump"
@@ -155,10 +147,7 @@ class TestHintConditions:
 
     def test_enemy_defeat_specific_type(self) -> None:
         """Test specific enemy type condition."""
-        condition = EnemyDefeatCondition(
-            min_defeats=3,
-            enemy_type="goomba"
-        )
+        condition = EnemyDefeatCondition(min_defeats=3, enemy_type="goomba")
 
         game_state = {"stats": {"goomba_defeated": 5}}
         assert condition.check(game_state) is True
@@ -251,12 +240,7 @@ class TestHintManager:
 
     def test_hint_cooldown(self, hint_manager: HintManager) -> None:
         """Test hint cooldown."""
-        hint = Hint(
-            id="cooldown_test",
-            title="Test",
-            message="Test",
-            cooldown=10000  # 10 seconds
-        )
+        hint = Hint(id="cooldown_test", title="Test", message="Test", cooldown=10000)  # 10 seconds
         hint_manager.register_hint(hint)
 
         # Trigger twice quickly
@@ -295,9 +279,7 @@ class TestHintManager:
 
     def test_reset(self, hint_manager: HintManager) -> None:
         """Test resetting hint manager."""
-        hint_manager.register_hint(
-            Hint(id="test", title="Test", message="Test")
-        )
+        hint_manager.register_hint(Hint(id="test", title="Test", message="Test"))
         hint_manager.force_show_hint("test")
         hint_manager.update({}, 16)
 
@@ -308,13 +290,7 @@ class TestHintManager:
 
     def test_update_processes_queue(self, hint_manager: HintManager) -> None:
         """Test that update processes hint queue."""
-        hint = Hint(
-            id="update_test",
-            title="Test",
-            message="Test message",
-            trigger_count=1,
-            prerequisites=[]
-        )
+        hint = Hint(id="update_test", title="Test", message="Test message", trigger_count=1, prerequisites=[])
         hint_manager.register_hint(hint)
         hint_manager.hint_queue.append(hint)
 
@@ -324,12 +300,7 @@ class TestHintManager:
 
     def test_hint_display_duration(self, hint_manager: HintManager) -> None:
         """Test hint display duration."""
-        hint = Hint(
-            id="duration_test",
-            title="Test",
-            message="Test",
-            display_duration=1000  # 1 second
-        )
+        hint = Hint(id="duration_test", title="Test", message="Test", display_duration=1000)  # 1 second
         hint_manager.register_hint(hint)
         hint_manager.force_show_hint("duration_test")
         hint_manager.update({}, 16)
@@ -355,20 +326,13 @@ class TestHintDisplay:
         """Create hint display."""
         return HintDisplay(hint_manager)
 
-    def test_hint_display_creation(
-        self,
-        hint_display: HintDisplay,
-        hint_manager: HintManager
-    ) -> None:
+    def test_hint_display_creation(self, hint_display: HintDisplay, hint_manager: HintManager) -> None:
         """Test hint display initialization."""
         assert hint_display.hint_manager == hint_manager
         assert hint_display.x == 50
         assert hint_display.y == 400
 
-    def test_hint_display_draw_no_hint(
-        self,
-        hint_display: HintDisplay
-    ) -> None:
+    def test_hint_display_draw_no_hint(self, hint_display: HintDisplay) -> None:
         """Test draw with no hint."""
         pg.init()
         surface = pg.Surface((800, 600))
@@ -378,11 +342,7 @@ class TestHintDisplay:
 
         pg.quit()
 
-    def test_hint_display_draw_with_hint(
-        self,
-        hint_display: HintDisplay,
-        hint_manager: HintManager
-    ) -> None:
+    def test_hint_display_draw_with_hint(self, hint_display: HintDisplay, hint_manager: HintManager) -> None:
         """Test draw with hint."""
         pg.init()
         surface = pg.Surface((800, 600))
@@ -406,35 +366,23 @@ class TestHintTriggerSystem:
         return HintManager()
 
     @pytest.fixture
-    def trigger_system(
-        self,
-        hint_manager: HintManager
-    ) -> HintTriggerSystem:
+    def trigger_system(self, hint_manager: HintManager) -> HintTriggerSystem:
         """Create trigger system."""
         return HintTriggerSystem(hint_manager)
 
-    def test_trigger_system_creation(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_trigger_system_creation(self, trigger_system: HintTriggerSystem) -> None:
         """Test trigger system initialization."""
         assert len(trigger_system.event_counts) == 0
         assert len(trigger_system.listeners) == 0
 
-    def test_register_event(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_register_event(self, trigger_system: HintTriggerSystem) -> None:
         """Test registering event."""
         trigger_system.register_event("player_jump")
 
         assert "player_jump" in trigger_system.event_counts
         assert trigger_system.event_counts["player_jump"] == 0
 
-    def test_trigger_event(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_trigger_event(self, trigger_system: HintTriggerSystem) -> None:
         """Test triggering event."""
         trigger_system.trigger_event("player_jump")
 
@@ -443,19 +391,13 @@ class TestHintTriggerSystem:
         trigger_system.trigger_event("player_jump")
         assert trigger_system.event_counts["player_jump"] == 2
 
-    def test_trigger_event_with_data(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_trigger_event_with_data(self, trigger_system: HintTriggerSystem) -> None:
         """Test triggering event with data."""
         trigger_system.trigger_event("enemy_defeat", {"type": "goomba"})
 
         assert trigger_system.event_counts["enemy_defeat"] == 1
 
-    def test_add_listener(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_add_listener(self, trigger_system: HintTriggerSystem) -> None:
         """Test adding event listener."""
         called = []
 
@@ -467,10 +409,7 @@ class TestHintTriggerSystem:
         assert "test_event" in trigger_system.listeners
         assert len(trigger_system.listeners["test_event"]) == 1
 
-    def test_listener_called(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_listener_called(self, trigger_system: HintTriggerSystem) -> None:
         """Test that listeners are called."""
         called = []
 
@@ -483,10 +422,7 @@ class TestHintTriggerSystem:
         assert len(called) == 1
         assert called[0] == {"value": 123}
 
-    def test_get_event_count(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_get_event_count(self, trigger_system: HintTriggerSystem) -> None:
         """Test getting event count."""
         trigger_system.trigger_event("test")
         trigger_system.trigger_event("test")
@@ -495,10 +431,7 @@ class TestHintTriggerSystem:
         count = trigger_system.get_event_count("test")
         assert count == 3
 
-    def test_reset(
-        self,
-        trigger_system: HintTriggerSystem
-    ) -> None:
+    def test_reset(self, trigger_system: HintTriggerSystem) -> None:
         """Test resetting trigger system."""
         trigger_system.trigger_event("event1")
         trigger_system.trigger_event("event2")
@@ -575,11 +508,7 @@ class TestHintIntegration:
         # Simulate game state
         game_state = {
             "player": {"level": 1, "is_big": False},
-            "stats": {
-                "coins_collected": 15,
-                "enemies_defeated": 3,
-                "deaths": 1
-            }
+            "stats": {"coins_collected": 15, "enemies_defeated": 3, "deaths": 1},
         }
 
         # Trigger various events

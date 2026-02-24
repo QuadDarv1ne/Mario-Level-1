@@ -27,6 +27,7 @@ class Enemy(pg.sprite.Sprite):
         self.x_vel: float = 0
         self.y_vel: float = 0
         self.current_time: float = 0
+        self.mario: Any = None
 
     def setup_enemy(self, x: int, y: int, direction: str, name: str, setup_frames: Callable[[], None]) -> None:
         """Sets up various values for enemy"""
@@ -125,13 +126,12 @@ class Enemy(pg.sprite.Sprite):
 
     def update(self, game_info: dict, *args: Any) -> None:
         """Updates enemy behavior"""
-        self.current_time = game_info[c.CURRENT_TIME]
+        self.current_time = game_info.get(c.CURRENT_TIME, getattr(self, "current_time", 0))
         self.handle_state()
         self.animation()
 
 
 class Goomba(Enemy):
-
     def __init__(self, y: int = c.GROUND_HEIGHT, x: int = 0, direction: str = c.LEFT, name: str = "goomba") -> None:
         Enemy.__init__(self)
         self.setup_enemy(x, y, direction, name, self.setup_frames)
@@ -153,7 +153,6 @@ class Goomba(Enemy):
 
 
 class Koopa(Enemy):
-
     def __init__(self, y: int = c.GROUND_HEIGHT, x: int = 0, direction: str = c.LEFT, name: str = "koopa") -> None:
         Enemy.__init__(self)
         self.setup_enemy(x, y, direction, name, self.setup_frames)

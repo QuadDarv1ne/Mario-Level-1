@@ -15,11 +15,12 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class EventType(Enum):
     """Built-in event types."""
+
     # Player events
     PLAYER_JUMP = auto()
     PLAYER_LAND = auto()
@@ -68,6 +69,7 @@ class Event:
         cancelled: Whether event was cancelled
         source: Component that emitted the event
     """
+
     type: EventType
     data: Dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
@@ -98,6 +100,7 @@ class EventHandler:
 
     Stores handler callback with priority and metadata.
     """
+
     callback: Callable[[Event], None]
     priority: int = 0  # Higher = called first
     once: bool = False  # Remove after first call
@@ -157,9 +160,9 @@ class EventManager:
         self._handlers: Dict[EventType, List[EventHandler]] = {}
         self._global_handlers: List[EventHandler] = []
         self._stats: Dict[str, int] = {
-            'emitted': 0,
-            'handled': 0,
-            'cancelled': 0,
+            "emitted": 0,
+            "handled": 0,
+            "cancelled": 0,
         }
         self._enabled: bool = True
         self._event_queue: List[Event] = []
@@ -219,8 +222,7 @@ class EventManager:
         removed = 0
         handlers = self._handlers[event_type]
         self._handlers[event_type] = [
-            h for h in handlers
-            if h.callback != callback or (removed := removed + 1) and False
+            h for h in handlers if h.callback != callback or (removed := removed + 1) and False
         ]
         return removed
 
@@ -256,13 +258,13 @@ class EventManager:
             return Event(event_type, data=data or {}, source=source)
 
         event = Event(type=event_type, data=data or {}, source=source)
-        self._stats['emitted'] += 1
+        self._stats["emitted"] += 1
 
         # Process global handlers first
         self._invoke_handlers(self._global_handlers, event)
 
         if event.is_cancelled():
-            self._stats['cancelled'] += 1
+            self._stats["cancelled"] += 1
             return event
 
         # Process type-specific handlers
@@ -281,7 +283,7 @@ class EventManager:
                 break
 
             keep = handler.invoke(event)
-            self._stats['handled'] += 1
+            self._stats["handled"] += 1
 
             if not keep:
                 handlers.pop(i)
@@ -329,9 +331,9 @@ class EventManager:
     def reset_stats(self) -> None:
         """Reset statistics."""
         self._stats = {
-            'emitted': 0,
-            'handled': 0,
-            'cancelled': 0,
+            "emitted": 0,
+            "handled": 0,
+            "cancelled": 0,
         }
 
 

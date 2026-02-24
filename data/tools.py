@@ -13,8 +13,7 @@ from __future__ import annotations
 import warnings
 
 warnings.warn(
-    "Importing from data.tools directly is deprecated. "
-    "Use data.tools module (it now re-exports all components).",
+    "Importing from data.tools directly is deprecated. " "Use data.tools module (it now re-exports all components).",
     DeprecationWarning,
     stacklevel=2,
 )

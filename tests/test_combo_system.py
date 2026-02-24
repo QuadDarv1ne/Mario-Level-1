@@ -301,6 +301,7 @@ class TestComboUI:
     def test_draw_inactive_combo(self) -> None:
         """Test drawing when combo is inactive."""
         import pygame as pg
+
         pg.init()
         surface = pg.Surface((800, 600))
 
@@ -326,6 +327,7 @@ class TestScoreUI:
     def test_draw_score(self) -> None:
         """Test drawing score."""
         import pygame as pg
+
         pg.init()
         surface = pg.Surface((800, 600))
 
@@ -366,7 +368,6 @@ class TestComboIntegration:
         assert combo.is_active
 
         # Combo should timeout
-        import time
         time.sleep(1.5)  # Wait for timeout
 
         combo.update(2000)

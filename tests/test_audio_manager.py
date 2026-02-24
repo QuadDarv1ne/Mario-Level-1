@@ -62,12 +62,7 @@ class TestSoundConfig:
 
     def test_custom_sound_config(self) -> None:
         """Test custom sound config."""
-        config = SoundConfig(
-            volume=0.5,
-            loops=3,
-            category=AudioCategory.MUSIC,
-            priority=10
-        )
+        config = SoundConfig(volume=0.5, loops=3, category=AudioCategory.MUSIC, priority=10)
 
         assert config.volume == 0.5
         assert config.loops == 3
@@ -80,12 +75,7 @@ class TestMusicTrack:
 
     def test_music_track_creation(self) -> None:
         """Test creating music track."""
-        track = MusicTrack(
-            name="Test Track",
-            file_path="/path/to/music.ogg",
-            duration_ms=180000,
-            volume=0.8
-        )
+        track = MusicTrack(name="Test Track", file_path="/path/to/music.ogg", duration_ms=180000, volume=0.8)
 
         assert track.name == "Test Track"
         assert track.file_path == "/path/to/music.ogg"
@@ -425,11 +415,7 @@ class TestGameAudioPreset:
         """Create game audio preset."""
         return GameAudioPreset(audio_manager)
 
-    def test_game_audio_creation(
-        self,
-        audio_manager: AudioManager,
-        game_audio: GameAudioPreset
-    ) -> None:
+    def test_game_audio_creation(self, audio_manager: AudioManager, game_audio: GameAudioPreset) -> None:
         """Test game audio preset initialization."""
         assert game_audio.audio == audio_manager
 
@@ -440,10 +426,7 @@ class TestGameAudioPreset:
         assert "stomp" in SOUND_NAMES
         assert "game_over" in SOUND_NAMES
 
-    def test_play_methods_no_crash(
-        self,
-        game_audio: GameAudioPreset
-    ) -> None:
+    def test_play_methods_no_crash(self, game_audio: GameAudioPreset) -> None:
         """Test that play methods don't crash."""
         # These should return False (no sounds loaded) but not crash
         assert game_audio.play_jump() is False
@@ -470,6 +453,7 @@ class TestAudioIntegration:
         try:
             # Create WAV file
             import wave
+
             with wave.open(temp_path, "w") as wav_file:
                 wav_file.setnchannels(1)
                 wav_file.setsampwidth(1)

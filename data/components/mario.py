@@ -563,11 +563,15 @@ class Mario(pg.sprite.Sprite):
         # Emit jump event for sound/effects systems
         if self.y_vel < 0:
             from ..event_system import get_event_manager, EventType
+
             events = get_event_manager()
-            events.emit(EventType.PLAYER_JUMP, {
-                'player': self,
-                'y_vel': self.y_vel,
-            })
+            events.emit(
+                EventType.PLAYER_JUMP,
+                {
+                    "player": self,
+                    "y_vel": self.y_vel,
+                },
+            )
 
     def falling(self, keys: Tuple[bool, ...], fire_group: pg.sprite.Group) -> None:
         """Called when Mario is in a FALL state"""

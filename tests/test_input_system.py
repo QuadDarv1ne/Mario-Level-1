@@ -34,10 +34,7 @@ class TestInputEvent:
 
     def test_input_event_creation(self) -> None:
         """Test creating input event."""
-        event = InputEvent(
-            input_type=InputType.JUMP,
-            timestamp=1000.0
-        )
+        event = InputEvent(input_type=InputType.JUMP, timestamp=1000.0)
 
         assert event.input_type == InputType.JUMP
         assert event.timestamp == 1000.0
@@ -46,11 +43,7 @@ class TestInputEvent:
 
     def test_input_event_with_position(self) -> None:
         """Test input event with position."""
-        event = InputEvent(
-            input_type=InputType.ACTION,
-            timestamp=1000.0,
-            position=(100, 200)
-        )
+        event = InputEvent(input_type=InputType.ACTION, timestamp=1000.0, position=(100, 200))
 
         assert event.position == (100, 200)
 
@@ -70,11 +63,7 @@ class TestInputConfig:
 
     def test_custom_config(self) -> None:
         """Test custom input config."""
-        config = InputConfig(
-            buffer_window=200,
-            max_buffer_size=20,
-            hold_threshold=500
-        )
+        config = InputConfig(buffer_window=200, max_buffer_size=20, hold_threshold=500)
 
         assert config.buffer_window == 200
         assert config.max_buffer_size == 20
@@ -252,7 +241,7 @@ class TestInputManager:
         """Test handling keydown event."""
         pg.init()
 
-        event = pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
+        event = pg.event.Event(pg.KEYDOWN, {"key": pg.K_a})
         result = input_manager.handle_event(event)
 
         assert result is True
@@ -265,14 +254,10 @@ class TestInputManager:
         pg.init()
 
         # Press
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         # Release
-        result = input_manager.handle_event(
-            pg.event.Event(pg.KEYUP, {'key': pg.K_a})
-        )
+        result = input_manager.handle_event(pg.event.Event(pg.KEYUP, {"key": pg.K_a}))
 
         assert result is True
 
@@ -283,7 +268,7 @@ class TestInputManager:
         input_manager.enabled = False
 
         pg.init()
-        event = pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
+        event = pg.event.Event(pg.KEYDOWN, {"key": pg.K_a})
         result = input_manager.handle_event(event)
 
         assert result is False
@@ -299,9 +284,7 @@ class TestInputManager:
         """Test checking if action is pressed."""
         pg.init()
 
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         assert input_manager.is_action_pressed(InputType.JUMP) is True
         assert input_manager.is_action_pressed(InputType.ACTION) is False
@@ -312,9 +295,7 @@ class TestInputManager:
         """Test consuming action."""
         pg.init()
 
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         result = input_manager.consume_action(InputType.JUMP)
 
@@ -331,9 +312,7 @@ class TestInputManager:
         assert input_manager.get_direction() == (0, 0)
 
         # Left
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_LEFT})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_LEFT}))
         assert input_manager.get_direction() == (-1, 0)
 
         pg.quit()
@@ -342,12 +321,8 @@ class TestInputManager:
         """Test getting combo sequence."""
         pg.init()
 
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_s})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_s}))
 
         sequence = input_manager.get_combo_sequence(2)
 
@@ -359,9 +334,7 @@ class TestInputManager:
         """Test resetting input manager."""
         pg.init()
 
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         input_manager.reset()
 
@@ -379,60 +352,35 @@ class TestComboDetector:
         return InputManager()
 
     @pytest.fixture
-    def combo_detector(
-        self,
-        input_manager: InputManager
-    ) -> ComboDetector:
+    def combo_detector(self, input_manager: InputManager) -> ComboDetector:
         """Create combo detector."""
         return ComboDetector(input_manager)
 
-    def test_detector_creation(
-        self,
-        combo_detector: ComboDetector,
-        input_manager: InputManager
-    ) -> None:
+    def test_detector_creation(self, combo_detector: ComboDetector, input_manager: InputManager) -> None:
         """Test combo detector initialization."""
         assert combo_detector.input_manager == input_manager
         assert len(combo_detector.combos) == 0
 
-    def test_register_combo(
-        self,
-        combo_detector: ComboDetector
-    ) -> None:
+    def test_register_combo(self, combo_detector: ComboDetector) -> None:
         """Test registering combo."""
         called = []
 
         def callback() -> None:
             called.append(True)
 
-        combo_detector.register_combo(
-            "test_combo",
-            [InputType.JUMP, InputType.ACTION],
-            callback=callback,
-            cooldown=100
-        )
+        combo_detector.register_combo("test_combo", [InputType.JUMP, InputType.ACTION], callback=callback, cooldown=100)
 
         assert "test_combo" in combo_detector.combos
         assert "test_combo" in combo_detector.callbacks
 
-    def test_check_combo_no_match(
-        self,
-        combo_detector: ComboDetector,
-        input_manager: InputManager
-    ) -> None:
+    def test_check_combo_no_match(self, combo_detector: ComboDetector, input_manager: InputManager) -> None:
         """Test checking combo with no match."""
-        combo_detector.register_combo(
-            "test",
-            [InputType.JUMP, InputType.ACTION],
-            cooldown=100
-        )
+        combo_detector.register_combo("test", [InputType.JUMP, InputType.ACTION], cooldown=100)
 
         pg.init()
 
         # Only press jump
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         result = combo_detector.check_combos()
 
@@ -440,27 +388,15 @@ class TestComboDetector:
 
         pg.quit()
 
-    def test_check_combo_match(
-        self,
-        combo_detector: ComboDetector,
-        input_manager: InputManager
-    ) -> None:
+    def test_check_combo_match(self, combo_detector: ComboDetector, input_manager: InputManager) -> None:
         """Test checking combo with match."""
-        combo_detector.register_combo(
-            "test",
-            [InputType.JUMP, InputType.JUMP],
-            cooldown=1000
-        )
+        combo_detector.register_combo("test", [InputType.JUMP, InputType.JUMP], cooldown=1000)
 
         pg.init()
 
         # Press jump twice
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         result = combo_detector.check_combos()
 
@@ -468,27 +404,15 @@ class TestComboDetector:
 
         pg.quit()
 
-    def test_combo_cooldown(
-        self,
-        combo_detector: ComboDetector,
-        input_manager: InputManager
-    ) -> None:
+    def test_combo_cooldown(self, combo_detector: ComboDetector, input_manager: InputManager) -> None:
         """Test combo cooldown."""
-        combo_detector.register_combo(
-            "test",
-            [InputType.JUMP, InputType.JUMP],
-            cooldown=500
-        )
+        combo_detector.register_combo("test", [InputType.JUMP, InputType.JUMP], cooldown=500)
 
         pg.init()
 
         # Trigger combo
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
-        input_manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
+        input_manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         result = combo_detector.check_combos()
         assert result == "test"
@@ -499,10 +423,7 @@ class TestComboDetector:
 
         pg.quit()
 
-    def test_reset_detector(
-        self,
-        combo_detector: ComboDetector
-    ) -> None:
+    def test_reset_detector(self, combo_detector: ComboDetector) -> None:
         """Test resetting detector."""
         combo_detector.register_combo("test", [InputType.JUMP])
         combo_detector.last_triggered["test"] = 1000
@@ -542,19 +463,11 @@ class TestInputIntegration:
         detector = ComboDetector(manager)
 
         # Register combo
-        detector.register_combo(
-            "jump_action",
-            [InputType.JUMP, InputType.ACTION],
-            cooldown=200
-        )
+        detector.register_combo("jump_action", [InputType.JUMP, InputType.ACTION], cooldown=200)
 
         # Simulate inputs
-        manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
-        manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_s})
-        )
+        manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
+        manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_s}))
 
         # Update
         manager.update()
@@ -566,20 +479,14 @@ class TestInputIntegration:
 
     def test_input_with_buffer_config(self) -> None:
         """Test input with custom buffer config."""
-        config = InputConfig(
-            buffer_window=300,
-            max_buffer_size=20,
-            hold_threshold=200
-        )
+        config = InputConfig(buffer_window=300, max_buffer_size=20, hold_threshold=200)
 
         manager = InputManager(config)
 
         pg.init()
 
         # Test with config
-        manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
+        manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
 
         assert manager.is_action_pressed(InputType.JUMP)
 
@@ -597,12 +504,8 @@ class TestInputIntegration:
         detector.register_combo("combo2", [InputType.ACTION], cooldown=100)
 
         # Trigger both
-        manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_a})
-        )
-        manager.handle_event(
-            pg.event.Event(pg.KEYDOWN, {'key': pg.K_s})
-        )
+        manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_a}))
+        manager.handle_event(pg.event.Event(pg.KEYDOWN, {"key": pg.K_s}))
 
         # Check combos
         result1 = detector.check_combos()

@@ -77,6 +77,7 @@ class DebugOverlay:
         """Get current memory usage."""
         try:
             import tracemalloc
+
             current, peak = tracemalloc.get_traced_memory()
             return f"{current / 1024 / 1024:.2f} MB"
         except Exception:
@@ -85,15 +86,15 @@ class DebugOverlay:
     def _get_object_counts(self) -> Dict[str, int]:
         """Get counts of game objects."""
         counts = {
-            'sprites': 0,
-            'groups': 0,
+            "sprites": 0,
+            "groups": 0,
         }
 
         # Count pygame sprites
-        for name, obj in sys.modules.get('__main__', {}).__dict__.items():
+        for name, obj in sys.modules.get("__main__", {}).__dict__.items():
             if isinstance(obj, pg.sprite.Group):
-                counts['groups'] += 1
-                counts['sprites'] += len(obj.sprites())
+                counts["groups"] += 1
+                counts["sprites"] += len(obj.sprites())
 
         return counts
 
@@ -185,10 +186,10 @@ class DebugConsole:
         def fps_cmd() -> str:
             return f"FPS: {pg.time.Clock().get_fps():.2f}"
 
-        self.register_command('help', help_cmd)
-        self.register_command('vars', vars_cmd)
-        self.register_command('gc', gc_cmd)
-        self.register_command('fps', fps_cmd)
+        self.register_command("help", help_cmd)
+        self.register_command("vars", vars_cmd)
+        self.register_command("gc", gc_cmd)
+        self.register_command("fps", fps_cmd)
 
     def register_command(self, name: str, func: Callable[[], str]) -> None:
         """
@@ -253,7 +254,7 @@ class DebugConsole:
         self.history_index = len(self.history)
 
         # Parse command
-        parts = command.split(' ', 1)
+        parts = command.split(" ", 1)
         cmd_name = parts[0]
         _ = parts[1] if len(parts) > 1 else ""  # args reserved for future use
 
@@ -383,7 +384,7 @@ class HitboxVisualizer:
             return
 
         for sprite in group.sprites():
-            if hasattr(sprite, 'rect'):
+            if hasattr(sprite, "rect"):
                 self.draw_rect(surface, sprite.rect, offset)
 
 

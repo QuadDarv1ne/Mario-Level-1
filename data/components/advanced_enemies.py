@@ -73,7 +73,7 @@ class PiranhaPlant(Enemy):
 
     def update(self, game_info: dict, *args: Any) -> None:
         """Update piranha plant behavior."""
-        self.current_time = game_info[c.CURRENT_TIME]
+        self.current_time = game_info.get(c.CURRENT_TIME, getattr(self, "current_time", 0))
         self.handle_state()
         self.animation()
 
@@ -203,7 +203,7 @@ class BulletBill(Enemy):
 
     def update(self, game_info: dict, *args: Any) -> None:
         """Update bullet bill."""
-        self.current_time = game_info[c.CURRENT_TIME]
+        self.current_time = game_info.get(c.CURRENT_TIME, getattr(self, "current_time", 0))
 
         if self.spawn_time == 0:
             self.spawn_time = self.current_time
@@ -484,7 +484,7 @@ def create_enemy(enemy_type: str, x: int, y: int, direction: str = c.LEFT, **kwa
 
 def setup_enemy_instance(cls_name: str, y: int, x: int, direction: str):
     """Helper to create classic enemies."""
-    from .components.enemies import Goomba, Koopa
+    from .enemies import Goomba, Koopa
 
     if cls_name == "Goomba":
         return Goomba(y, x, direction)

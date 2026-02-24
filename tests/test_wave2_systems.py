@@ -25,9 +25,9 @@ class TestEventSystem:
         """Test event creation."""
         from data.event_system import Event, EventType
 
-        event = Event(EventType.PLAYER_JUMP, {'height': 100})
+        event = Event(EventType.PLAYER_JUMP, {"height": 100})
         assert event.type == EventType.PLAYER_JUMP
-        assert event.get('height') == 100
+        assert event.get("height") == 100
         assert not event.is_cancelled()
 
     def test_event_cancellation(self):
@@ -49,10 +49,10 @@ class TestEventSystem:
             received.append(event)
 
         manager.on(EventType.PLAYER_JUMP, handler)
-        manager.emit(EventType.PLAYER_JUMP, {'test': True})
+        manager.emit(EventType.PLAYER_JUMP, {"test": True})
 
         assert len(received) == 1
-        assert received[0].get('test') is True
+        assert received[0].get("test") is True
 
     def test_event_priority(self):
         """Test event handler priority."""
@@ -116,7 +116,7 @@ class TestEventSystem:
         manager.emit(EventType.PLAYER_SCORE)
 
         stats = manager.get_stats()
-        assert stats['emitted'] == 3
+        assert stats["emitted"] == 3
 
 
 class TestRenderSystem:
@@ -147,7 +147,7 @@ class TestRenderSystem:
 
         renderer.render()
         stats = renderer.get_stats()
-        assert stats['visible_sprites'] == 10
+        assert stats["visible_sprites"] == 10
 
     def test_viewport_culling(self, init_pygame):
         """Test viewport culling."""
@@ -169,8 +169,8 @@ class TestRenderSystem:
 
         renderer.render()
         stats = renderer.get_stats()
-        assert stats['visible_sprites'] == 1
-        assert stats['culled_sprites'] == 1
+        assert stats["visible_sprites"] == 1
+        assert stats["culled_sprites"] == 1
 
 
 class TestProfiler:
@@ -214,7 +214,7 @@ class TestProfiler:
         profiler = Profiler()
         profiler.start()
 
-        with profiler.profile('test_section'):
+        with profiler.profile("test_section"):
             time.sleep(0.01)
 
         profiler.end_frame()
@@ -278,8 +278,8 @@ class TestDebugUtils:
         console = DebugConsole()
 
         # Test help command
-        assert 'help' in console.commands
-        assert 'fps' in console.commands
+        assert "help" in console.commands
+        assert "fps" in console.commands
 
     def test_hitbox_visualizer(self):
         """Test hitbox visualizer."""
@@ -310,40 +310,36 @@ class TestDialogSystem:
         manager = DialogManager()
 
         data = {
-            'dialogs': [
+            "dialogs": [
                 {
-                    'id': 'test_dialog',
-                    'speaker': 'Mario',
-                    'text': 'Hello, World!',
+                    "id": "test_dialog",
+                    "speaker": "Mario",
+                    "text": "Hello, World!",
                 }
             ]
         }
 
         manager.load_from_dict(data)
-        assert 'test_dialog' in manager.dialogs
+        assert "test_dialog" in manager.dialogs
 
     def test_dialog_start(self, init_pygame):
         """Test starting dialog."""
         from data.dialog_system import DialogManager
 
         manager = DialogManager()
-        manager.load_from_dict({
-            'dialogs': [
-                {'id': 'test', 'speaker': 'Mario', 'text': 'Hello!'}
-            ]
-        })
+        manager.load_from_dict({"dialogs": [{"id": "test", "speaker": "Mario", "text": "Hello!"}]})
 
-        result = manager.start('test')
+        result = manager.start("test")
         assert result is True
         assert manager.active
-        assert manager.current_id == 'test'
+        assert manager.current_id == "test"
 
     def test_dialog_start_invalid(self, init_pygame):
         """Test starting invalid dialog."""
         from data.dialog_system import DialogManager
 
         manager = DialogManager()
-        result = manager.start('nonexistent')
+        result = manager.start("nonexistent")
         assert result is False
         assert not manager.active
 
@@ -352,18 +348,20 @@ class TestDialogSystem:
         from data.dialog_system import DialogManager
 
         manager = DialogManager()
-        manager.load_from_dict({
-            'dialogs': [
-                {
-                    'id': 'test',
-                    'speaker': 'Mario',
-                    'text': 'Hello World!',
-                    'speed': 'FAST',
-                }
-            ]
-        })
+        manager.load_from_dict(
+            {
+                "dialogs": [
+                    {
+                        "id": "test",
+                        "speaker": "Mario",
+                        "text": "Hello World!",
+                        "speed": "FAST",
+                    }
+                ]
+            }
+        )
 
-        manager.start('test')
+        manager.start("test")
         initial_text = manager.state.displayed_text
 
         manager.update(0.1)  # 100ms
@@ -376,32 +374,30 @@ class TestDialogSystem:
         from data.dialog_system import DialogManager
 
         manager = DialogManager()
-        manager.load_from_dict({
-            'dialogs': [
-                {'id': 'test1', 'speaker': 'Mario', 'text': 'First', 'next_dialog': 'test2'},
-                {'id': 'test2', 'speaker': 'Luigi', 'text': 'Second'},
-            ]
-        })
+        manager.load_from_dict(
+            {
+                "dialogs": [
+                    {"id": "test1", "speaker": "Mario", "text": "First", "next_dialog": "test2"},
+                    {"id": "test2", "speaker": "Luigi", "text": "Second"},
+                ]
+            }
+        )
 
-        manager.start('test1')
+        manager.start("test1")
         manager.state.waiting_for_input = True  # Simulate typing complete
 
         result = manager.advance()
         assert result is True
-        assert manager.current_id == 'test2'
+        assert manager.current_id == "test2"
 
     def test_dialog_end(self, init_pygame):
         """Test dialog ending."""
         from data.dialog_system import DialogManager
 
         manager = DialogManager()
-        manager.load_from_dict({
-            'dialogs': [
-                {'id': 'test', 'speaker': 'Mario', 'text': 'Hello!'}
-            ]
-        })
+        manager.load_from_dict({"dialogs": [{"id": "test", "speaker": "Mario", "text": "Hello!"}]})
 
-        manager.start('test')
+        manager.start("test")
         manager.end()
 
         assert not manager.active
@@ -412,28 +408,30 @@ class TestDialogSystem:
         from data.dialog_system import DialogManager
 
         manager = DialogManager()
-        manager.load_from_dict({
-            'dialogs': [
-                {
-                    'id': 'start',
-                    'speaker': 'NPC',
-                    'text': 'Choose wisely!',
-                    'choices': [
-                        {'text': 'Option 1', 'next_dialog': 'ending1'},
-                        {'text': 'Option 2', 'next_dialog': 'ending2'},
-                    ]
-                },
-                {'id': 'ending1', 'speaker': 'NPC', 'text': 'You chose 1!'},
-                {'id': 'ending2', 'speaker': 'NPC', 'text': 'You chose 2!'},
-            ]
-        })
+        manager.load_from_dict(
+            {
+                "dialogs": [
+                    {
+                        "id": "start",
+                        "speaker": "NPC",
+                        "text": "Choose wisely!",
+                        "choices": [
+                            {"text": "Option 1", "next_dialog": "ending1"},
+                            {"text": "Option 2", "next_dialog": "ending2"},
+                        ],
+                    },
+                    {"id": "ending1", "speaker": "NPC", "text": "You chose 1!"},
+                    {"id": "ending2", "speaker": "NPC", "text": "You chose 2!"},
+                ]
+            }
+        )
 
-        manager.start('start')
+        manager.start("start")
         manager.state.waiting_for_input = True
         manager.advance()  # Now waiting for choice
 
         manager.select_choice(0)
-        assert manager.current_id == 'ending1'
+        assert manager.current_id == "ending1"
 
 
 class TestController:
@@ -451,7 +449,7 @@ class TestController:
         from data.controller import ControllerConfig
 
         config = ControllerConfig()
-        assert 'jump' in config.button_mappings
+        assert "jump" in config.button_mappings
         assert config.vibration_enabled is True
 
     def test_controller_config_to_dict(self):
@@ -461,21 +459,21 @@ class TestController:
         config = ControllerConfig()
         data = config.to_dict()
 
-        assert 'button_mappings' in data
-        assert 'vibration_enabled' in data
+        assert "button_mappings" in data
+        assert "vibration_enabled" in data
 
     def test_controller_config_from_dict(self):
         """Test controller config deserialization."""
         from data.controller import ControllerConfig
 
         data = {
-            'button_mappings': {'jump': 5},
-            'vibration_enabled': False,
-            'deadzone': 0.2,
+            "button_mappings": {"jump": 5},
+            "vibration_enabled": False,
+            "deadzone": 0.2,
         }
 
         config = ControllerConfig.from_dict(data)
-        assert config.button_mappings['jump'] == 5
+        assert config.button_mappings["jump"] == 5
         assert config.vibration_enabled is False
         assert config.deadzone == 0.2
 
@@ -484,6 +482,7 @@ class TestController:
 def init_pygame():
     """Initialize pygame for tests."""
     import pygame as pg
+
     pg.init()
     pg.display.set_mode((100, 100))
     yield

@@ -18,6 +18,7 @@ from enum import IntEnum
 
 class RenderLayer(IntEnum):
     """Rendering layers for proper z-ordering."""
+
     BACKGROUND = 0
     GROUND = 1
     BRICKS = 2
@@ -32,6 +33,7 @@ class RenderLayer(IntEnum):
 @dataclass
 class RenderStats:
     """Rendering statistics."""
+
     total_sprites: int = 0
     visible_sprites: int = 0
     culled_sprites: int = 0
@@ -48,6 +50,10 @@ class RenderStats:
         self.draw_calls = 0
         self.dirty_rects = 0
 
+    def __getitem__(self, key: str) -> int:
+        """Allow dict-like access for tests."""
+        return getattr(self, key)
+
 
 @dataclass
 class SpriteBatch:
@@ -56,6 +62,7 @@ class SpriteBatch:
 
     Groups sprites by texture for efficient rendering.
     """
+
     texture: pg.Surface
     sprites: List[Tuple[pg.Rect, Optional[pg.Rect]]] = field(default_factory=list)
 
@@ -131,9 +138,7 @@ class SpriteRenderer:
         self.stats = RenderStats()
 
         # Batches per layer
-        self._batches: Dict[RenderLayer, Dict[int, SpriteBatch]] = {
-            layer: {} for layer in RenderLayer
-        }
+        self._batches: Dict[RenderLayer, Dict[int, SpriteBatch]] = {layer: {} for layer in RenderLayer}
 
         # Sprite data
         self._sprites: List[RenderSprite] = []
@@ -161,12 +166,14 @@ class SpriteRenderer:
             layer: Rendering layer
             src_rect: Source rectangle (for sprite sheets)
         """
-        self._sprites.append(RenderSprite(
-            rect=rect,
-            image=image,
-            layer=layer,
-            src_rect=src_rect,
-        ))
+        self._sprites.append(
+            RenderSprite(
+                rect=rect,
+                image=image,
+                layer=layer,
+                src_rect=src_rect,
+            )
+        )
 
     def add_sprite_object(self, sprite: pg.sprite.Sprite, layer: RenderLayer) -> None:
         """
@@ -176,7 +183,7 @@ class SpriteRenderer:
             sprite: Pygame sprite object
             layer: Rendering layer
         """
-        if hasattr(sprite, 'image') and hasattr(sprite, 'rect'):
+        if hasattr(sprite, "image") and hasattr(sprite, "rect"):
             self.add_sprite(sprite.rect, sprite.image, layer)
 
     def add_sprite_group(
@@ -212,8 +219,12 @@ class SpriteRenderer:
         margin = 50
         viewport = self._viewport.inflate(margin * 2, margin * 2)
 
-        return (rect.right < viewport.left or rect.left > viewport.right
-                or rect.bottom < viewport.top or rect.top > viewport.bottom)
+        return (
+            rect.right < viewport.left
+            or rect.left > viewport.right
+            or rect.bottom < viewport.top
+            or rect.top > viewport.bottom
+        )
 
     def _build_batches(self) -> None:
         """Build sprite batches from sprite list."""
@@ -260,9 +271,7 @@ class SpriteRenderer:
 
         # Build batches
         self._build_batches()
-        self.stats.batches = sum(
-            len(batches) for batches in self._batches.values()
-        )
+        self.stats.batches = sum(len(batches) for batches in self._batches.values())
 
         # Render by layer
         for layer in RenderLayer:
@@ -295,7 +304,7 @@ class SpriteRenderer:
         ox, oy = offset
 
         for sprite in group.sprites():
-            if not hasattr(sprite, 'image') or not hasattr(sprite, 'rect'):
+            if not hasattr(sprite, "image") or not hasattr(sprite, "rect"):
                 continue
 
             # Cull check
@@ -333,6 +342,7 @@ class SpriteRenderer:
 @dataclass
 class RenderSprite:
     """Data class for sprite rendering."""
+
     rect: pg.Rect
     image: pg.Surface
     layer: RenderLayer = RenderLayer.ITEMS
@@ -414,9 +424,9 @@ class RenderManager:
         """Get render statistics."""
         stats = self.renderer.get_stats()
         return {
-            'total_sprites': stats.total_sprites,
-            'visible_sprites': stats.visible_sprites,
-            'culled_sprites': stats.culled_sprites,
-            'batches': stats.batches,
-            'draw_calls': stats.draw_calls,
+            "total_sprites": stats.total_sprites,
+            "visible_sprites": stats.visible_sprites,
+            "culled_sprites": stats.culled_sprites,
+            "batches": stats.batches,
+            "draw_calls": stats.draw_calls,
         }

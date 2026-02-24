@@ -148,6 +148,7 @@ class TestAnimationFrame:
     def test_custom_frame(self) -> None:
         """Test custom animation frame."""
         import pygame as pg
+
         pg.init()
         image = pg.Surface((32, 32))
 
@@ -156,12 +157,7 @@ class TestAnimationFrame:
         def callback() -> None:
             callback_called.append(True)
 
-        frame = AnimationFrame(
-            image=image,
-            duration=200,
-            offset=(10, -5),
-            callback=callback
-        )
+        frame = AnimationFrame(image=image, duration=200, offset=(10, -5), callback=callback)
 
         assert frame.image == image
         assert frame.duration == 200
@@ -214,19 +210,12 @@ class TestAnimationState:
     def test_update_with_frames(self) -> None:
         """Test update with frames."""
         import pygame as pg
+
         pg.init()
 
-        frames = [
-            AnimationFrame(image=pg.Surface((32, 32)), duration=100)
-            for _ in range(3)
-        ]
+        frames = [AnimationFrame(image=pg.Surface((32, 32)), duration=100) for _ in range(3)]
 
-        anim = AnimationState(
-            name="test",
-            frames=frames,
-            fps=10,
-            loop=True
-        )
+        anim = AnimationState(name="test", frames=frames, fps=10, loop=True)
         anim.play()
 
         # Should advance frames
@@ -238,19 +227,12 @@ class TestAnimationState:
     def test_animation_loop(self) -> None:
         """Test animation looping."""
         import pygame as pg
+
         pg.init()
 
-        frames = [
-            AnimationFrame(image=pg.Surface((32, 32)))
-            for _ in range(3)
-        ]
+        frames = [AnimationFrame(image=pg.Surface((32, 32))) for _ in range(3)]
 
-        anim = AnimationState(
-            name="test",
-            frames=frames,
-            fps=10,
-            loop=True
-        )
+        anim = AnimationState(name="test", frames=frames, fps=10, loop=True)
         anim.play()
 
         # Run through all frames multiple times
@@ -265,19 +247,12 @@ class TestAnimationState:
     def test_animation_no_loop(self) -> None:
         """Test non-looping animation."""
         import pygame as pg
+
         pg.init()
 
-        frames = [
-            AnimationFrame(image=pg.Surface((32, 32)))
-            for _ in range(3)
-        ]
+        frames = [AnimationFrame(image=pg.Surface((32, 32))) for _ in range(3)]
 
-        anim = AnimationState(
-            name="test",
-            frames=frames,
-            fps=10,
-            loop=False
-        )
+        anim = AnimationState(name="test", frames=frames, fps=10, loop=False)
         anim.play()
 
         # Run through all frames
@@ -293,6 +268,7 @@ class TestAnimationState:
     def test_frame_callback(self) -> None:
         """Test frame callback."""
         import pygame as pg
+
         pg.init()
 
         callbacks = []
@@ -300,20 +276,9 @@ class TestAnimationState:
         def on_frame() -> None:
             callbacks.append(True)
 
-        frames = [
-            AnimationFrame(
-                image=pg.Surface((32, 32)),
-                callback=on_frame
-            )
-            for _ in range(3)
-        ]
+        frames = [AnimationFrame(image=pg.Surface((32, 32)), callback=on_frame) for _ in range(3)]
 
-        anim = AnimationState(
-            name="test",
-            frames=frames,
-            fps=10,
-            loop=False
-        )
+        anim = AnimationState(name="test", frames=frames, fps=10, loop=False)
         anim.play()
 
         anim.update(200)
@@ -466,6 +431,7 @@ class TestAnimationManager:
     def test_draw(self) -> None:
         """Test manager draw."""
         import pygame as pg
+
         pg.init()
 
         manager = AnimationManager()
@@ -622,6 +588,7 @@ class TestAnimationIntegration:
     def test_sprite_with_animation(self) -> None:
         """Test sprite with animation."""
         import pygame as pg
+
         pg.init()
 
         sprite = InterpolatedSprite()
@@ -640,6 +607,7 @@ class TestAnimationIntegration:
     def test_manager_with_multiple_sprites(self) -> None:
         """Test manager with multiple animated sprites."""
         import pygame as pg
+
         pg.init()
 
         manager = AnimationManager()
