@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pygame as pg
 
@@ -29,7 +29,7 @@ class Level2(tools._State):
     def __init__(self) -> None:
         tools._State.__init__(self)
 
-    def startup(self, current_time: float, persist: Dict[str, Any]) -> None:
+    def startup(self, current_time: float, persist: dict[str, Any]) -> None:
         """Called when the State object is created"""
         self.game_info = persist
         self.persist = self.game_info
@@ -40,30 +40,30 @@ class Level2(tools._State):
         self.state = c.NOT_FROZEN
         self.death_timer: float = 0
         self.flag_timer: float = 0
-        self.flag_score: Optional[Any] = None
+        self.flag_score: Any | None = None
 
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
 
-        self.background: Optional[pg.Surface] = None
-        self.back_rect: Optional[pg.Rect] = None
-        self.level: Optional[pg.Surface] = None
-        self.level_rect: Optional[pg.Rect] = None
-        self.viewport: Optional[pg.Rect] = None
-        self.ground_group: Optional[pg.sprite.Group] = None
-        self.pipe_group: Optional[pg.sprite.Group] = None
-        self.step_group: Optional[pg.sprite.Group] = None
-        self.brick_group: Optional[pg.sprite.Group] = None
-        self.coin_box_group: Optional[pg.sprite.Group] = None
-        self.flag_pole_group: Optional[pg.sprite.Group] = None
-        self.enemy_group: Optional[pg.sprite.Group] = None
-        self.mario: Optional[mario.Mario] = None
-        self.checkpoint_group: Optional[pg.sprite.Group] = None
-        self.flag: Optional[flagpole.Flag] = None
-        self.pole: Optional[flagpole.Pole] = None
-        self.finial: Optional[flagpole.Finial] = None
-        self.coin_group: Optional[pg.sprite.Group] = None
-        self.powerup_group: Optional[pg.sprite.Group] = None
-        self.fire_group: Optional[pg.sprite.Group] = None
+        self.background: pg.Surface | None = None
+        self.back_rect: pg.Rect | None = None
+        self.level: pg.Surface | None = None
+        self.level_rect: pg.Rect | None = None
+        self.viewport: pg.Rect | None = None
+        self.ground_group: pg.sprite.Group | None = None
+        self.pipe_group: pg.sprite.Group | None = None
+        self.step_group: pg.sprite.Group | None = None
+        self.brick_group: pg.sprite.Group | None = None
+        self.coin_box_group: pg.sprite.Group | None = None
+        self.flag_pole_group: pg.sprite.Group | None = None
+        self.enemy_group: pg.sprite.Group | None = None
+        self.mario: mario.Mario | None = None
+        self.checkpoint_group: pg.sprite.Group | None = None
+        self.flag: flagpole.Flag | None = None
+        self.pole: flagpole.Pole | None = None
+        self.finial: flagpole.Finial | None = None
+        self.coin_group: pg.sprite.Group | None = None
+        self.powerup_group: pg.sprite.Group | None = None
+        self.fire_group: pg.sprite.Group | None = None
 
         # Load level data from JSON
         try:
