@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 import pygame as pg
 
 from .. import setup, tools
-from .. import constants as c
+from data import constants as c
 
 if TYPE_CHECKING:
     from . import powerups
