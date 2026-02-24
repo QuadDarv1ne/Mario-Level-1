@@ -44,7 +44,6 @@ class Level4(tools._State):
         self.death_timer: float = 0
         self.flag_timer: float = 0
         self.flag_score: Optional[Any] = None
-        self.flag_score_total = 0
 
         self.moving_score_list: List[score.Score] = []
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
