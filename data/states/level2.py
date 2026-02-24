@@ -274,15 +274,11 @@ class Level2(tools._State):
                 self.game_info[c.COIN_TOTAL] += 1
 
     def check_checkpoints(self) -> None:
-        """Check for enemy spawn checkpoints"""
-        if not self.mario or not self.checkpoint_group:
-            return
-
-        checkpoint = pg.sprite.spritecollideany(self.mario, self.checkpoint_group)
-        if checkpoint:
-            checkpoint.kill()
-            # Handle enemy spawning based on checkpoint
-            # This is simplified - full implementation would spawn specific enemies
+        """Check checkpoints"""
+        if self.mario and self.checkpoint_group:
+            checkpoint = pg.sprite.spritecollideany(self.mario, self.checkpoint_group)
+            if checkpoint:
+                checkpoint.kill()
 
     def check_state_triggers(self) -> None:
         """Check for state transition triggers"""
