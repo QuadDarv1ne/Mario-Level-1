@@ -10,7 +10,6 @@ import pygame as pg
 
 from .. import setup, tools
 from .. import constants as c
-from .. import game_sound
 from ..components import mario
 from ..components import collider
 from ..components import bricks
@@ -49,7 +48,6 @@ class Level3(tools._State):
 
         self.moving_score_list: List[score.Score] = []
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
-        self.sound_manager = game_sound.Sound(self.overhead_info_display)
 
         self.background: Optional[pg.Surface] = None
         self.back_rect: Optional[pg.Rect] = None
