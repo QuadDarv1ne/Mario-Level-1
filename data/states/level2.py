@@ -21,7 +21,6 @@ from ..components import checkpoint
 from ..components import flagpole
 from ..components import info
 from ..components import score
-from ..components import castle_flag
 from .. import level_loader
 
 logger = logging.getLogger(__name__)
