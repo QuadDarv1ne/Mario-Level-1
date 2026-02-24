@@ -76,7 +76,22 @@ class Level3(tools._State):
             self.next = c.GAME_OVER
             self.done = True
             return
+        self._init_groups()
         self.setup_all()
+
+    def _init_groups(self) -> None:
+        """Initialize sprite groups"""
+        self.ground_group = pg.sprite.Group()
+        self.pipe_group = pg.sprite.Group()
+        self.step_group = pg.sprite.Group()
+        self.brick_group = pg.sprite.Group()
+        self.coin_box_group = pg.sprite.Group()
+        self.flag_pole_group = pg.sprite.Group()
+        self.enemy_group = pg.sprite.Group()
+        self.checkpoint_group = pg.sprite.Group()
+        self.coin_group = pg.sprite.Group()
+        self.powerup_group = pg.sprite.Group()
+        self.fire_group = pg.sprite.Group()
 
     def setup_all(self) -> None:
         """Setup all level components"""
@@ -90,7 +105,6 @@ class Level3(tools._State):
         self.setup_enemies()
         self.setup_mario()
         self.setup_checkpoints()
-        self.setup_spritegroups()
 
     def setup_background(self) -> None:
         """Sets the background"""
@@ -193,26 +207,12 @@ class Level3(tools._State):
 
     def setup_checkpoints(self) -> None:
         """Setup checkpoints"""
-        checkpoint_data = getattr(self.level_data, 'checkpoints', [])
-        for cp_info in checkpoint_data:
-            cp = checkpoint.Checkpoint(
-                cp_info['x'],
-                cp_info.get('y', 0),
-                cp_info.get('width', 10),
-                cp_info.get('height', 600),
+        for cp_info in getattr(self.level_data, 'checkpoints', []):
+            self.checkpoint_group.add(checkpoint.Checkpoint(
+                cp_info['x'], cp_info.get('y', 0),
+                cp_info.get('width', 10), cp_info.get('height', 600),
                 cp_info['name']
-            )
-            self.checkpoint_group.add(cp)
-        if not hasattr(self, 'checkpoint_group') or self.checkpoint_group is None:
-            self.checkpoint_group = pg.sprite.Group()
-
-    def setup_spritegroups(self) -> None:
-        """Initialize sprite groups"""
-        for attr in ['ground_group', 'pipe_group', 'step_group', 'brick_group', 
-                     'coin_box_group', 'flag_pole_group', 'enemy_group', 
-                     'checkpoint_group', 'coin_group', 'powerup_group', 'fire_group']:
-            if not hasattr(self, attr) or getattr(self, attr) is None:
-                setattr(self, attr, pg.sprite.Group())
+            ))
 
     def update(self, surface: pg.Surface, keys: tuple, current_time: float) -> None:
         """Update level state"""
