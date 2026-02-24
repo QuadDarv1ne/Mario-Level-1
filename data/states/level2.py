@@ -294,7 +294,7 @@ class Level2(tools._State):
                 self.overhead_info_display.moving_score_list.append(self.flag_score)
 
     def update_viewport(self) -> None:
-        """Update viewport based on Mario position"""
+        """Update viewport"""
         if not self.mario or not self.viewport:
             return
 
