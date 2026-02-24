@@ -484,7 +484,7 @@ def create_enemy(enemy_type: str, x: int, y: int, direction: str = c.LEFT, **kwa
 
 def setup_enemy_instance(cls_name: str, y: int, x: int, direction: str):
     """Helper to create classic enemies."""
-    from .components.enemies import Goomba, Koopa
+    from .enemies import Goomba, Koopa
 
     if cls_name == "Goomba":
         return Goomba(y, x, direction)

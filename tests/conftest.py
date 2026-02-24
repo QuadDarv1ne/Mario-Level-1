@@ -142,7 +142,7 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
         def fill(self, color):
             return None
 
-        def blit(self, src, dest):
+        def blit(self, src, dest, *args, **kwargs):
             return None
 
         def get_rect(self, **kwargs):
@@ -158,6 +158,12 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
             return _Rect(0, 0, w, h)
         def set_alpha(self, alpha):
             self._alpha = alpha
+
+        def convert(self):
+            return self
+
+        def set_colorkey(self, color):
+            self._colorkey = color
 
         def get_width(self):
             return self._size[0]
@@ -192,17 +198,33 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
         def left(self):
             return self.x
 
+        @left.setter
+        def left(self, val):
+            self.x = int(val)
+
         @property
         def right(self):
             return self.x + self.width
+
+        @right.setter
+        def right(self, val):
+            self.x = int(val) - self.width
 
         @property
         def top(self):
             return self.y
 
+        @top.setter
+        def top(self, val):
+            self.y = int(val)
+
         @property
         def bottom(self):
             return self.y + self.height
+
+        @bottom.setter
+        def bottom(self, val):
+            self.y = int(val) - self.height
 
         def collidepoint(self, point):
             px, py = point
@@ -251,6 +273,17 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
         return None
 
     pg.draw = SimpleNamespace(rect=_draw_rect)
+
+    # Minimal transform helpers
+    class _Transform:
+        @staticmethod
+        def scale(surface, size):
+            try:
+                return _DummySurface(size)
+            except Exception:
+                return surface
+
+    pg.transform = _Transform()
 
     # Basic constants
     pg.SRCALPHA = 1
