@@ -40,7 +40,6 @@ class BaseLevel(tools._State):
         self.death_timer: float = 0
         self.flag_timer: float = 0
         self.flag_score: Optional[Any] = None
-        self.flag_score_total: int = 0
 
         # Sprite groups
         self.moving_score_list: List[Any] = []
