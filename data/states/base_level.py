@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 import pygame as pg
 
 from .. import tools
-from .. import constants as c
+from data import constants as c
 from ..components import mario as mario_module
 
 if TYPE_CHECKING:

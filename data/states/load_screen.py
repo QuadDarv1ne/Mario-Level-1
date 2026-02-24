@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Tuple
 import pygame as pg
 
 from .. import tools
-from .. import constants as c
+from data import constants as c
 from .. import game_sound
 from ..components import info
 

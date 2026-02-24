@@ -9,7 +9,7 @@ import json
 import os
 from typing import Any
 
-from .. import constants as c
+from data import constants as c
 
 
 class LevelData:

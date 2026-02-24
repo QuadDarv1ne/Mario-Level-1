@@ -6,7 +6,7 @@ from typing import Any, List
 
 import pygame as pg
 
-from .. import constants as c
+from data import constants as c
 from .. import setup
 
 

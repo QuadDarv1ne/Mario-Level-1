@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 import pygame as pg
 
 from .. import setup, tools
-from .. import constants as c
+from data import constants as c
 from ..components import mario
 from ..components import collider
 from ..components import bricks
@@ -213,7 +213,11 @@ class Level2(tools._State):
                     self.next = c.GAME_OVER
                     self.done = True
             elif self.game_info.get(c.FLAG_AND_FIREWORKS):
-                self.check_flag_timer(current_time)
+                self.flag_timer = current_time - (self.flag_score.start_time if self.flag_score else current_time)
+                if self.flag_timer >= 200:
+                    self.game_info['current_level'] = c.LEVEL2
+                    self.next = c.LOAD_SCREEN
+                    self.done = True
             else:
                 self.update_entities(current_time)
                 self.check_collisions()
@@ -224,16 +228,6 @@ class Level2(tools._State):
                     self.update_viewport()
 
         self.draw(surface)
-
-    def check_flag_timer(self, current_time: float) -> None:
-        """Check flag timer for level completion"""
-        self.flag_timer = current_time - self.flag_score.start_time
-        if self.flag_timer < 200:
-            self.flag_score = None
-        else:
-            self.game_info['current_level'] = c.LEVEL2
-            self.next = c.LOAD_SCREEN
-            self.done = True
 
     def update_entities(self, current_time: float) -> None:
         """Update all game entities"""

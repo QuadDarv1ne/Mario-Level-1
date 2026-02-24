@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Tuple
 import pygame as pg
 
 from .. import setup, tools
-from .. import constants as c
+from data import constants as c
 from ..components import info, mario
 
 
