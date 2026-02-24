@@ -442,7 +442,6 @@ class Level2(tools._State):
             self.coin_box_group,
             self.flag_pole_group,
             self.enemy_group,
-            self.flag_group if hasattr(self, 'flag_group') else None,
             self.powerup_group,
             self.coin_group,
             self.fire_group,
