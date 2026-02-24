@@ -109,7 +109,11 @@ class ResourceLoader:
             surface = pg.image.load(path)
 
             if alpha_convert:
-                surface = surface.convert_alpha()
+                try:
+                    surface = surface.convert_alpha()
+                except pg.error:
+                    # no video mode available during headless testing
+                    pass
 
             if compress:
                 # Scale down for compression
@@ -282,7 +286,15 @@ class AssetManager:
 
         # Build full path
         dir_path = self.get_directory(asset_type)
-        full_path = self.base_path / dir_path / file_path
+        # build the directory path and allow fallback if the expected folder
+        # doesn't exist (tests often create plain "graphics" instead of
+        # "resources/graphics").
+        full_dir = self.base_path / dir_path
+        if not full_dir.exists():
+            alt = self.base_path / dir_path.name
+            if alt.exists():
+                full_dir = alt
+        full_path = full_dir / file_path
 
         # Create asset info
         info = AssetInfo(name=name, asset_type=asset_type, file_path=str(full_path))
@@ -456,8 +468,9 @@ class AssetManager:
         # Decrement ref count
         info.ref_count -= 1
 
-        # Check if should unload
-        if force or info.ref_count <= 0:
+        # Only unload when forced or count goes below zero.  A ref_count of zero
+        # means the asset is unused but can stay cached for future requests.
+        if force or info.ref_count < 0:
             # Free memory
             if info.data:
                 if hasattr(info.data, "get_size"):

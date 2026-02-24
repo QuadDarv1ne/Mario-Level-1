@@ -397,7 +397,7 @@ class TestAdvancedAI:
         mario.rect = Mock()
         mario.rect.centerx = 200
         mario.rect.centery = 100
-        return enemy
+        return mario
 
     def test_ai_init(self, mock_enemy) -> None:
         """Test EnemyAI initialization."""

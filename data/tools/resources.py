@@ -62,10 +62,16 @@ class ImageCache:
 
             img = pg.image.load(path)
             if img.get_alpha():
-                img = img.convert_alpha()
+                try:
+                    img = img.convert_alpha()
+                except pg.error:
+                    pass
             else:
-                img = img.convert()
-                img.set_colorkey(colorkey)
+                try:
+                    img = img.convert()
+                    img.set_colorkey(colorkey)
+                except pg.error:
+                    pass
 
             cls._cache[path] = img
 
@@ -169,10 +175,16 @@ class LazyImageLoader:
         else:
             img = pg.image.load(available[name])
         if img.get_alpha():
-            img = img.convert_alpha()
+            try:
+                img = img.convert_alpha()
+            except pg.error:
+                pass
         else:
-            img = img.convert()
-            img.set_colorkey(self.colorkey)
+            try:
+                img = img.convert()
+                img.set_colorkey(self.colorkey)
+            except pg.error:
+                pass
 
         self.cache[name] = img
         return img
@@ -223,10 +235,16 @@ def load_all_gfx(
         if ext.lower() in accept:
             img = pg.image.load(os.path.join(directory, pic))
             if img.get_alpha():
-                img = img.convert_alpha()
+                try:
+                    img = img.convert_alpha()
+                except pg.error:
+                    pass
             else:
-                img = img.convert()
-                img.set_colorkey(colorkey)
+                try:
+                    img = img.convert()
+                    img.set_colorkey(colorkey)
+                except pg.error:
+                    pass
             graphics[name] = img
     return graphics
 

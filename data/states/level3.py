@@ -114,7 +114,7 @@ class Level3(tools._State):
         width = self.back_rect.width
         height = self.back_rect.height
 
-        self.level = pg.Surface((width, height)).convert()
+        self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
         self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
         self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)

@@ -111,7 +111,7 @@ class Level2(tools._State):
         width = self.back_rect.width
         height = self.back_rect.height
 
-        self.level = pg.Surface((width, height)).convert()
+        self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
         self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
         self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
@@ -233,13 +233,13 @@ class Level2(tools._State):
             self.mario.update(keys, self.game_info, self.fire_group)
 
         if self.enemy_group:
-            self.enemy_group.update(current_time)
+            self.enemy_group.update(self.game_info)
 
         if self.powerup_group:
-            self.powerup_group.update(current_time)
+            self.powerup_group.update(self.game_info)
 
         if self.fire_group:
-            self.fire_group.update(current_time)
+            self.fire_group.update(self.game_info)
 
         if self.brick_group:
             self.brick_group.update()
