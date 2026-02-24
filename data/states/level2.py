@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any, Dict, List, Optional
 
@@ -71,7 +72,13 @@ class Level2(tools._State):
         self.fire_group: Optional[pg.sprite.Group] = None
 
         # Load level data from JSON
-        self.level_data = level_loader.load_level_from_json("data/levels/level_2_1.json")
+        try:
+            self.level_data = level_loader.load_level_from_json("data/levels/level_2_1.json")
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logger.error(f"Failed to load level: {e}")
+            self.next = c.GAME_OVER
+            self.done = True
+            return
         self._init_groups()
         self.setup_all()
 

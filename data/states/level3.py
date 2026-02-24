@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any, Dict, List, Optional
 
@@ -71,7 +72,13 @@ class Level3(tools._State):
         self.powerup_group: Optional[pg.sprite.Group] = None
         self.fire_group: Optional[pg.sprite.Group] = None
 
-        self.level_data = level_loader.load_level_from_json(self.level_file)
+        try:
+            self.level_data = level_loader.load_level_from_json(self.level_file)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logger.error(f"Failed to load level: {e}")
+            self.next = c.GAME_OVER
+            self.done = True
+            return
         self.setup_all()
 
     def setup_all(self) -> None:
