@@ -23,8 +23,8 @@ from typing import Any, Callable, Optional, Tuple
 
 import pygame as pg
 
-from . import setup
-from . import constants as c
+from data import setup
+from data import constants as c
 from .enemies import Enemy
 
 
