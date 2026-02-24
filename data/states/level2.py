@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 import pygame as pg
 
 from .. import setup, tools
-from data import constants as c
+from .. import constants as c
 from ..components import mario
 from ..components import collider
 from ..components import bricks
