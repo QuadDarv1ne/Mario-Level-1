@@ -43,7 +43,6 @@ class Level2(tools._State):
         self.death_timer: float = 0
         self.flag_timer: float = 0
         self.flag_score: Optional[Any] = None
-        self.flag_score_total = 0
 
         self.moving_score_list: List[score.Score] = []
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
@@ -369,7 +368,6 @@ class Level2(tools._State):
                 self.state = c.FLAG_AND_FIREWORKS
                 self.flag_score = score.Score(self.mario.rect.centerx, self.mario.rect.y, c.SCORE_FLAG_POLE_TOP)
                 self.moving_score_list.append(self.flag_score)
-                self.flag_score_total = 5000
 
     def update_viewport(self) -> None:
         """Update viewport based on Mario position"""
