@@ -204,7 +204,7 @@ class Level2(tools._State):
 
     def setup_enemies(self) -> None:
         """Setup all enemies"""
-        enemy_data = self.level_data.enemies if hasattr(self.level_data, 'enemies') else []
+        enemy_data = getattr(self.level_data, 'enemies', [])
         enemy_map = {
             'goomba': enemies.Goomba,
             'koopa': enemies.Koopa,
@@ -213,19 +213,16 @@ class Level2(tools._State):
             'hammer_bro': advanced_enemies.HammerBro,
         }
 
-        if enemy_data:
-            for enemy_info in enemy_data:
-                enemy_type = enemy_info.get('type', 'goomba')
-                enemy_class = enemy_map.get(enemy_type)
-                if enemy_class is None:
-                    logger.warning(f"Unknown enemy type: {enemy_type}, using Goomba")
-                    enemy_class = enemies.Goomba
-                x = enemy_info.get('x', 0)
-                y = enemy_info.get('y', c.GROUND_HEIGHT)
-                direction = enemy_info.get('direction', 'left')
-                self.enemy_group.add(enemy_class(x, y, direction))
-        else:
-            self.enemy_group = pg.sprite.Group()
+        for enemy_info in enemy_data:
+            enemy_type = enemy_info.get('type', 'goomba')
+            enemy_class = enemy_map.get(enemy_type)
+            if enemy_class is None:
+                logger.warning(f"Unknown enemy type: {enemy_type}, using Goomba")
+                enemy_class = enemies.Goomba
+            x = enemy_info.get('x', 0)
+            y = enemy_info.get('y', c.GROUND_HEIGHT)
+            direction = enemy_info.get('direction', 'left')
+            self.enemy_group.add(enemy_class(x, y, direction))
 
     def setup_mario(self) -> None:
         """Setup Mario player sprite"""
