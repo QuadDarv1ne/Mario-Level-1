@@ -327,53 +327,22 @@ class Level2(tools._State):
         if not self.mario:
             return
 
-        # Ground collisions
-        if self.ground_group:
-            ground_collide = pg.sprite.spritecollideany(self.mario, self.ground_group)
-            if ground_collide:
-                self.mario.adjust_for_collisions(ground_collide)
+        for group in (self.ground_group, self.pipe_group, self.step_group,
+                      self.brick_group, self.coin_box_group, self.enemy_group):
+            if group:
+                collide = pg.sprite.spritecollideany(self.mario, group)
+                if collide:
+                    self.mario.adjust_for_collisions(collide)
 
-        # Pipe collisions
-        if self.pipe_group:
-            pipe_collide = pg.sprite.spritecollideany(self.mario, self.pipe_group)
-            if pipe_collide:
-                self.mario.adjust_for_collisions(pipe_collide)
-
-        # Step collisions
-        if self.step_group:
-            step_collide = pg.sprite.spritecollideany(self.mario, self.step_group)
-            if step_collide:
-                self.mario.adjust_for_collisions(step_collide)
-
-        # Brick collisions
-        if self.brick_group:
-            brick_collide = pg.sprite.spritecollideany(self.mario, self.brick_group)
-            if brick_collide:
-                self.mario.adjust_for_collisions(brick_collide)
-
-        # Coin box collisions
-        if self.coin_box_group:
-            coin_box_collide = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
-            if coin_box_collide:
-                self.mario.adjust_for_collisions(coin_box_collide)
-
-        # Enemy collisions
-        if self.enemy_group:
-            enemy_collide = pg.sprite.spritecollideany(self.mario, self.enemy_group)
-            if enemy_collide:
-                self.mario.adjust_for_collisions(enemy_collide)
-
-        # Powerup collisions
         if self.powerup_group:
-            powerup_collide = pg.sprite.spritecollideany(self.mario, self.powerup_group)
-            if powerup_collide:
-                powerup_collide.collide_action(self.mario, self.game_info, self.current_time)
+            powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
+            if powerup:
+                powerup.collide_action(self.mario, self.game_info, self.current_time)
 
-        # Coin collisions
         if self.coin_group:
-            coin_collide = pg.sprite.spritecollideany(self.mario, self.coin_group)
-            if coin_collide:
-                coin_collide.kill()
+            coin = pg.sprite.spritecollideany(self.mario, self.coin_group)
+            if coin:
+                coin.kill()
                 self.game_info[c.SCORE] += 200
                 self.game_info[c.COIN_TOTAL] += 1
 
