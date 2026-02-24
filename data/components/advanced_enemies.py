@@ -13,8 +13,8 @@ from __future__ import annotations
 from typing import Any, Optional
 import pygame as pg
 
-from . import setup
-from . import constants as c
+from data import setup
+from data import constants as c
 from .enemies import Enemy
 
 

@@ -310,30 +310,21 @@ class Level2(tools._State):
         self.viewport.right = min(self.viewport.right, level_rect.right)
 
     def draw(self, surface: pg.Surface) -> None:
-        """Render the level"""
+        """Render level"""
         if self.level is None or self.background is None:
             return
 
         self.level.blit(self.background, self.back_rect, self.viewport)
 
-        for group in (
-            self.ground_group,
-            self.pipe_group,
-            self.step_group,
-            self.brick_group,
-            self.coin_box_group,
-            self.flag_pole_group,
-            self.enemy_group,
-            self.powerup_group,
-            self.coin_group,
-            self.fire_group,
-        ):
+        for group_name in ['ground_group', 'pipe_group', 'step_group', 'brick_group',
+                          'coin_box_group', 'flag_pole_group', 'enemy_group',
+                          'powerup_group', 'coin_group', 'fire_group']:
+            group = getattr(self, group_name, None)
             if group:
                 group.draw(self.level)
 
         if self.mario:
             self.mario.draw(self.level)
-
         if self.overhead_info_display:
             self.overhead_info_display.draw(self.level)
 

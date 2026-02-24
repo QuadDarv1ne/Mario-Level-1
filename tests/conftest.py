@@ -81,6 +81,41 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
             return obj
 
     pg.event = _EventModule()
+    # Minimal sprite implementation
+    class _Sprite:
+        def __init__(self):
+            self.image = None
+            self.rect = None
+
+        def update(self, *_, **__):
+            pass
+
+    class _Group:
+        def __init__(self):
+            self._sprites = []
+
+        def add(self, *sprites):
+            for s in sprites:
+                if s not in self._sprites:
+                    self._sprites.append(s)
+
+        def remove(self, *sprites):
+            for s in sprites:
+                if s in self._sprites:
+                    self._sprites.remove(s)
+
+        def empty(self):
+            self._sprites.clear()
+
+        def update(self, *args, **kwargs):
+            for s in list(self._sprites):
+                if hasattr(s, "update"):
+                    s.update(*args, **kwargs)
+
+        def sprites(self):
+            return list(self._sprites)
+
+    pg.sprite = SimpleNamespace(Sprite=_Sprite, Group=_Group)
 
     # Make the dummy pygame available for subsequent imports
     sys.modules["pygame"] = pg
