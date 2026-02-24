@@ -9,11 +9,11 @@ import pytest
 try:
     import pygame as pg
 except Exception:  # pragma: no cover - fallback for environments without pygame
-    from types import SimpleNamespace
+    from types import ModuleType, SimpleNamespace
+    import sys
 
-    class _DummySurface(SimpleNamespace):
+    class _DummySurface:
         def __init__(self, size=(0, 0)):
-            super().__init__()
             self._size = tuple(size)
 
         def get_size(self):
@@ -38,7 +38,52 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
     def _quit():
         return None
 
-    pg = SimpleNamespace(init=_init, quit=_quit, display=_Display(), time=_Time())
+    pg = ModuleType("pygame")
+    pg.init = _init
+    pg.quit = _quit
+    pg.display = _Display()
+    pg.time = _Time()
+
+    # Minimal key constants and event support used in tests
+    pg.K_a = ord("a")
+    pg.K_s = ord("s")
+    pg.K_z = ord("z")
+    pg.K_d = ord("d")
+    pg.K_w = ord("w")
+    pg.K_SPACE = 32
+    pg.K_RETURN = 13
+    pg.K_BACKSPACE = 8
+    pg.K_ESCAPE = 27
+    pg.K_LSHIFT = 304
+    pg.K_LEFT = 276
+    pg.K_RIGHT = 275
+    pg.K_UP = 273
+    pg.K_DOWN = 274
+    pg.K_F3 = 294
+    pg.K_F4 = 295
+    pg.K_F5 = 296
+    pg.K_F9 = 300
+    pg.K_F10 = 301
+    pg.K_F12 = 303
+    pg.K_BACKQUOTE = 96
+
+    class _EventModule:
+        KEYDOWN = 1
+        KEYUP = 2
+
+        @staticmethod
+        def Event(event_type, attrs=None):
+            obj = SimpleNamespace()
+            obj.type = event_type
+            if attrs:
+                for k, v in attrs.items():
+                    setattr(obj, k, v)
+            return obj
+
+    pg.event = _EventModule()
+
+    # Make the dummy pygame available for subsequent imports
+    sys.modules["pygame"] = pg
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
