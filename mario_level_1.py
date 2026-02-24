@@ -23,7 +23,7 @@ from __future__ import annotations
 import sys
 import pygame as pg
 from data.main import main
-import cProfile
+# cProfile imported previously for profiling; remove unused import
 
 __version__ = "2.7.0"
 __python_version__ = "3.10+"

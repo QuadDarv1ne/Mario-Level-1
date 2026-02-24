@@ -368,8 +368,6 @@ class TestComboIntegration:
         assert combo.is_active
 
         # Combo should timeout
-        import time
-
         time.sleep(1.5)  # Wait for timeout
 
         combo.update(2000)

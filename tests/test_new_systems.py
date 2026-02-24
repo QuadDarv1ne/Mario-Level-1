@@ -542,7 +542,7 @@ class TestDebugManager:
         result = debug_manager.handle_event(event)
 
         assert result is True
-        assert debug_manager.overlay.visible != False
+        assert debug_manager.overlay.visible is not False
 
         pg.quit()
 

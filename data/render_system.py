@@ -50,6 +50,10 @@ class RenderStats:
         self.draw_calls = 0
         self.dirty_rects = 0
 
+    def __getitem__(self, key: str) -> int:
+        """Allow dict-like access for tests."""
+        return getattr(self, key)
+
 
 @dataclass
 class SpriteBatch:

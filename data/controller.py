@@ -72,9 +72,9 @@ class ControllerConfig:
         """Create from dictionary."""
         config = cls()
         config.button_mappings = data.get("button_mappings", DEFAULT_MAPPINGS.copy())
-        config.axis_mappings = {
-            k: tuple(v) for k, v in data.get("axis_mappings", DEFAULT_AXIS_MAPPINGS.items()).items()
-        }
+        axis_data = data.get("axis_mappings", DEFAULT_AXIS_MAPPINGS)
+        # Ensure we have a mapping dict; convert values to tuples
+        config.axis_mappings = {k: tuple(v) for k, v in axis_data.items()}
         config.trigger_mappings = data.get("trigger_mappings", DEFAULT_TRIGGER_MAPPINGS.copy())
         config.vibration_enabled = data.get("vibration_enabled", True)
         config.vibration_strength = data.get("vibration_strength", 1.0)

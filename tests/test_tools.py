@@ -32,8 +32,8 @@ class TestControl:
         control = tools.Control("Test Game")
         assert control.caption == "Test Game"
         assert control.fps == 60
-        assert control.done == False
-        assert control.show_fps == False
+        assert control.done is False
+        assert control.show_fps is False
 
     def test_control_setup_states(self, init_pygame):
         """Test setting up states on Control."""
@@ -69,8 +69,8 @@ class TestState:
     def test_state_creation(self):
         """Test that _State can be instantiated."""
         state = tools._State()
-        assert state.done == False
-        assert state.quit == False
+        assert state.done is False
+        assert state.quit is False
         assert state.next is None
         assert state.previous is None
         assert state.persist == {}
@@ -90,7 +90,7 @@ class TestState:
         state.done = True
         result = state.cleanup()
 
-        assert state.done == False
+        assert state.done is False
         assert isinstance(result, dict)
 
     def test_state_get_event(self):

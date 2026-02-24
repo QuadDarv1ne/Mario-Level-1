@@ -37,7 +37,7 @@ class MenuAction(Enum):
     START_GAME = "start_game"
     OPTIONS = "options"
     ACHIEVEMENTS = "achievements"
-    QIT = "quit"
+    QUIT = "quit"
     BACK = "back"
     SELECT = "select"
     NAVIGATE_UP = "navigate_up"

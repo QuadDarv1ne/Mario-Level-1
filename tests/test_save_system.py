@@ -89,7 +89,7 @@ class TestSaveLoad:
 
             # Save
             result = save_system.save_game(save)
-            assert result == True
+            assert result is True
             assert os.path.exists(save_system.SAVE_FILE)
 
             # Load
@@ -129,7 +129,7 @@ class TestSaveLoad:
 
             # Delete save
             result = save_system.delete_save()
-            assert result == True
+            assert result is True
             assert not os.path.exists(save_system.SAVE_FILE)
         finally:
             save_system.SAVE_DIR = original_dir
@@ -141,11 +141,11 @@ class TestSaveLoad:
         save_system.SAVE_FILE = os.path.join(str(tmp_path), "test_save.json")
 
         try:
-            assert save_system.save_exists() == False
+            assert save_system.save_exists() is False
 
             save = save_system.GameSave()
             save_system.save_game(save)
-            assert save_system.save_exists() == True
+            assert save_system.save_exists() is True
         finally:
             save_system.SAVE_FILE = original_file
 
