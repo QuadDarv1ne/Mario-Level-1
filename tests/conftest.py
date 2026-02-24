@@ -87,6 +87,9 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
                 for k, v in attrs.items():
                     setattr(obj, k, v)
             return obj
+        @staticmethod
+        def set_allowed(_):
+            return None
 
     pg.event = _EventModule()
     # Mirror common event constants at module level
@@ -183,6 +186,21 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
                     w, h = self._size
             return _DummySurface((w, h))
 
+    def _image_save(surface, path):
+        try:
+            # create an empty file so directory scans will find it
+            with open(path, "wb") as f:
+                f.write(b"")
+        except Exception:
+            pass
+
+    def _image_load(path):
+        # Return a dummy surface for tests
+        return _DummySurface((10, 10))
+
+    pg.image = SimpleNamespace(save=_image_save, load=_image_load)
+    
+
     # Simple Rect implementation
     class _Rect:
         def __init__(self, *args):
@@ -229,6 +247,15 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
         def collidepoint(self, point):
             px, py = point
             return self.left <= px <= self.right and self.top <= py <= self.bottom
+
+        def colliderect(self, other):
+            # Simple AABB collision
+            return not (
+                self.right <= other.left
+                or self.left >= other.right
+                or self.bottom <= other.top
+                or self.top >= other.bottom
+            )
 
         def inflate(self, dx, dy):
             # return a new rect expanded by dx/dy (both sides total)
@@ -280,6 +307,14 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
         def scale(surface, size):
             try:
                 return _DummySurface(size)
+            except Exception:
+                return surface
+        @staticmethod
+        def flip(surface, flip_x, flip_y):
+            # Tests only need a flipped surface placeholder; return same surface
+            try:
+                # preserve size when possible
+                return _DummySurface(surface.get_size())
             except Exception:
                 return surface
 
