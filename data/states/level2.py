@@ -225,29 +225,21 @@ class Level2(tools._State):
             self.enemy_group.add(enemy_class(x, y, direction))
 
     def setup_mario(self) -> None:
-        """Setup Mario player sprite"""
-        mario_start = self.level_data.mario_start if hasattr(self.level_data, 'mario_start') else {'x': 110, 'y': c.GROUND_HEIGHT}
+        """Setup Mario"""
+        mario_start = getattr(self.level_data, 'mario_start', {'x': 110, 'y': c.GROUND_HEIGHT})
         self.mario = mario.Mario()
         if self.mario:
             self.mario.rect.x = mario_start.get('x', 110)
             self.mario.rect.y = mario_start.get('y', c.GROUND_HEIGHT)
 
     def setup_checkpoints(self) -> None:
-        """Setup checkpoints for enemy spawning"""
-        checkpoint_data = self.level_data.checkpoints if hasattr(self.level_data, 'checkpoints') else []
-        
-        if checkpoint_data:
-            for cp_info in checkpoint_data:
-                cp = checkpoint.Checkpoint(
-                    cp_info['x'],
-                    cp_info.get('y', 0),
-                    cp_info.get('width', 10),
-                    cp_info.get('height', 600),
-                    cp_info['name']
-                )
-                self.checkpoint_group.add(cp)
-        else:
-            self.checkpoint_group = pg.sprite.Group()
+        """Setup checkpoints"""
+        for cp_info in getattr(self.level_data, 'checkpoints', []):
+            self.checkpoint_group.add(checkpoint.Checkpoint(
+                cp_info['x'], cp_info.get('y', 0),
+                cp_info.get('width', 10), cp_info.get('height', 600),
+                cp_info['name']
+            ))
 
     def update(self, surface: pg.Surface, keys: tuple, current_time: float) -> None:
         """Update level state"""
