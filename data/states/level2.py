@@ -206,7 +206,12 @@ class Level2(tools._State):
 
         if self.state == c.NOT_FROZEN:
             if self.game_info.get(c.MARIO_DEAD):
-                self.check_mario_dead()
+                self.death_timer += 1
+                if self.death_timer == 90 and self.mario:
+                    self.mario.update((), self.current_time)
+                elif self.death_timer == 120:
+                    self.next = c.GAME_OVER
+                    self.done = True
             elif self.game_info.get(c.FLAG_AND_FIREWORKS):
                 self.check_flag_timer(current_time)
             else:
@@ -219,16 +224,6 @@ class Level2(tools._State):
                     self.update_viewport()
 
         self.draw(surface)
-
-    def check_mario_dead(self) -> None:
-        """Check if Mario is dead and handle death sequence"""
-        if self.mario and self.mario.dead:
-            self.death_timer += 1
-            if self.death_timer == 90:
-                self.mario.update((), self.current_time)
-            elif self.death_timer == 120:
-                self.next = c.GAME_OVER
-                self.done = True
 
     def check_flag_timer(self, current_time: float) -> None:
         """Check flag timer for level completion"""
