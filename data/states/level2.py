@@ -69,7 +69,25 @@ class Level2(tools._State):
 
         # Load level data from JSON
         self.level_data = level_loader.load_level_from_json("data/levels/level_2_1.json")
+        self._init_groups()
+        self.setup_all()
 
+    def _init_groups(self) -> None:
+        """Initialize sprite groups early"""
+        self.ground_group = pg.sprite.Group()
+        self.pipe_group = pg.sprite.Group()
+        self.step_group = pg.sprite.Group()
+        self.brick_group = pg.sprite.Group()
+        self.coin_box_group = pg.sprite.Group()
+        self.flag_pole_group = pg.sprite.Group()
+        self.enemy_group = pg.sprite.Group()
+        self.checkpoint_group = pg.sprite.Group()
+        self.coin_group = pg.sprite.Group()
+        self.powerup_group = pg.sprite.Group()
+        self.fire_group = pg.sprite.Group()
+
+    def setup_all(self) -> None:
+        """Setup all level components"""
         self.setup_background()
         self.setup_ground()
         self.setup_pipes()
@@ -80,7 +98,6 @@ class Level2(tools._State):
         self.setup_enemies()
         self.setup_mario()
         self.setup_checkpoints()
-        self.setup_spritegroups()
 
     def setup_background(self) -> None:
         """Sets the background image, rect and scales it to the correct proportions"""
@@ -231,31 +248,6 @@ class Level2(tools._State):
                 self.checkpoint_group.add(cp)
         else:
             self.checkpoint_group = pg.sprite.Group()
-
-    def setup_spritegroups(self) -> None:
-        """Initialize sprite groups"""
-        if not hasattr(self, 'ground_group') or self.ground_group is None:
-            self.ground_group = pg.sprite.Group()
-        if not hasattr(self, 'pipe_group') or self.pipe_group is None:
-            self.pipe_group = pg.sprite.Group()
-        if not hasattr(self, 'step_group') or self.step_group is None:
-            self.step_group = pg.sprite.Group()
-        if not hasattr(self, 'brick_group') or self.brick_group is None:
-            self.brick_group = pg.sprite.Group()
-        if not hasattr(self, 'coin_box_group') or self.coin_box_group is None:
-            self.coin_box_group = pg.sprite.Group()
-        if not hasattr(self, 'flag_pole_group') or self.flag_pole_group is None:
-            self.flag_pole_group = pg.sprite.Group()
-        if not hasattr(self, 'enemy_group') or self.enemy_group is None:
-            self.enemy_group = pg.sprite.Group()
-        if not hasattr(self, 'checkpoint_group') or self.checkpoint_group is None:
-            self.checkpoint_group = pg.sprite.Group()
-        if not hasattr(self, 'coin_group') or self.coin_group is None:
-            self.coin_group = pg.sprite.Group()
-        if not hasattr(self, 'powerup_group') or self.powerup_group is None:
-            self.powerup_group = pg.sprite.Group()
-        if not hasattr(self, 'fire_group') or self.fire_group is None:
-            self.fire_group = pg.sprite.Group()
 
     def update(self, surface: pg.Surface, keys: tuple, current_time: float) -> None:
         """Update level state"""
