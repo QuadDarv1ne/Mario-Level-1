@@ -373,27 +373,20 @@ class Level2(tools._State):
                 self.flag_score_total = 5000
 
     def update_viewport(self) -> None:
-        """Update camera viewport based on Mario position"""
+        """Update viewport based on Mario position"""
         if not self.mario or not self.viewport:
             return
 
-        _ = self.game_info
         level_rect = self.level_rect
-
         if self.mario.rect.right > self.viewport.centerx:
             self.viewport.centerx = self.mario.rect.centerx
-            if self.mario.rect.right > level_rect.right:
-                self.viewport.right = level_rect.right
-            else:
-                self.viewport.right = level_rect.right if self.viewport.right > level_rect.right else self.viewport.right
+            self.viewport.right = min(self.viewport.right, level_rect.right)
 
         if self.mario.rect.left < self.viewport.x:
             self.mario.rect.left = self.viewport.x
 
-        if self.viewport.x < 0:
-            self.viewport.x = 0
-        elif self.viewport.right > level_rect.right:
-            self.viewport.right = level_rect.right
+        self.viewport.x = max(0, self.viewport.x)
+        self.viewport.right = min(self.viewport.right, level_rect.right)
 
     def draw(self, surface: pg.Surface) -> None:
         """Render the level"""
