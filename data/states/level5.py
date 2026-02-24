@@ -190,10 +190,10 @@ class Level5(tools._State):
             self.checkpoint_group.add(
                 checkpoint.Checkpoint(
                     cp_info["x"],
+                    cp_info["name"],
                     cp_info.get("y", 0),
                     cp_info.get("width", 10),
                     cp_info.get("height", 600),
-                    cp_info["name"],
                 )
             )
 
@@ -211,7 +211,7 @@ class Level5(tools._State):
             if self.game_info.get(c.MARIO_DEAD):
                 self.death_timer += 1
                 if self.death_timer == 90 and self.mario:
-                    self.mario.update((), self.current_time)
+                    self.mario.update((), self.game_info, self.fire_group)
                 elif self.death_timer == 120:
                     self.next = c.GAME_OVER
                     self.done = True
@@ -234,7 +234,7 @@ class Level5(tools._State):
     def update_entities(self, keys: tuple, current_time: float) -> None:
         """Update all entities"""
         if self.mario:
-            self.mario.update(keys, current_time)
+            self.mario.update(keys, self.game_info, self.fire_group)
         if self.enemy_group:
             self.enemy_group.update(current_time)
         if self.powerup_group:

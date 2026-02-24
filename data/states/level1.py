@@ -84,7 +84,7 @@ class Level1(tools._State):
         self.back_rect = self.background.get_rect()
         self.background = pg.transform.scale(
             self.background,
-            (int(self.back_rect.width * c.BACKGROUND_MULTIPLER), int(self.back_rect.height * c.BACKGROUND_MULTIPLER)),
+            (int(self.back_rect.width * c.BACKGROUND_MULTIPLIER), int(self.back_rect.height * c.BACKGROUND_MULTIPLIER)),
         )
         self.back_rect = self.background.get_rect()
         width = self.back_rect.width
