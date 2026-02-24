@@ -388,7 +388,7 @@ class Level2(tools._State):
 
         self.level.blit(self.background, self.back_rect, self.viewport)
 
-        for group in [
+        for group in (
             self.ground_group,
             self.pipe_group,
             self.step_group,
@@ -399,7 +399,7 @@ class Level2(tools._State):
             self.powerup_group,
             self.coin_group,
             self.fire_group,
-        ]:
+        ):
             if group:
                 group.draw(self.level)
 
