@@ -44,7 +44,6 @@ class Level2(tools._State):
         self.flag_timer: float = 0
         self.flag_score: Optional[Any] = None
 
-        self.moving_score_list: List[score.Score] = []
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
         self.sound_manager = game_sound.Sound(self.overhead_info_display)
 
@@ -263,8 +262,6 @@ class Level2(tools._State):
             return
 
         if self.state == c.NOT_FROZEN:
-            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []
-            
             if self.game_info.get(c.MARIO_DEAD):
                 self.check_mario_dead()
             elif self.game_info.get(c.FLAG_AND_FIREWORKS):
@@ -367,7 +364,7 @@ class Level2(tools._State):
             if flag_pole and hasattr(flag_pole, 'state') and flag_pole.state == c.TOP_OF_POLE:
                 self.state = c.FLAG_AND_FIREWORKS
                 self.flag_score = score.Score(self.mario.rect.centerx, self.mario.rect.y, c.SCORE_FLAG_POLE_TOP)
-                self.moving_score_list.append(self.flag_score)
+                self.overhead_info_display.moving_score_list.append(self.flag_score)
 
     def update_viewport(self) -> None:
         """Update viewport based on Mario position"""
