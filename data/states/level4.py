@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class Level4(tools._State):
     """Level 4 - Underground with Lava themed level"""
-    
+
     def __init__(self) -> None:
         tools._State.__init__(self)
         self.level_file = "data/levels/level_4_1.json"
@@ -121,77 +121,81 @@ class Level4(tools._State):
 
     def setup_ground(self) -> None:
         """Creates ground collision rectangles"""
-        for section in getattr(self.level_data, 'ground_sections', []):
-            ground_rect = collider.Collider(section['x'], section['y'], section['width'], section['height'])
+        for section in getattr(self.level_data, "ground_sections", []):
+            ground_rect = collider.Collider(section["x"], section["y"], section["width"], section["height"])
             self.ground_group.add(ground_rect)
 
     def setup_pipes(self) -> None:
         """Create pipe obstacles"""
-        for p in getattr(self.level_data, 'pipes', []):
-            self.pipe_group.add(collider.Collider(p['x'], p['y'], p['width'], p['height']))
+        for p in getattr(self.level_data, "pipes", []):
+            self.pipe_group.add(collider.Collider(p["x"], p["y"], p["width"], p["height"]))
 
     def setup_steps(self) -> None:
         """Create step obstacles"""
-        for s in getattr(self.level_data, 'steps', []):
-            self.step_group.add(collider.Collider(s['x'], s['y'], s['width'], s['height']))
+        for s in getattr(self.level_data, "steps", []):
+            self.step_group.add(collider.Collider(s["x"], s["y"], s["width"], s["height"]))
 
     def setup_bricks(self) -> None:
         """Creates breakable bricks"""
         self.brick_pieces_group = pg.sprite.Group()
-        for brick_info in getattr(self.level_data, 'bricks', []):
-            brick = bricks.Brick(brick_info['x'], brick_info['y'], contents=brick_info.get('contents'))
+        for brick_info in getattr(self.level_data, "bricks", []):
+            brick = bricks.Brick(brick_info["x"], brick_info["y"], contents=brick_info.get("contents"))
             self.brick_group.add(brick)
 
     def setup_coin_boxes(self) -> None:
         """Creates coin boxes"""
-        for box_info in getattr(self.level_data, 'coin_boxes', []):
-            self.coin_box_group.add(coin_box.CoinBox(box_info['x'], box_info['y'], contents=box_info.get('contents')))
+        for box_info in getattr(self.level_data, "coin_boxes", []):
+            self.coin_box_group.add(coin_box.CoinBox(box_info["x"], box_info["y"], contents=box_info.get("contents")))
 
     def setup_flag_pole(self) -> None:
         """Creates flag pole"""
-        flag_pole_data = getattr(self.level_data, 'flag_pole', {})
+        flag_pole_data = getattr(self.level_data, "flag_pole", {})
         if flag_pole_data:
-            self.flag = flagpole.Flag(flag_pole_data['x'], flag_pole_data['y'])
-            self.pole = flagpole.Pole(flag_pole_data['x'], flag_pole_data['y'])
-            self.finial = flagpole.Finial(flag_pole_data['x'], flag_pole_data['y'])
+            self.flag = flagpole.Flag(flag_pole_data["x"], flag_pole_data["y"])
+            self.pole = flagpole.Pole(flag_pole_data["x"], flag_pole_data["y"])
+            self.finial = flagpole.Finial(flag_pole_data["x"], flag_pole_data["y"])
             self.flag_pole_group.add(self.flag, self.pole, self.finial)
 
     def setup_enemies(self) -> None:
         """Setup enemies"""
         enemy_map = {
-            'goomba': enemies.Goomba,
-            'koopa': enemies.Koopa,
-            'piranha': advanced_enemies.PiranhaPlant,
-            'bullet_bill': advanced_enemies.BulletBill,
-            'hammer_bro': advanced_enemies.HammerBro,
+            "goomba": enemies.Goomba,
+            "koopa": enemies.Koopa,
+            "piranha": advanced_enemies.PiranhaPlant,
+            "bullet_bill": advanced_enemies.BulletBill,
+            "hammer_bro": advanced_enemies.HammerBro,
         }
-        for enemy_info in getattr(self.level_data, 'enemies', []):
-            enemy_type = enemy_info.get('type', 'goomba')
+        for enemy_info in getattr(self.level_data, "enemies", []):
+            enemy_type = enemy_info.get("type", "goomba")
             enemy_class = enemy_map.get(enemy_type)
             if enemy_class is None:
                 logger.warning(f"Unknown enemy type: {enemy_type}, using Goomba")
                 enemy_class = enemies.Goomba
-            x = enemy_info.get('x', 0)
-            y = enemy_info.get('y', c.GROUND_HEIGHT)
-            direction = enemy_info.get('direction', 'left')
+            x = enemy_info.get("x", 0)
+            y = enemy_info.get("y", c.GROUND_HEIGHT)
+            direction = enemy_info.get("direction", "left")
             self.enemy_group.add(enemy_class(x, y, direction))
 
     def setup_mario(self) -> None:
         """Setup Mario"""
-        mario_start = getattr(self.level_data, 'mario_start', {'x': 110, 'y': c.GROUND_HEIGHT})
+        mario_start = getattr(self.level_data, "mario_start", {"x": 110, "y": c.GROUND_HEIGHT})
         self.mario = mario.Mario()
         if self.mario:
-            self.mario.rect.x = mario_start.get('x', 110)
-            self.mario.rect.y = mario_start.get('y', c.GROUND_HEIGHT)
+            self.mario.rect.x = mario_start.get("x", 110)
+            self.mario.rect.y = mario_start.get("y", c.GROUND_HEIGHT)
 
     def setup_checkpoints(self) -> None:
         """Setup checkpoints"""
-        for cp_info in getattr(self.level_data, 'checkpoints', []):
-            self.checkpoint_group.add(checkpoint.Checkpoint(
-                cp_info['x'], cp_info.get('y', 0),
-                cp_info.get('width', 10), cp_info.get('height', 600),
-                cp_info['name']
-            ))
+        for cp_info in getattr(self.level_data, "checkpoints", []):
+            self.checkpoint_group.add(
+                checkpoint.Checkpoint(
+                    cp_info["x"],
+                    cp_info.get("y", 0),
+                    cp_info.get("width", 10),
+                    cp_info.get("height", 600),
+                    cp_info["name"],
+                )
+            )
 
     def update(self, surface: pg.Surface, keys: tuple, current_time: float) -> None:
         """Update level state"""
@@ -203,7 +207,7 @@ class Level4(tools._State):
 
         if self.state == c.NOT_FROZEN:
             self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []
-            
+
             if self.game_info.get(c.MARIO_DEAD):
                 self.death_timer += 1
                 if self.death_timer == 90 and self.mario:
@@ -214,11 +218,11 @@ class Level4(tools._State):
             elif self.game_info.get(c.FLAG_AND_FIREWORKS):
                 self.flag_timer = current_time - (self.flag_score.start_time if self.flag_score else current_time)
                 if self.flag_timer >= 200:
-                    self.game_info['current_level'] = c.LEVEL4
+                    self.game_info["current_level"] = c.LEVEL4
                     self.next = c.LOAD_SCREEN
                     self.done = True
             else:
-                self.update_entities(current_time)
+                self.update_entities(keys, current_time)
                 self.check_collisions()
                 self.check_checkpoints()
                 self.check_state_triggers()
@@ -227,7 +231,7 @@ class Level4(tools._State):
 
         self.draw(surface)
 
-    def update_entities(self, current_time: float) -> None:
+    def update_entities(self, keys: tuple, current_time: float) -> None:
         """Update all entities"""
         if self.mario:
             self.mario.update(keys, current_time)
@@ -247,8 +251,14 @@ class Level4(tools._State):
         if not self.mario:
             return
 
-        for group in [self.ground_group, self.pipe_group, self.step_group, 
-                      self.brick_group, self.coin_box_group, self.enemy_group]:
+        for group in [
+            self.ground_group,
+            self.pipe_group,
+            self.step_group,
+            self.brick_group,
+            self.coin_box_group,
+            self.enemy_group,
+        ]:
             collide = pg.sprite.spritecollideany(self.mario, group)
             if collide:
                 self.mario.adjust_for_collisions(collide)
@@ -280,7 +290,7 @@ class Level4(tools._State):
 
         if self.mario and self.flag_pole_group:
             flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)
-            if flag_pole and hasattr(flag_pole, 'state') and flag_pole.state == c.TOP_OF_POLE:
+            if flag_pole and hasattr(flag_pole, "state") and flag_pole.state == c.TOP_OF_POLE:
                 self.state = c.FLAG_AND_FIREWORKS
                 self.flag_score = score.Score(self.mario.rect.centerx, self.mario.rect.y, c.SCORE_FLAG_POLE_TOP)
                 self.moving_score_list.append(self.flag_score)
@@ -308,9 +318,18 @@ class Level4(tools._State):
 
         self.level.blit(self.background, self.back_rect, self.viewport)
 
-        for group in [self.ground_group, self.pipe_group, self.step_group,
-                      self.brick_group, self.coin_box_group, self.flag_pole_group,
-                      self.enemy_group, self.powerup_group, self.coin_group, self.fire_group]:
+        for group in [
+            self.ground_group,
+            self.pipe_group,
+            self.step_group,
+            self.brick_group,
+            self.coin_box_group,
+            self.flag_pole_group,
+            self.enemy_group,
+            self.powerup_group,
+            self.coin_group,
+            self.fire_group,
+        ]:
             if group:
                 group.draw(self.level)
 

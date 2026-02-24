@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 from . import constants as c
 
 # Configuration
-SAVE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saves')
+SAVE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "saves")
 MAX_SAVE_SLOTS = 3
 AUTO_SAVE_INTERVAL = 300  # seconds (5 minutes)
 MAX_BACKUPS = 3
@@ -31,6 +31,7 @@ MAX_BACKUPS = 3
 @dataclass
 class SaveMetadata:
     """Metadata for a save file."""
+
     slot: int
     timestamp: str = ""
     score: int = 0
@@ -49,43 +50,44 @@ class SaveMetadata:
     def from_dict(cls, data: Dict[str, Any]) -> SaveMetadata:
         """Create SaveMetadata from dictionary."""
         return cls(
-            slot=data.get('slot', 0),
-            timestamp=data.get('timestamp', ''),
-            score=data.get('score', 0),
-            coin_total=data.get('coin_total', 0),
-            lives=data.get('lives', 3),
-            top_score=data.get('top_score', 0),
-            current_level=data.get('current_level', c.LEVEL1),
-            play_time=data.get('play_time', 0),
-            enemies_defeated=data.get('enemies_defeated', 0),
-            blocks_broken=data.get('blocks_broken', 0),
-            levels_completed=data.get('levels_completed', []),
-            is_valid=data.get('is_valid', True),
-            file_size=data.get('file_size', 0),
+            slot=data.get("slot", 0),
+            timestamp=data.get("timestamp", ""),
+            score=data.get("score", 0),
+            coin_total=data.get("coin_total", 0),
+            lives=data.get("lives", 3),
+            top_score=data.get("top_score", 0),
+            current_level=data.get("current_level", c.LEVEL1),
+            play_time=data.get("play_time", 0),
+            enemies_defeated=data.get("enemies_defeated", 0),
+            blocks_broken=data.get("blocks_broken", 0),
+            levels_completed=data.get("levels_completed", []),
+            is_valid=data.get("is_valid", True),
+            file_size=data.get("file_size", 0),
         )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert SaveMetadata to dictionary."""
         return {
-            'slot': self.slot,
-            'timestamp': self.timestamp,
-            'score': self.score,
-            'coin_total': self.coin_total,
-            'lives': self.lives,
-            'top_score': self.top_score,
-            'current_level': self.current_level,
-            'play_time': self.play_time,
-            'enemies_defeated': self.enemies_defeated,
-            'blocks_broken': self.blocks_broken,
-            'levels_completed': self.levels_completed,
-            'is_valid': self.is_valid,
-            'file_size': self.file_size,
+            "slot": self.slot,
+            "timestamp": self.timestamp,
+            "score": self.score,
+            "coin_total": self.coin_total,
+            "lives": self.lives,
+            "top_score": self.top_score,
+            "current_level": self.current_level,
+            "play_time": self.play_time,
+            "enemies_defeated": self.enemies_defeated,
+            "blocks_broken": self.blocks_broken,
+            "levels_completed": self.levels_completed,
+            "is_valid": self.is_valid,
+            "file_size": self.file_size,
         }
 
 
 @dataclass
 class GameData:
     """Container for game save data."""
+
     score: int = 0
     coin_total: int = 0
     lives: int = 3
@@ -104,40 +106,40 @@ class GameData:
     def to_dict(self) -> Dict[str, Any]:
         """Convert game data to dictionary."""
         return {
-            'score': self.score,
-            'coin_total': self.coin_total,
-            'lives': self.lives,
-            'top_score': self.top_score,
-            'current_level': self.current_level,
-            'play_time': self.play_time,
-            'enemies_defeated': self.enemies_defeated,
-            'blocks_broken': self.blocks_broken,
-            'levels_completed': self.levels_completed,
-            'settings': self.settings,
-            'unlocked_skins': self.unlocked_skins,
-            'current_skin': self.current_skin,
-            'challenges_completed': self.challenges_completed,
-            'statistics': self.statistics,
+            "score": self.score,
+            "coin_total": self.coin_total,
+            "lives": self.lives,
+            "top_score": self.top_score,
+            "current_level": self.current_level,
+            "play_time": self.play_time,
+            "enemies_defeated": self.enemies_defeated,
+            "blocks_broken": self.blocks_broken,
+            "levels_completed": self.levels_completed,
+            "settings": self.settings,
+            "unlocked_skins": self.unlocked_skins,
+            "current_skin": self.current_skin,
+            "challenges_completed": self.challenges_completed,
+            "statistics": self.statistics,
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> GameData:
         """Create GameData from dictionary."""
         return cls(
-            score=data.get('score', 0),
-            coin_total=data.get('coin_total', 0),
-            lives=data.get('lives', 3),
-            top_score=data.get('top_score', 0),
-            current_level=data.get('current_level', c.LEVEL1),
-            play_time=data.get('play_time', 0),
-            enemies_defeated=data.get('enemies_defeated', 0),
-            blocks_broken=data.get('blocks_broken', 0),
-            levels_completed=data.get('levels_completed', []),
-            settings=data.get('settings', {}),
-            unlocked_skins=data.get('unlocked_skins', []),
-            current_skin=data.get('current_skin', 'default'),
-            challenges_completed=data.get('challenges_completed', []),
-            statistics=data.get('statistics', {}),
+            score=data.get("score", 0),
+            coin_total=data.get("coin_total", 0),
+            lives=data.get("lives", 3),
+            top_score=data.get("top_score", 0),
+            current_level=data.get("current_level", c.LEVEL1),
+            play_time=data.get("play_time", 0),
+            enemies_defeated=data.get("enemies_defeated", 0),
+            blocks_broken=data.get("blocks_broken", 0),
+            levels_completed=data.get("levels_completed", []),
+            settings=data.get("settings", {}),
+            unlocked_skins=data.get("unlocked_skins", []),
+            current_skin=data.get("current_skin", "default"),
+            challenges_completed=data.get("challenges_completed", []),
+            statistics=data.get("statistics", {}),
         )
 
 
@@ -156,7 +158,7 @@ class SaveManager:
     def __init__(self) -> None:
         """Initialize save manager."""
         self.save_dir = SAVE_DIR
-        self.metadata_file = os.path.join(self.save_dir, 'metadata.json')
+        self.metadata_file = os.path.join(self.save_dir, "metadata.json")
         self.metadata: Dict[int, SaveMetadata] = {}
         self._last_auto_save: float = 0
         self._auto_save_enabled: bool = True
@@ -172,19 +174,16 @@ class SaveManager:
         """Load metadata from file."""
         if os.path.exists(self.metadata_file):
             try:
-                with open(self.metadata_file, 'r', encoding='utf-8') as f:
+                with open(self.metadata_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                self.metadata = {
-                    int(k): SaveMetadata.from_dict(v)
-                    for k, v in data.items()
-                }
+                self.metadata = {int(k): SaveMetadata.from_dict(v) for k, v in data.items()}
             except (json.JSONDecodeError, IOError):
                 self.metadata = {}
 
     def _save_metadata(self) -> None:
         """Save metadata to file."""
         try:
-            with open(self.metadata_file, 'w', encoding='utf-8') as f:
+            with open(self.metadata_file, "w", encoding="utf-8") as f:
                 json.dump(
                     {k: v.to_dict() for k, v in self.metadata.items()},
                     f,
@@ -196,18 +195,18 @@ class SaveManager:
 
     def _get_save_path(self, slot: int, compressed: bool = True) -> str:
         """Get file path for save slot."""
-        ext = '.sav.gz' if compressed else '.sav'
-        return os.path.join(self.save_dir, f'save_{slot}{ext}')
+        ext = ".sav.gz" if compressed else ".sav"
+        return os.path.join(self.save_dir, f"save_{slot}{ext}")
 
     def _get_backup_path(self, slot: int, timestamp: str) -> str:
         """Get backup file path."""
-        return os.path.join(self.save_dir, f'save_{slot}_backup_{timestamp}.sav.gz')
+        return os.path.join(self.save_dir, f"save_{slot}_backup_{timestamp}.sav.gz")
 
     def _create_backup(self, slot: int) -> None:
         """Create backup of save slot."""
         save_path = self._get_save_path(slot)
         if os.path.exists(save_path):
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             backup_path = self._get_backup_path(slot, timestamp)
 
             # Copy save file to backup
@@ -218,10 +217,7 @@ class SaveManager:
 
     def _cleanup_old_backups(self, slot: int) -> None:
         """Remove old backups, keeping only MAX_BACKUPS most recent."""
-        backups = sorted([
-            f for f in os.listdir(self.save_dir)
-            if f.startswith(f'save_{slot}_backup_')
-        ])
+        backups = sorted([f for f in os.listdir(self.save_dir) if f.startswith(f"save_{slot}_backup_")])
 
         while len(backups) > MAX_BACKUPS:
             oldest = backups.pop(0)
@@ -258,17 +254,17 @@ class SaveManager:
             # Save with compression
             save_path = self._get_save_path(slot)
             data_dict = game_data.to_dict()
-            data_dict['version'] = '2.7.0'
-            data_dict['saved_at'] = datetime.now().isoformat()
+            data_dict["version"] = "2.7.0"
+            data_dict["saved_at"] = datetime.now().isoformat()
 
-            with gzip.open(save_path, 'wt', encoding='utf-8') as f:
+            with gzip.open(save_path, "wt", encoding="utf-8") as f:
                 json.dump(data_dict, f, indent=2, ensure_ascii=False)
 
             # Update metadata
             file_size = os.path.getsize(save_path)
             self.metadata[slot] = SaveMetadata(
                 slot=slot,
-                timestamp=data_dict['saved_at'],
+                timestamp=data_dict["saved_at"],
                 score=game_data.score,
                 coin_total=game_data.coin_total,
                 lives=game_data.lives,
@@ -312,11 +308,11 @@ class SaveManager:
         try:
             # Try compressed first
             try:
-                with gzip.open(save_path, 'rt', encoding='utf-8') as f:
+                with gzip.open(save_path, "rt", encoding="utf-8") as f:
                     data = json.load(f)
             except gzip.BadGzipFile:
                 # Fall back to uncompressed
-                with open(save_path, 'r', encoding='utf-8') as f:
+                with open(save_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
 
             return GameData.from_dict(data)
@@ -351,7 +347,7 @@ class SaveManager:
 
             # Delete backups
             for f in os.listdir(self.save_dir):
-                if f.startswith(f'save_{slot}_backup_'):
+                if f.startswith(f"save_{slot}_backup_"):
                     os.remove(os.path.join(self.save_dir, f))
 
             # Remove metadata

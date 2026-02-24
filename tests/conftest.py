@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 import sys
 import pytest
+
 try:
     import pygame as pg
 except Exception:  # pragma: no cover - fallback for environments without pygame
@@ -81,6 +82,7 @@ except Exception:  # pragma: no cover - fallback for environments without pygame
             return obj
 
     pg.event = _EventModule()
+
     # Minimal sprite implementation
     class _Sprite:
         def __init__(self):

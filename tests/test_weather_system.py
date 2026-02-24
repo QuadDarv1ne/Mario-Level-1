@@ -59,11 +59,7 @@ class TestWeatherConfig:
 
     def test_custom_config(self) -> None:
         """Test custom weather config."""
-        config = WeatherConfig(
-            rain_drop_count=200,
-            rain_speed=10.0,
-            rain_color=(50, 50, 100)
-        )
+        config = WeatherConfig(rain_drop_count=200, rain_speed=10.0, rain_color=(50, 50, 100))
 
         assert config.rain_drop_count == 200
         assert config.rain_speed == 10.0
@@ -368,28 +364,19 @@ class TestSeasonalTheme:
         """Create weather manager for seasonal theme."""
         return WeatherManager(800, 600)
 
-    def test_seasonal_theme_creation(
-        self,
-        weather_manager: WeatherManager
-    ) -> None:
+    def test_seasonal_theme_creation(self, weather_manager: WeatherManager) -> None:
         """Test seasonal theme initialization."""
         theme = SeasonalTheme(weather_manager, "summer")
 
         assert theme.season == "summer"
 
-    def test_invalid_season_defaults(
-        self,
-        weather_manager: WeatherManager
-    ) -> None:
+    def test_invalid_season_defaults(self, weather_manager: WeatherManager) -> None:
         """Test that invalid season defaults to spring."""
         theme = SeasonalTheme(weather_manager, "invalid")
 
         assert theme.season == "spring"
 
-    def test_apply_theme(
-        self,
-        weather_manager: WeatherManager
-    ) -> None:
+    def test_apply_theme(self, weather_manager: WeatherManager) -> None:
         """Test applying seasonal theme."""
         theme = SeasonalTheme(weather_manager, "winter")
         theme.apply_theme()
@@ -398,20 +385,14 @@ class TestSeasonalTheme:
         weather = weather_manager.get_current_weather()
         assert weather in [WeatherType.SNOWY, WeatherType.CLOUDY]
 
-    def test_change_season(
-        self,
-        weather_manager: WeatherManager
-    ) -> None:
+    def test_change_season(self, weather_manager: WeatherManager) -> None:
         """Test changing season."""
         theme = SeasonalTheme(weather_manager, "spring")
         theme.change_season("autumn")
 
         assert theme.season == "autumn"
 
-    def test_get_season_colors(
-        self,
-        weather_manager: WeatherManager
-    ) -> None:
+    def test_get_season_colors(self, weather_manager: WeatherManager) -> None:
         """Test getting season colors."""
         theme = SeasonalTheme(weather_manager, "summer")
         colors = theme.get_season_colors()

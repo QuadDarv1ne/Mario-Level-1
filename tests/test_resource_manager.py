@@ -48,11 +48,7 @@ class TestAssetInfo:
 
     def test_asset_info_creation(self) -> None:
         """Test creating asset info."""
-        info = AssetInfo(
-            name="test_asset",
-            asset_type=AssetType.IMAGE,
-            file_path="/test/path.png"
-        )
+        info = AssetInfo(name="test_asset", asset_type=AssetType.IMAGE, file_path="/test/path.png")
 
         assert info.name == "test_asset"
         assert info.asset_type == AssetType.IMAGE
@@ -65,7 +61,7 @@ class TestAssetInfo:
             name="test",
             asset_type=AssetType.IMAGE,
             file_path="/test.png",
-            metadata={"author": "test", "version": "1.0"}
+            metadata={"author": "test", "version": "1.0"},
         )
 
         assert info.metadata["author"] == "test"
@@ -209,30 +205,18 @@ class TestAssetManager:
 
         assert asset_manager.get_directory(AssetType.IMAGE) == Path("/custom/graphics")
 
-    def test_load_image(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_load_image(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test loading image asset."""
         asset_manager.set_base_path(temp_asset_dir)
 
-        info = asset_manager.load(
-            "test_image",
-            "test.png",
-            AssetType.IMAGE
-        )
+        info = asset_manager.load("test_image", "test.png", AssetType.IMAGE)
 
         assert info.name == "test_image"
         assert info.state == AssetState.LOADED
         assert info.data is not None
         assert isinstance(info.data, pg.Surface)
 
-    def test_load_data(
-        self,
-        asset_manager: AssetManager,
-        tmp_path: Path
-    ) -> None:
+    def test_load_data(self, asset_manager: AssetManager, tmp_path: Path) -> None:
         """Test loading data asset."""
         # Create temp data file
         data_file = tmp_path / "data.json"
@@ -241,37 +225,21 @@ class TestAssetManager:
         asset_manager.set_base_path(tmp_path)
         asset_manager.set_directory(AssetType.DATA, Path("."))
 
-        info = asset_manager.load(
-            "test_data",
-            "data.json",
-            AssetType.DATA
-        )
+        info = asset_manager.load("test_data", "data.json", AssetType.DATA)
 
         assert info.state == AssetState.LOADED
         assert info.data["score"] == 100
 
-    def test_load_nonexistent(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_load_nonexistent(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test loading nonexistent asset."""
         asset_manager.set_base_path(temp_asset_dir)
 
-        info = asset_manager.load(
-            "missing",
-            "nonexistent.png",
-            AssetType.IMAGE
-        )
+        info = asset_manager.load("missing", "nonexistent.png", AssetType.IMAGE)
 
         assert info.state == AssetState.FAILED
         assert "error" in info.metadata
 
-    def test_get_asset(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_get_asset(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test getting loaded asset."""
         asset_manager.set_base_path(temp_asset_dir)
         asset_manager.load("test", "test.png", AssetType.IMAGE)
@@ -287,36 +255,20 @@ class TestAssetManager:
 
         assert data is None
 
-    def test_get_or_load(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_get_or_load(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test get or load."""
         asset_manager.set_base_path(temp_asset_dir)
 
         # First call loads
-        data1 = asset_manager.get_or_load(
-            "test",
-            "test.png",
-            AssetType.IMAGE
-        )
+        data1 = asset_manager.get_or_load("test", "test.png", AssetType.IMAGE)
 
         # Second call gets from cache
-        data2 = asset_manager.get_or_load(
-            "test",
-            "test.png",
-            AssetType.IMAGE
-        )
+        data2 = asset_manager.get_or_load("test", "test.png", AssetType.IMAGE)
 
         assert data1 is not None
         assert data2 is data1
 
-    def test_load_batch(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_load_batch(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test loading batch of assets."""
         asset_manager.set_base_path(temp_asset_dir)
 
@@ -338,11 +290,7 @@ class TestAssetManager:
         assert "img1" in results
         assert "img2" in results
 
-    def test_unload_asset(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_unload_asset(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test unloading asset."""
         asset_manager.set_base_path(temp_asset_dir)
         asset_manager.load("test", "test.png", AssetType.IMAGE)
@@ -358,11 +306,7 @@ class TestAssetManager:
 
         assert "test" not in asset_manager.assets
 
-    def test_unload_unused(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_unload_unused(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test unloading unused assets."""
         asset_manager.set_base_path(temp_asset_dir)
         asset_manager.load("test", "test.png", AssetType.IMAGE)
@@ -374,11 +318,7 @@ class TestAssetManager:
 
         assert count >= 1
 
-    def test_clear_assets(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_clear_assets(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test clearing all assets."""
         asset_manager.set_base_path(temp_asset_dir)
         asset_manager.load("test", "test.png", AssetType.IMAGE)
@@ -387,11 +327,7 @@ class TestAssetManager:
 
         assert len(asset_manager.assets) == 0
 
-    def test_get_info(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_get_info(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test getting asset info."""
         asset_manager.set_base_path(temp_asset_dir)
         asset_manager.load("test", "test.png", AssetType.IMAGE)
@@ -401,11 +337,7 @@ class TestAssetManager:
         assert info is not None
         assert info.name == "test"
 
-    def test_get_stats(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_get_stats(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test getting statistics."""
         asset_manager.set_base_path(temp_asset_dir)
         asset_manager.load("test", "test.png", AssetType.IMAGE)
@@ -417,11 +349,7 @@ class TestAssetManager:
         assert "cache_size_mb" in stats
         assert stats["total_assets"] >= 1
 
-    def test_ref_count_increment(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_ref_count_increment(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test reference count increment."""
         asset_manager.set_base_path(temp_asset_dir)
 
@@ -434,11 +362,7 @@ class TestAssetManager:
 
         assert asset_manager.assets["test"].ref_count > initial_ref
 
-    def test_load_same_asset_twice(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_load_same_asset_twice(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test loading same asset twice."""
         asset_manager.set_base_path(temp_asset_dir)
 
@@ -449,11 +373,7 @@ class TestAssetManager:
         assert info1 is info2
         assert info2.ref_count >= 2
 
-    def test_set_callbacks(
-        self,
-        asset_manager: AssetManager,
-        temp_asset_dir: Path
-    ) -> None:
+    def test_set_callbacks(self, asset_manager: AssetManager, temp_asset_dir: Path) -> None:
         """Test setting callbacks."""
         load_starts = []
         load_completes = []
@@ -462,7 +382,7 @@ class TestAssetManager:
         asset_manager.set_callbacks(
             on_load_start=lambda name: load_starts.append(name),
             on_load_complete=lambda name: load_completes.append(name),
-            on_load_error=lambda name, error: load_errors.append((name, error))
+            on_load_error=lambda name, error: load_errors.append((name, error)),
         )
 
         asset_manager.set_base_path(temp_asset_dir)
@@ -487,12 +407,7 @@ class TestSpriteSheet:
 
         pg.quit()
 
-        return SpriteSheet(
-            image,
-            tile_size=(32, 32),
-            margin=0,
-            spacing=0
-        )
+        return SpriteSheet(image, tile_size=(32, 32), margin=0, spacing=0)
 
     def test_sprite_sheet_creation(self, sprite_sheet: SpriteSheet) -> None:
         """Test sprite sheet initialization."""

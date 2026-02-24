@@ -22,6 +22,7 @@ import pygame as pg
 @dataclass
 class ScreenshotMetadata:
     """Screenshot metadata."""
+
     filename: str
     timestamp: str
     resolution: tuple[int, int]
@@ -34,15 +35,15 @@ class ScreenshotMetadata:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'filename': self.filename,
-            'timestamp': self.timestamp,
-            'resolution': self.resolution,
-            'game_state': self.game_state,
-            'level': self.level,
-            'score': self.score,
-            'coin_total': self.coin_total,
-            'fps': round(self.fps, 2),
-            'notes': self.notes,
+            "filename": self.filename,
+            "timestamp": self.timestamp,
+            "resolution": self.resolution,
+            "game_state": self.game_state,
+            "level": self.level,
+            "score": self.score,
+            "coin_total": self.coin_total,
+            "fps": round(self.fps, 2),
+            "notes": self.notes,
         }
 
 
@@ -94,7 +95,7 @@ class ScreenshotManager:
         """Load metadata from file."""
         if os.path.exists(self._metadata_file):
             try:
-                with open(self._metadata_file, 'r', encoding='utf-8') as f:
+                with open(self._metadata_file, "r", encoding="utf-8") as f:
                     return json.load(f)
             except (json.JSONDecodeError, IOError):
                 pass
@@ -103,7 +104,7 @@ class ScreenshotManager:
     def _save_metadata(self) -> None:
         """Save metadata to file."""
         try:
-            with open(self._metadata_file, 'w', encoding='utf-8') as f:
+            with open(self._metadata_file, "w", encoding="utf-8") as f:
                 json.dump(self._metadata, f, indent=2, ensure_ascii=False)
         except (IOError, OSError):
             pass
@@ -142,11 +143,11 @@ class ScreenshotManager:
                 filename=filename,
                 timestamp=datetime.now().isoformat(),
                 resolution=(surface.get_width(), surface.get_height()),
-                game_state=game_info.get('level_state', 'unknown') if game_info else 'unknown',
-                level=game_info.get('current_level', 'unknown') if game_info else 'unknown',
-                score=game_info.get('score', 0) if game_info else 0,
-                coin_total=game_info.get('coin_total', 0) if game_info else 0,
-                fps=game_info.get('fps', 0.0) if game_info else 0.0,
+                game_state=game_info.get("level_state", "unknown") if game_info else "unknown",
+                level=game_info.get("current_level", "unknown") if game_info else "unknown",
+                score=game_info.get("score", 0) if game_info else 0,
+                coin_total=game_info.get("coin_total", 0) if game_info else 0,
+                fps=game_info.get("fps", 0.0) if game_info else 0.0,
                 notes=notes,
             )
 
@@ -170,15 +171,12 @@ class ScreenshotManager:
             return
 
         # Sort by timestamp
-        sorted_screens = sorted(
-            self._metadata,
-            key=lambda x: x.get('timestamp', '')
-        )
+        sorted_screens = sorted(self._metadata, key=lambda x: x.get("timestamp", ""))
 
         # Remove oldest
-        to_remove = sorted_screens[:len(self._metadata) - self.max_screenshots]
+        to_remove = sorted_screens[: len(self._metadata) - self.max_screenshots]
         for screen in to_remove:
-            filepath = os.path.join(self.output_dir, screen['filename'])
+            filepath = os.path.join(self.output_dir, screen["filename"])
             try:
                 if os.path.exists(filepath):
                     os.remove(filepath)
@@ -186,7 +184,7 @@ class ScreenshotManager:
                 pass
 
         # Update metadata
-        self._metadata = sorted_screens[len(to_remove):]
+        self._metadata = sorted_screens[len(to_remove) :]
         self._save_metadata()
 
     def get_screenshots(self) -> List[Dict[str, Any]]:
@@ -214,9 +212,7 @@ class ScreenshotManager:
                 os.remove(filepath)
 
             # Remove from metadata
-            self._metadata = [
-                m for m in self._metadata if m['filename'] != filename
-            ]
+            self._metadata = [m for m in self._metadata if m["filename"] != filename]
             self._save_metadata()
 
             return True
@@ -233,7 +229,7 @@ class ScreenshotManager:
         """
         count = 0
         for screen in self._metadata:
-            filepath = os.path.join(self.output_dir, screen['filename'])
+            filepath = os.path.join(self.output_dir, screen["filename"])
             try:
                 if os.path.exists(filepath):
                     os.remove(filepath)
@@ -250,29 +246,26 @@ class ScreenshotManager:
         """Get screenshot statistics."""
         if not self._metadata:
             return {
-                'count': 0,
-                'total_size': 0,
-                'oldest': None,
-                'newest': None,
+                "count": 0,
+                "total_size": 0,
+                "oldest": None,
+                "newest": None,
             }
 
         total_size = 0
         for screen in self._metadata:
-            filepath = os.path.join(self.output_dir, screen['filename'])
+            filepath = os.path.join(self.output_dir, screen["filename"])
             if os.path.exists(filepath):
                 total_size += os.path.getsize(filepath)
 
-        sorted_screens = sorted(
-            self._metadata,
-            key=lambda x: x.get('timestamp', '')
-        )
+        sorted_screens = sorted(self._metadata, key=lambda x: x.get("timestamp", ""))
 
         return {
-            'count': len(self._metadata),
-            'total_size': total_size,
-            'total_size_mb': round(total_size / 1024 / 1024, 2),
-            'oldest': sorted_screens[0]['timestamp'] if sorted_screens else None,
-            'newest': sorted_screens[-1]['timestamp'] if sorted_screens else None,
+            "count": len(self._metadata),
+            "total_size": total_size,
+            "total_size_mb": round(total_size / 1024 / 1024, 2),
+            "oldest": sorted_screens[0]["timestamp"] if sorted_screens else None,
+            "newest": sorted_screens[-1]["timestamp"] if sorted_screens else None,
         }
 
 

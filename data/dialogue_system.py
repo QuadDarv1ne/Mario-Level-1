@@ -23,6 +23,7 @@ from .animation_system import TweenManager, EasingType
 
 class DialogueAlign(Enum):
     """Text alignment options."""
+
     LEFT = "left"
     CENTER = "center"
     RIGHT = "right"
@@ -30,6 +31,7 @@ class DialogueAlign(Enum):
 
 class DialogueSpeed(Enum):
     """Typewriter speed options."""
+
     SLOW = 50  # ms per character
     NORMAL = 30
     FAST = 15
@@ -52,6 +54,7 @@ class DialogueLine:
         sound_effect: Sound to play
         callback: Function to call when line shown
     """
+
     speaker: str
     text: str
     avatar: Optional[str] = None
@@ -66,6 +69,7 @@ class DialogueLine:
 @dataclass
 class Character:
     """Character definition for dialogue."""
+
     name: str
     display_name: str
     color: tuple[int, int, int] = c.WHITE
@@ -78,14 +82,7 @@ class DialogueBox:
     Dialogue display box with typewriter effect.
     """
 
-    def __init__(
-        self,
-        x: int,
-        y: int,
-        width: int,
-        height: int,
-        font_size: int = 28
-    ) -> None:
+    def __init__(self, x: int, y: int, width: int, height: int, font_size: int = 28) -> None:
         """
         Initialize dialogue box.
 
@@ -146,23 +143,11 @@ class DialogueBox:
         self.visible = True
 
         # Slide in animation
-        self.tween_manager.add_tween(
-            "slide",
-            self.slide_offset,
-            0,
-            300,
-            EasingType.EASE_OUT_QUAD
-        )
+        self.tween_manager.add_tween("slide", self.slide_offset, 0, 300, EasingType.EASE_OUT_QUAD)
         self.slide_offset = self.height
 
         # Fade in
-        self.tween_manager.add_tween(
-            "alpha",
-            self.alpha,
-            255,
-            200,
-            EasingType.EASE_OUT_SINE
-        )
+        self.tween_manager.add_tween("alpha", self.alpha, 255, 200, EasingType.EASE_OUT_SINE)
         self.alpha = 255
 
     def update(self, dt: int) -> None:
@@ -229,12 +214,7 @@ class DialogueBox:
         self.current_line = None
 
         # Slide out animation
-        self.tween_manager.add_tween(
-            "slide",
-            self.slide_offset,
-            self.height,
-            200
-        )
+        self.tween_manager.add_tween("slide", self.slide_offset, self.height, 200)
 
     def draw(self, surface: pg.Surface) -> None:
         """
@@ -263,11 +243,7 @@ class DialogueBox:
         # Draw speaker name
         if self.current_line and self.current_line.speaker:
             if self.name_font:
-                name_surface = self.name_font.render(
-                    self.current_line.speaker,
-                    True,
-                    self.name_color
-                )
+                name_surface = self.name_font.render(self.current_line.speaker, True, self.name_color)
                 name_surface.set_alpha(self.alpha)
                 surface.blit(name_surface, (self.x + 15, draw_y + 10))
 
@@ -327,9 +303,7 @@ class DialogueBox:
             if self.font:
                 arrow_surface = self.font.render(arrow, True, c.GOLD)
                 arrow_surface.set_alpha(self.alpha)
-                arrow_rect = arrow_surface.get_rect(
-                    center=(self.x + self.width - 30, draw_y + self.height - 25)
-                )
+                arrow_rect = arrow_surface.get_rect(center=(self.x + self.width - 30, draw_y + self.height - 25))
                 surface.blit(arrow_surface, arrow_rect)
 
 
@@ -536,80 +510,48 @@ class StoryProgression:
 # Default Mario dialogues
 MARIO_DIALOGUES = {
     "intro_1": DialogueLine(
-        speaker="Марио",
-        text="Давайте начнём! Нужно добраться до флага!",
-        speed=DialogueSpeed.NORMAL,
-        next_id="intro_2"
+        speaker="Марио", text="Давайте начнём! Нужно добраться до флага!", speed=DialogueSpeed.NORMAL, next_id="intro_2"
     ),
     "intro_2": DialogueLine(
-        speaker="Марио",
-        text="Собирайте монеты и побеждайте врагов!",
-        speed=DialogueSpeed.NORMAL,
-        next_id=None
+        speaker="Марио", text="Собирайте монеты и побеждайте врагов!", speed=DialogueSpeed.NORMAL, next_id=None
     ),
     "first_mushroom": DialogueLine(
-        speaker="Марио",
-        text="Супер-гриб! Я стану большим!",
-        speed=DialogueSpeed.FAST,
-        next_id=None
+        speaker="Марио", text="Супер-гриб! Я стану большим!", speed=DialogueSpeed.FAST, next_id=None
     ),
     "first_fireflower": DialogueLine(
-        speaker="Марио",
-        text="Огненный цветок! Теперь я могу бросаться огнём!",
-        speed=DialogueSpeed.FAST,
-        next_id=None
+        speaker="Марио", text="Огненный цветок! Теперь я могу бросаться огнём!", speed=DialogueSpeed.FAST, next_id=None
     ),
     "low_time": DialogueLine(
-        speaker="Марио",
-        text="Время заканчивается! Нужно спешить!",
-        speed=DialogueSpeed.NORMAL,
-        next_id=None
+        speaker="Марио", text="Время заканчивается! Нужно спешить!", speed=DialogueSpeed.NORMAL, next_id=None
     ),
     "near_flag": DialogueLine(
-        speaker="Марио",
-        text="Флаг близко! Почти у цели!",
-        speed=DialogueSpeed.NORMAL,
-        next_id=None
+        speaker="Марио", text="Флаг близко! Почти у цели!", speed=DialogueSpeed.NORMAL, next_id=None
     ),
 }
 
 LUIGI_DIALOGUES = {
     "intro": DialogueLine(
-        speaker="Луиджи",
-        text="Марио, будь осторожен! Там много врагов!",
-        speed=DialogueSpeed.NORMAL,
-        next_id=None
+        speaker="Луиджи", text="Марио, будь осторожен! Там много врагов!", speed=DialogueSpeed.NORMAL, next_id=None
     ),
 }
 
 TOAD_DIALOGUES = {
     "greeting": DialogueLine(
-        speaker="Тод",
-        text="Привет! Я видел принцессу в другом замке!",
-        speed=DialogueSpeed.NORMAL,
-        next_id=None
+        speaker="Тод", text="Привет! Я видел принцессу в другом замке!", speed=DialogueSpeed.NORMAL, next_id=None
     ),
     "hint": DialogueLine(
         speaker="Тод",
         text="Попробуй разбить некоторые блоки. В них могут быть секреты!",
         speed=DialogueSpeed.NORMAL,
-        next_id=None
+        next_id=None,
     ),
 }
 
 BOWSER_DIALOGUES = {
     "taunt_1": DialogueLine(
-        speaker="Боузер",
-        text="Ха-ха-ха! Тебе не победить меня!",
-        speed=DialogueSpeed.NORMAL,
-        next_id=None
+        speaker="Боузер", text="Ха-ха-ха! Тебе не победить меня!", speed=DialogueSpeed.NORMAL, next_id=None
     ),
-    "defeated": DialogueLine(
-        speaker="Боузер",
-        text="Нет! Это невозможно!",
-        speed=DialogueSpeed.FAST,
-        next_id=None
-    ),
+    "defeated": DialogueLine(speaker="Боузер", text="Нет! Это невозможно!", speed=DialogueSpeed.FAST, next_id=None),
 }
 
 
@@ -623,26 +565,10 @@ def create_default_dialogues() -> DialogueManager:
     manager = DialogueManager()
 
     # Register characters
-    manager.register_character("mario", Character(
-        name="mario",
-        display_name="Марио",
-        color=c.RED
-    ))
-    manager.register_character("luigi", Character(
-        name="luigi",
-        display_name="Луиджи",
-        color=c.GREEN
-    ))
-    manager.register_character("toad", Character(
-        name="toad",
-        display_name="Тод",
-        color=c.SKY_BLUE
-    ))
-    manager.register_character("bowser", Character(
-        name="bowser",
-        display_name="Боузер",
-        color=c.ORANGE
-    ))
+    manager.register_character("mario", Character(name="mario", display_name="Марио", color=c.RED))
+    manager.register_character("luigi", Character(name="luigi", display_name="Луиджи", color=c.GREEN))
+    manager.register_character("toad", Character(name="toad", display_name="Тод", color=c.SKY_BLUE))
+    manager.register_character("bowser", Character(name="bowser", display_name="Боузер", color=c.ORANGE))
 
     # Register dialogues
     for line_id, line in MARIO_DIALOGUES.items():

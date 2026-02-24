@@ -67,11 +67,7 @@ class TestMenuItem:
         def callback() -> None:
             called.append(True)
 
-        item = MenuItem(
-            text="Test",
-            action=MenuAction.SELECT,
-            callback=callback
-        )
+        item = MenuItem(text="Test", action=MenuAction.SELECT, callback=callback)
 
         assert item.enabled is True
         item.callback()
@@ -84,13 +80,7 @@ class TestUIButton:
     @pytest.fixture
     def button(self) -> UIButton:
         """Create test button."""
-        return UIButton(
-            x=100,
-            y=100,
-            width=200,
-            height=50,
-            text="Click Me"
-        )
+        return UIButton(x=100, y=100, width=200, height=50, text="Click Me")
 
     def test_button_creation(self, button: UIButton) -> None:
         """Test button creation."""
@@ -126,21 +116,14 @@ class TestUIButton:
         def callback() -> None:
             called.append(True)
 
-        button = UIButton(
-            x=100,
-            y=100,
-            width=200,
-            height=50,
-            text="Click",
-            callback=callback
-        )
+        button = UIButton(x=100, y=100, width=200, height=50, text="Click", callback=callback)
 
         pg.init()
         # Simulate click
-        event = pg.event.Event(pg.MOUSEBUTTONDOWN, {'pos': (150, 120), 'button': 1})
+        event = pg.event.Event(pg.MOUSEBUTTONDOWN, {"pos": (150, 120), "button": 1})
         button.handle_event(event)
 
-        event = pg.event.Event(pg.MOUSEBUTTONUP, {'pos': (150, 120), 'button': 1})
+        event = pg.event.Event(pg.MOUSEBUTTONUP, {"pos": (150, 120), "button": 1})
         button.handle_event(event)
 
         assert len(called) == 1
@@ -182,13 +165,7 @@ class TestUILabel:
     @pytest.fixture
     def label(self) -> UILabel:
         """Create test label."""
-        return UILabel(
-            x=100,
-            y=50,
-            text="Test Label",
-            font_size=36,
-            color=c.WHITE
-        )
+        return UILabel(x=100, y=50, text="Test Label", font_size=36, color=c.WHITE)
 
     def test_label_creation(self, label: UILabel) -> None:
         """Test label creation."""
@@ -488,14 +465,7 @@ class TestUIIntegration:
         def on_click() -> None:
             click_count[0] += 1
 
-        button = UIButton(
-            x=100,
-            y=100,
-            width=200,
-            height=50,
-            text="Test",
-            callback=on_click
-        )
+        button = UIButton(x=100, y=100, width=200, height=50, text="Test", callback=on_click)
 
         surface = pg.Surface((800, 600))
 
@@ -504,10 +474,10 @@ class TestUIIntegration:
         assert button.is_hovered
 
         # Click
-        event = pg.event.Event(pg.MOUSEBUTTONDOWN, {'pos': (150, 120), 'button': 1})
+        event = pg.event.Event(pg.MOUSEBUTTONDOWN, {"pos": (150, 120), "button": 1})
         button.handle_event(event)
 
-        event = pg.event.Event(pg.MOUSEBUTTONUP, {'pos': (150, 120), 'button': 1})
+        event = pg.event.Event(pg.MOUSEBUTTONUP, {"pos": (150, 120), "button": 1})
         button.handle_event(event)
 
         assert click_count[0] == 1

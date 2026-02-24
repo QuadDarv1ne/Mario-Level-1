@@ -29,8 +29,8 @@ class LoadScreen(tools._State):
 
     def set_next_state(self) -> str:
         """Sets the next state based on current level"""
-        current_level = self.persist.get('current_level', c.LEVEL1)
-        
+        current_level = self.persist.get("current_level", c.LEVEL1)
+
         if current_level == c.LEVEL1:
             return c.LEVEL2
         elif current_level == c.LEVEL2:

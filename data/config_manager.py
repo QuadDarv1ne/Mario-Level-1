@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 
 try:
     import yaml
+
     YAML_AVAILABLE = True
 except ImportError:
     YAML_AVAILABLE = False
@@ -20,16 +21,13 @@ if TYPE_CHECKING:
     pass
 
 # Default configuration path
-DEFAULT_CONFIG_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    'config',
-    'game.yaml'
-)
+DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "game.yaml")
 
 
 @dataclass
 class DisplayConfig:
     """Display configuration."""
+
     screen_width: int = 800
     screen_height: int = 600
     fps: int = 60
@@ -41,6 +39,7 @@ class DisplayConfig:
 @dataclass
 class AudioConfig:
     """Audio configuration."""
+
     enabled: bool = True
     music_volume: float = 0.5
     sfx_volume: float = 0.7
@@ -50,6 +49,7 @@ class AudioConfig:
 @dataclass
 class GameplayConfig:
     """Gameplay configuration."""
+
     starting_lives: int = 3
     enable_auto_save: bool = True
     auto_save_interval: int = 300
@@ -64,6 +64,7 @@ class GameplayConfig:
 @dataclass
 class ControlsConfig:
     """Controls configuration."""
+
     jump: str = "K_a"
     action: str = "K_s"
     left: str = "K_LEFT"
@@ -79,6 +80,7 @@ class ControlsConfig:
 @dataclass
 class GraphicsConfig:
     """Graphics configuration."""
+
     enable_particles: bool = True
     max_particles: int = 1000
     enable_weather: bool = True
@@ -92,6 +94,7 @@ class GraphicsConfig:
 @dataclass
 class PerformanceConfig:
     """Performance configuration."""
+
     enable_object_pooling: bool = True
     enemy_pool_size: int = 20
     particle_pool_size: int = 200
@@ -105,6 +108,7 @@ class PerformanceConfig:
 @dataclass
 class DebugConfig:
     """Debug configuration."""
+
     enabled: bool = False
     show_hitboxes: bool = False
     show_fps_graph: bool = False
@@ -117,6 +121,7 @@ class DebugConfig:
 @dataclass
 class SaveConfig:
     """Save system configuration."""
+
     max_save_slots: int = 3
     compression_enabled: bool = True
     backup_enabled: bool = True
@@ -126,6 +131,7 @@ class SaveConfig:
 @dataclass
 class AchievementsConfig:
     """Achievements configuration."""
+
     enabled: bool = True
     show_notifications: bool = True
     sync_to_cloud: bool = False
@@ -134,6 +140,7 @@ class AchievementsConfig:
 @dataclass
 class ChallengesConfig:
     """Challenges configuration."""
+
     enabled: bool = True
     daily_refresh_hour: int = 0
     weekly_refresh_day: str = "monday"
@@ -142,6 +149,7 @@ class ChallengesConfig:
 @dataclass
 class NetworkConfig:
     """Network configuration."""
+
     enabled: bool = False
     leaderboard_url: str = ""
     sync_interval: int = 600
@@ -150,6 +158,7 @@ class NetworkConfig:
 @dataclass
 class Config:
     """Main configuration container."""
+
     display: DisplayConfig = field(default_factory=DisplayConfig)
     audio: AudioConfig = field(default_factory=AudioConfig)
     gameplay: GameplayConfig = field(default_factory=GameplayConfig)
@@ -207,7 +216,7 @@ class ConfigManager:
             return False
 
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as f:
+            with open(self.config_path, "r", encoding="utf-8") as f:
                 self._raw_config = yaml.safe_load(f) or {}
 
             self._apply_config()
@@ -221,50 +230,40 @@ class ConfigManager:
 
     def _apply_config(self) -> None:
         """Apply raw configuration to config object."""
-        if 'display' in self._raw_config:
-            self._apply_section(self.config.display, self._raw_config['display'])
+        if "display" in self._raw_config:
+            self._apply_section(self.config.display, self._raw_config["display"])
 
-        if 'audio' in self._raw_config:
-            self._apply_section(self.config.audio, self._raw_config['audio'])
+        if "audio" in self._raw_config:
+            self._apply_section(self.config.audio, self._raw_config["audio"])
 
-        if 'gameplay' in self._raw_config:
-            self._apply_section(self.config.gameplay, self._raw_config['gameplay'])
+        if "gameplay" in self._raw_config:
+            self._apply_section(self.config.gameplay, self._raw_config["gameplay"])
 
-        if 'controls' in self._raw_config:
-            self._apply_section(self.config.controls, self._raw_config['controls'])
+        if "controls" in self._raw_config:
+            self._apply_section(self.config.controls, self._raw_config["controls"])
 
-        if 'graphics' in self._raw_config:
-            self._apply_section(self.config.graphics, self._raw_config['graphics'])
+        if "graphics" in self._raw_config:
+            self._apply_section(self.config.graphics, self._raw_config["graphics"])
 
-        if 'performance' in self._raw_config:
-            self._apply_section(
-                self.config.performance, self._raw_config['performance']
-            )
+        if "performance" in self._raw_config:
+            self._apply_section(self.config.performance, self._raw_config["performance"])
 
-        if 'debug' in self._raw_config:
-            self._apply_section(self.config.debug, self._raw_config['debug'])
+        if "debug" in self._raw_config:
+            self._apply_section(self.config.debug, self._raw_config["debug"])
 
-        if 'save' in self._raw_config:
-            self._apply_section(self.config.save, self._raw_config['save'])
+        if "save" in self._raw_config:
+            self._apply_section(self.config.save, self._raw_config["save"])
 
-        if 'achievements' in self._raw_config:
-            self._apply_section(
-                self.config.achievements, self._raw_config['achievements']
-            )
+        if "achievements" in self._raw_config:
+            self._apply_section(self.config.achievements, self._raw_config["achievements"])
 
-        if 'challenges' in self._raw_config:
-            self._apply_section(
-                self.config.challenges, self._raw_config['challenges']
-            )
+        if "challenges" in self._raw_config:
+            self._apply_section(self.config.challenges, self._raw_config["challenges"])
 
-        if 'network' in self._raw_config:
-            self._apply_section(self.config.network, self._raw_config['network'])
+        if "network" in self._raw_config:
+            self._apply_section(self.config.network, self._raw_config["network"])
 
-    def _apply_section(
-        self,
-        config_obj: Any,
-        data: Dict[str, Any]
-    ) -> None:
+    def _apply_section(self, config_obj: Any, data: Dict[str, Any]) -> None:
         """Apply configuration section to dataclass."""
         if not isinstance(data, dict):
             return
@@ -288,7 +287,7 @@ class ConfigManager:
             config_dir = os.path.dirname(self.config_path)
             os.makedirs(config_dir, exist_ok=True)
 
-            with open(self.config_path, 'w', encoding='utf-8') as f:
+            with open(self.config_path, "w", encoding="utf-8") as f:
                 yaml.dump(
                     self._raw_config,
                     f,

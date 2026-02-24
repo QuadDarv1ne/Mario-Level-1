@@ -51,15 +51,13 @@ from data.statistics import (
 # Dialogue System Tests
 # =============================================================================
 
+
 class TestDialogueLine:
     """Tests for DialogueLine."""
 
     def test_dialogue_line_creation(self) -> None:
         """Test creating dialogue line."""
-        line = DialogueLine(
-            speaker="Mario",
-            text="Let's-a go!"
-        )
+        line = DialogueLine(speaker="Mario", text="Let's-a go!")
 
         assert line.speaker == "Mario"
         assert line.text == "Let's-a go!"
@@ -69,11 +67,7 @@ class TestDialogueLine:
     def test_dialogue_line_with_options(self) -> None:
         """Test dialogue line with custom options."""
         line = DialogueLine(
-            speaker="Mario",
-            text="Hello!",
-            align=DialogueAlign.CENTER,
-            speed=DialogueSpeed.FAST,
-            next_id="line_2"
+            speaker="Mario", text="Hello!", align=DialogueAlign.CENTER, speed=DialogueSpeed.FAST, next_id="line_2"
         )
 
         assert line.align == DialogueAlign.CENTER
@@ -86,11 +80,7 @@ class TestCharacter:
 
     def test_character_creation(self) -> None:
         """Test creating character."""
-        char = Character(
-            name="mario",
-            display_name="Марио",
-            color=(255, 0, 0)
-        )
+        char = Character(name="mario", display_name="Марио", color=(255, 0, 0))
 
         assert char.name == "mario"
         assert char.display_name == "Марио"
@@ -121,11 +111,7 @@ class TestDialogueBox:
 
     def test_update_typewriter(self, dialogue_box: DialogueBox) -> None:
         """Test typewriter effect."""
-        line = DialogueLine(
-            speaker="Test",
-            text="Hello",
-            speed=DialogueSpeed.INSTANT
-        )
+        line = DialogueLine(speaker="Test", text="Hello", speed=DialogueSpeed.INSTANT)
         dialogue_box.show(line)
         dialogue_box.update(100)
 
@@ -134,11 +120,7 @@ class TestDialogueBox:
 
     def test_advance_dialogue(self, dialogue_box: DialogueBox) -> None:
         """Test advancing dialogue."""
-        line = DialogueLine(
-            speaker="Test",
-            text="Hello World",
-            speed=DialogueSpeed.INSTANT
-        )
+        line = DialogueLine(speaker="Test", text="Hello World", speed=DialogueSpeed.INSTANT)
         dialogue_box.show(line)
         dialogue_box.update(100)
 
@@ -175,11 +157,7 @@ class TestDialogueManager:
 
     def test_start_dialogue(self, dialogue_manager: DialogueManager) -> None:
         """Test starting dialogue."""
-        line = DialogueLine(
-            speaker="Test",
-            text="Test",
-            next_id=None
-        )
+        line = DialogueLine(speaker="Test", text="Test", next_id=None)
         dialogue_manager.register_dialogue("start", line)
 
         result = dialogue_manager.start("start")
@@ -260,17 +238,14 @@ class TestStoryProgression:
 # Screenshot System Tests
 # =============================================================================
 
+
 class TestScreenshotInfo:
     """Tests for ScreenshotInfo."""
 
     def test_screenshot_info_creation(self) -> None:
         """Test creating screenshot info."""
         info = ScreenshotInfo(
-            filename="test.png",
-            filepath="/test/test.png",
-            timestamp="2024-01-01",
-            width=800,
-            height=600
+            filename="test.png", filepath="/test/test.png", timestamp="2024-01-01", width=800, height=600
         )
 
         assert info.filename == "test.png"
@@ -390,6 +365,7 @@ class TestAutoScreenshot:
 # Debug System Tests
 # =============================================================================
 
+
 class TestDebugStats:
     """Tests for DebugStats."""
 
@@ -468,6 +444,7 @@ class TestDebugConsole:
 
     def test_register_command(self, console: DebugConsole) -> None:
         """Test registering command."""
+
         def test_cmd(args: str) -> str:
             return "test"
 
@@ -513,6 +490,7 @@ class TestPerformanceProfiler:
         profiler.start("test_op")
 
         import time
+
         time.sleep(0.01)  # 10ms
 
         duration = profiler.stop("test_op")
@@ -523,6 +501,7 @@ class TestPerformanceProfiler:
         """Test getting stats."""
         profiler.start("test")
         import time
+
         time.sleep(0.01)
         profiler.stop("test")
 
@@ -559,7 +538,7 @@ class TestDebugManager:
         """Test handling overlay toggle event."""
         pg.init()
 
-        event = pg.event.Event(pg.KEYDOWN, {'key': pg.K_F3})
+        event = pg.event.Event(pg.KEYDOWN, {"key": pg.K_F3})
         result = debug_manager.handle_event(event)
 
         assert result is True
@@ -571,6 +550,7 @@ class TestDebugManager:
 # =============================================================================
 # Statistics System Tests
 # =============================================================================
+
 
 class TestSessionStats:
     """Tests for SessionStats."""
@@ -691,18 +671,11 @@ class TestStatsDisplay:
         """Create stats display."""
         return StatsDisplay(stats_manager)
 
-    def test_display_creation(
-        self,
-        stats_display: StatsDisplay,
-        stats_manager: StatisticsManager
-    ) -> None:
+    def test_display_creation(self, stats_display: StatsDisplay, stats_manager: StatisticsManager) -> None:
         """Test stats display initialization."""
         assert stats_display.stats == stats_manager
 
-    def test_draw_session_stats(
-        self,
-        stats_display: StatsDisplay
-    ) -> None:
+    def test_draw_session_stats(self, stats_display: StatsDisplay) -> None:
         """Test drawing session stats."""
         pg.init()
         surface = pg.Surface((800, 600))
@@ -716,6 +689,7 @@ class TestStatsDisplay:
 # =============================================================================
 # Integration Tests
 # =============================================================================
+
 
 class TestIntegration:
     """Integration tests for new systems."""

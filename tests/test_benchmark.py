@@ -30,6 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 def init_pygame():
     """Initialize pygame for benchmarks."""
     import pygame as pg
+
     pg.init()
     pg.display.set_mode((100, 100))
     yield
@@ -106,15 +107,12 @@ class TestCollisionBenchmark:
         from data.components.collider import Collider
 
         # Create multiple colliders
-        colliders = [
-            Collider(i * 10, i * 10, 50, 50)
-            for i in range(20)
-        ]
+        colliders = [Collider(i * 10, i * 10, 50, 50) for i in range(20)]
 
         def check_collisions():
             count = 0
             for i, c1 in enumerate(colliders):
-                for c2 in colliders[i + 1:]:
+                for c2 in colliders[i + 1 :]:
                     if c1.rect.colliderect(c2.rect):
                         count += 1
             return count
@@ -157,6 +155,7 @@ class TestResourceLoadingBenchmark:
             return loader._available_images
 
         import pygame
+
         result = benchmark(scan_directory)
         assert result is not None
 
@@ -170,11 +169,12 @@ class TestSaveSystemBenchmark:
 
         # Create temp save directory
         import os
-        original_dir = os.environ.get('SAVE_DIR')
-        
+
+        original_dir = os.environ.get("SAVE_DIR")
+
         manager = SaveManager()
         manager.save_dir = str(tmp_path)
-        manager.metadata_file = str(tmp_path / 'metadata.json')
+        manager.metadata_file = str(tmp_path / "metadata.json")
 
         game_data = GameData(
             score=10000,
@@ -195,7 +195,7 @@ class TestSaveSystemBenchmark:
 
         manager = SaveManager()
         manager.save_dir = str(tmp_path)
-        manager.metadata_file = str(tmp_path / 'metadata.json')
+        manager.metadata_file = str(tmp_path / "metadata.json")
 
         # Create save first
         game_data = GameData(score=10000, coin_total=50)
@@ -256,11 +256,12 @@ class TestMemoryUsage:
 
         manager = SaveManager()
         manager.save_dir = str(tmp_path)
-        manager.metadata_file = str(tmp_path / 'metadata.json')
+        manager.metadata_file = str(tmp_path / "metadata.json")
 
         # Create multiple saves
         for i in range(3):
             from data.save_system import GameData
+
             manager.save_game(i + 1, GameData(score=i * 1000))
 
         current, peak = tracemalloc.get_traced_memory()
@@ -283,8 +284,10 @@ PERFORMANCE_THRESHOLDS = {
 @pytest.fixture
 def benchmark_threshold(benchmark):
     """Fixture to check performance thresholds."""
+
     def check_threshold(test_name: str) -> None:
         if test_name in PERFORMANCE_THRESHOLDS:
             threshold = PERFORMANCE_THRESHOLDS[test_name]["max_time"]
             assert benchmark.stats.get("mean", 0) < threshold
+
     return check_threshold

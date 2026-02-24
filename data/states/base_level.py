@@ -149,7 +149,7 @@ class BaseLevel(tools._State):
             self.draw(surface)
             return
 
-        self.update_entities(current_time)
+        self.update_entities(keys, current_time)
         self.check_collisions()
         self.check_state_triggers()
 
@@ -158,10 +158,10 @@ class BaseLevel(tools._State):
 
         self.draw(surface)
 
-    def update_entities(self, current_time: float) -> None:
+    def update_entities(self, keys: tuple, current_time: float) -> None:
         """Update all game entities."""
         if self.mario:
-            self.mario.update((), current_time)
+            self.mario.update(keys, current_time)
 
         if self.enemy_group:
             self.enemy_group.update(current_time)

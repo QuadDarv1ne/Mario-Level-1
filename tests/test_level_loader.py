@@ -35,10 +35,7 @@ class TestLoadLevelFromJson:
 
     def test_load_level_1_1(self):
         """Test loading the built-in level 1-1 JSON file."""
-        level_path = os.path.join(
-            os.path.dirname(__file__),
-            '..', 'data', 'levels', 'level_1_1.json'
-        )
+        level_path = os.path.join(os.path.dirname(__file__), "..", "data", "levels", "level_1_1.json")
         level_path = os.path.abspath(level_path)
 
         if os.path.exists(level_path):
@@ -91,12 +88,12 @@ class TestCreateLevel1_1:
         assert len(level.checkpoints) > 0
 
         # Check flag pole exists
-        assert 'x' in level.flag_pole
-        assert 'y' in level.flag_pole
+        assert "x" in level.flag_pole
+        assert "y" in level.flag_pole
 
         # Check mario start position exists
-        assert 'x' in level.mario_start
-        assert 'y' in level.mario_start
+        assert "x" in level.mario_start
+        assert "y" in level.mario_start
 
     def test_level_1_1_brick_count(self):
         """Test that level 1-1 has the expected number of bricks."""

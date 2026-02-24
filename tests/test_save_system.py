@@ -31,19 +31,19 @@ class TestGameSave:
         save.lives = 5
 
         data = save.to_dict()
-        assert data['score'] == 1500
-        assert data['lives'] == 5
-        assert data['coin_total'] == 0
+        assert data["score"] == 1500
+        assert data["lives"] == 5
+        assert data["coin_total"] == 0
 
     def test_game_save_from_dict(self):
         """Test creating GameSave from dictionary."""
         data = {
-            'score': 2000,
-            'coin_total': 50,
-            'lives': 2,
-            'top_score': 5000,
-            'levels_completed': ['1-1', '1-2'],
-            'enemies_defeated': 25
+            "score": 2000,
+            "coin_total": 50,
+            "lives": 2,
+            "top_score": 5000,
+            "levels_completed": ["1-1", "1-2"],
+            "enemies_defeated": 25,
         }
 
         save = save_system.GameSave.from_dict(data)
@@ -58,7 +58,7 @@ class TestGameSave:
         original.score = 3000
         original.coin_total = 100
         original.lives = 4
-        original.levels_completed = ['1-1']
+        original.levels_completed = ["1-1"]
         original.enemies_defeated = 10
 
         data = original.to_dict()
@@ -80,7 +80,7 @@ class TestSaveLoad:
         original_file = save_system.SAVE_FILE
 
         save_system.SAVE_DIR = str(tmp_path)
-        save_system.SAVE_FILE = os.path.join(str(tmp_path), 'test_save.json')
+        save_system.SAVE_FILE = os.path.join(str(tmp_path), "test_save.json")
 
         try:
             save = save_system.GameSave()
@@ -105,7 +105,7 @@ class TestSaveLoad:
     def test_load_nonexistent(self, tmp_path):
         """Test loading when no save file exists."""
         original_file = save_system.SAVE_FILE
-        save_system.SAVE_FILE = os.path.join(str(tmp_path), 'nonexistent.json')
+        save_system.SAVE_FILE = os.path.join(str(tmp_path), "nonexistent.json")
 
         try:
             result = save_system.load_game()
@@ -119,7 +119,7 @@ class TestSaveLoad:
         original_file = save_system.SAVE_FILE
 
         save_system.SAVE_DIR = str(tmp_path)
-        save_system.SAVE_FILE = os.path.join(str(tmp_path), 'test_save.json')
+        save_system.SAVE_FILE = os.path.join(str(tmp_path), "test_save.json")
 
         try:
             # Create save
@@ -138,7 +138,7 @@ class TestSaveLoad:
     def test_save_exists(self, tmp_path):
         """Test save_exists function."""
         original_file = save_system.SAVE_FILE
-        save_system.SAVE_FILE = os.path.join(str(tmp_path), 'test_save.json')
+        save_system.SAVE_FILE = os.path.join(str(tmp_path), "test_save.json")
 
         try:
             assert save_system.save_exists() == False
@@ -152,7 +152,7 @@ class TestSaveLoad:
     def test_get_save_info(self, tmp_path):
         """Test getting save info without full load."""
         original_file = save_system.SAVE_FILE
-        save_system.SAVE_FILE = os.path.join(str(tmp_path), 'test_save.json')
+        save_system.SAVE_FILE = os.path.join(str(tmp_path), "test_save.json")
 
         try:
             # No save exists
@@ -165,8 +165,8 @@ class TestSaveLoad:
 
             info = save_system.get_save_info()
             assert info is not None
-            assert info['score'] == 2500
-            assert 'timestamp' in info
+            assert info["score"] == 2500
+            assert "timestamp" in info
         finally:
             save_system.SAVE_FILE = original_file
 
@@ -176,12 +176,7 @@ class TestGameInfoConversion:
 
     def test_create_save_from_game_info(self):
         """Test creating save from game_info."""
-        game_info = {
-            c.SCORE: 1500,
-            c.COIN_TOTAL: 30,
-            c.LIVES: 4,
-            c.TOP_SCORE: 5000
-        }
+        game_info = {c.SCORE: 1500, c.COIN_TOTAL: 30, c.LIVES: 4, c.TOP_SCORE: 5000}
 
         save = save_system.create_save_from_game_info(game_info)
         assert save.score == 1500

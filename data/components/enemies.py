@@ -131,7 +131,6 @@ class Enemy(pg.sprite.Sprite):
 
 
 class Goomba(Enemy):
-
     def __init__(self, y: int = c.GROUND_HEIGHT, x: int = 0, direction: str = c.LEFT, name: str = "goomba") -> None:
         Enemy.__init__(self)
         self.setup_enemy(x, y, direction, name, self.setup_frames)
@@ -153,7 +152,6 @@ class Goomba(Enemy):
 
 
 class Koopa(Enemy):
-
     def __init__(self, y: int = c.GROUND_HEIGHT, x: int = 0, direction: str = c.LEFT, name: str = "koopa") -> None:
         Enemy.__init__(self)
         self.setup_enemy(x, y, direction, name, self.setup_frames)
