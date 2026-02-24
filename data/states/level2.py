@@ -10,7 +10,6 @@ import pygame as pg
 
 from .. import setup, tools
 from .. import constants as c
-from .. import game_sound
 from ..components import mario
 from ..components import collider
 from ..components import bricks
