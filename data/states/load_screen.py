@@ -28,8 +28,19 @@ class LoadScreen(tools._State):
         self.sound_manager: Optional[game_sound.Sound] = None
 
     def set_next_state(self) -> str:
-        """Sets the next state"""
-        return c.LEVEL1
+        """Sets the next state based on current level"""
+        current_level = self.persist.get('current_level', c.LEVEL1)
+        
+        if current_level == c.LEVEL1:
+            return c.LEVEL2
+        elif current_level == c.LEVEL2:
+            return c.LEVEL3
+        elif current_level == c.LEVEL3:
+            return c.LEVEL4
+        elif current_level == c.LEVEL4:
+            return c.LEVEL5
+        else:
+            return c.LEVEL1
 
     def set_overhead_info_state(self) -> str:
         """sets the state to send to the overhead info object"""
