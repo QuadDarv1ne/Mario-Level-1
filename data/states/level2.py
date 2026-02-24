@@ -281,12 +281,11 @@ class Level2(tools._State):
                 checkpoint.kill()
 
     def check_state_triggers(self) -> None:
-        """Check for state transition triggers"""
+        """Check state triggers"""
         if self.mario and self.mario.dead:
             self.state = c.FROZEN
             self.game_info[c.MARIO_DEAD] = True
 
-        # Check for flag pole collision
         if self.mario and self.flag_pole_group:
             flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)
             if flag_pole and hasattr(flag_pole, 'state') and flag_pole.state == c.TOP_OF_POLE:
