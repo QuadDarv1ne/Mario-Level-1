@@ -388,6 +388,8 @@ class TestAdvancedAI:
         enemy.max_speed = 3.0
         enemy.direction = "left"
         enemy.x_vel = 0
+        enemy.health = 100
+        enemy.max_health = 100
         return enemy
 
     @pytest.fixture
@@ -517,6 +519,11 @@ class TestAdvancedAI:
         director = AIDirector()
         game_info = {c.CURRENT_TIME: 1000}
 
+        # First update - no decisions yet (need time to pass)
+        decisions = director.update(game_info, player_alive=True, player_health=0.8, enemies_remaining=5)
+
+        # Advance time beyond adjustment interval (30 seconds)
+        game_info[c.CURRENT_TIME] = 35000
         decisions = director.update(game_info, player_alive=True, player_health=0.8, enemies_remaining=5)
 
         assert "spawn_rate" in decisions
@@ -528,7 +535,10 @@ class TestAdvancedAI:
         game_info = {c.CURRENT_TIME: 1000}
 
         # Low health, many enemies = high tension
-        director.update(game_info, player_alive=True, player_health=0.1, enemies_remaining=10)  # Very low  # Max
+        # Need multiple updates to build up tension (smooth transition)
+        for i in range(20):
+            game_info[c.CURRENT_TIME] = 1000 + i * 1000
+            director.update(game_info, player_alive=True, player_health=0.1, enemies_remaining=10)
 
         tension = director.get_tension_level()
         assert tension > 0.5

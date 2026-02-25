@@ -279,7 +279,7 @@ class WeatherEffect:
 
         # Affect clouds
         for cloud in self.clouds:
-            cloud.x += self.config.wind_speed * dt * 60
+            cloud.x += self.config.cloud_speed * dt * 60
 
     def draw(self, surface: pg.Surface) -> None:
         """

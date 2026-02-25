@@ -448,6 +448,10 @@ def save_exists_file() -> bool:
     return os.path.exists(SAVE_FILE)
 
 
+# Alias for backwards compatibility
+save_exists = save_exists_file
+
+
 def get_save_info_file() -> Optional[Dict[str, Any]]:
     """Return basic info about the save file (without full load)."""
     if not os.path.exists(SAVE_FILE):
@@ -464,6 +468,10 @@ def get_save_info_file() -> Optional[Dict[str, Any]]:
         return info
     except (IOError, json.JSONDecodeError):
         return None
+
+
+# Alias for backwards compatibility
+get_save_info = get_save_info_file
 
 
 def create_save_from_game_info(game_info: Dict[str, Any]) -> GameSave:
