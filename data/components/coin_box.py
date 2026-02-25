@@ -40,7 +40,7 @@ class CoinBox(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Extract image from sprite sheet"""
-        image = pg.Surface([width, height]).convert()
+        image = pg.Surface((width, height), pg.SRCALPHA)
         rect = image.get_rect()
 
         image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))

@@ -106,7 +106,13 @@ class DebugOverlay:
         """
         # FPS
         if clock:
-            self.stats.fps = clock.get_fps()
+            fps = clock.get_fps()
+            if fps <= 0:
+                # clock.get_fps() often returns 0 on the first tick, fall back
+                # to calculating from get_time()
+                dt = clock.get_time()
+                fps = 1000 / dt if dt > 0 else 0
+            self.stats.fps = fps
             self.stats.frame_time = 1000 / self.stats.fps if self.stats.fps > 0 else 0
 
         # Frame time tracking

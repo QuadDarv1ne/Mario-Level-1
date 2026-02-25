@@ -37,13 +37,19 @@ class Coin(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Get the image frames from the sprite sheet"""
-        image = pg.Surface([width, height]).convert()
+        image = pg.Surface((width, height), pg.SRCALPHA)
         rect = image.get_rect()
 
         image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
         image.set_colorkey(c.BLACK)
 
-        image = pg.transform.scale(image, (int(rect.width * c.SIZE_MULTIPLIER), int(rect.height * c.SIZE_MULTIPLIER)))
+        image = pg.transform.scale(
+            image,
+            (
+                int(rect.width * c.SIZE_MULTIPLIER),
+                int(rect.height * c.SIZE_MULTIPLIER),
+            ),
+        )
         return image
 
     def setup_frames(self) -> None:

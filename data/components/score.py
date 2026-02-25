@@ -64,13 +64,17 @@ class Score:
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Extracts image from sprite sheet"""
-        image = pg.Surface([width, height]).convert()
+        image = pg.Surface((width, height), pg.SRCALPHA)
         rect = image.get_rect()
 
         image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
         image.set_colorkey(c.BLACK)
         image = pg.transform.scale(
-            image, (int(rect.width * c.BRICK_SIZE_MULTIPLIER), int(rect.height * c.BRICK_SIZE_MULTIPLIER))
+            image,
+            (
+                int(rect.width * c.BRICK_SIZE_MULTIPLIER),
+                int(rect.height * c.BRICK_SIZE_MULTIPLIER),
+            ),
         )
         return image
 

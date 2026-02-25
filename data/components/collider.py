@@ -13,7 +13,7 @@ class Collider(pg.sprite.Sprite):
 
     def __init__(self, x: int, y: int, width: int, height: int, name: str = "collider") -> None:
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((width, height)).convert()
+        self.image = pg.Surface((width, height), pg.SRCALPHA)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y

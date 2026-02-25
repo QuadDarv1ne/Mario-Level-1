@@ -284,6 +284,8 @@ class HammerBro(Enemy):
         self.rect.x = x
         self.rect.bottom = y
 
+        self.start_y = y
+        self.y_vel = 0
         self.jump_timer: float = 0
         self.hammer_timer: float = 0
         self.jump_vel: float = 0

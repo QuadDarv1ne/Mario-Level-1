@@ -89,6 +89,7 @@ class Level2(tools._State):
         self.coin_group = pg.sprite.Group()
         self.powerup_group = pg.sprite.Group()
         self.fire_group = pg.sprite.Group()
+        self.mario_and_enemy_group = pg.sprite.Group()
 
     def setup_all(self) -> None:
         """Setup all level components"""
@@ -102,6 +103,7 @@ class Level2(tools._State):
         self.setup_enemies()
         self.setup_mario()
         self.setup_checkpoints()
+        self._update_mario_enemy_group()
 
     def setup_background(self) -> None:
         """Sets the background"""
@@ -111,7 +113,7 @@ class Level2(tools._State):
         width = self.back_rect.width
         height = self.back_rect.height
 
-        self.level = pg.Surface((width, height)).convert()
+        self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
         self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
         self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
@@ -180,6 +182,14 @@ class Level2(tools._State):
         if self.mario:
             self.mario.rect.x = mario_start.get("x", 110)
             self.mario.rect.y = mario_start.get("y", c.GROUND_HEIGHT)
+            self.mario_and_enemy_group.add(self.mario)
+
+    def _update_mario_enemy_group(self) -> None:
+        """Update mario and enemy group"""
+        if self.mario:
+            self.mario_and_enemy_group.add(self.mario)
+        if self.enemy_group:
+            self.mario_and_enemy_group.add(self.enemy_group)
 
     def setup_checkpoints(self) -> None:
         """Setup checkpoints"""
@@ -233,19 +243,19 @@ class Level2(tools._State):
             self.mario.update(keys, self.game_info, self.fire_group)
 
         if self.enemy_group:
-            self.enemy_group.update(current_time)
+            self.enemy_group.update(self.game_info)
 
         if self.powerup_group:
-            self.powerup_group.update(current_time)
+            self.powerup_group.update(self.game_info)
 
         if self.fire_group:
-            self.fire_group.update(current_time)
+            self.fire_group.update(self.game_info)
 
         if self.brick_group:
             self.brick_group.update()
 
         if self.coin_box_group:
-            self.coin_box_group.update()
+            self.coin_box_group.update(self.game_info)
 
     def check_collisions(self) -> None:
         """Check all collisions"""
@@ -318,7 +328,7 @@ class Level2(tools._State):
         if self.level is None or self.background is None:
             return
 
-        self.level.blit(self.background, self.back_rect, self.viewport)
+        self.level.blit(self.background, self.viewport, self.viewport)
 
         for group_name in [
             "ground_group",
@@ -327,7 +337,7 @@ class Level2(tools._State):
             "brick_group",
             "coin_box_group",
             "flag_pole_group",
-            "enemy_group",
+            "mario_and_enemy_group",
             "powerup_group",
             "coin_group",
             "fire_group",
@@ -336,8 +346,6 @@ class Level2(tools._State):
             if group:
                 group.draw(self.level)
 
-        if self.mario:
-            self.mario.draw(self.level)
         if self.overhead_info_display:
             self.overhead_info_display.draw(self.level)
 
@@ -345,5 +353,4 @@ class Level2(tools._State):
 
     def get_event(self, event: pg.event.Event) -> None:
         """Handle events"""
-        if self.mario:
-            self.mario.get_event(event)
+        pass

@@ -58,13 +58,20 @@ class Enemy(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Get the image frames from the sprite sheet"""
-        image = pg.Surface([width, height]).convert()
+        # create a surface with alpha so we don't require a video mode
+        image = pg.Surface((width, height), pg.SRCALPHA)
         rect = image.get_rect()
 
         image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
         image.set_colorkey(c.BLACK)
 
-        image = pg.transform.scale(image, (int(rect.width * c.SIZE_MULTIPLIER), int(rect.height * c.SIZE_MULTIPLIER)))
+        image = pg.transform.scale(
+            image,
+            (
+                int(rect.width * c.SIZE_MULTIPLIER),
+                int(rect.height * c.SIZE_MULTIPLIER),
+            ),
+        )
         return image
 
     def handle_state(self) -> None:
