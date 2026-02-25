@@ -388,6 +388,8 @@ class TestAdvancedAI:
         enemy.max_speed = 3.0
         enemy.direction = "left"
         enemy.x_vel = 0
+        enemy.health = 100
+        enemy.max_health = 100
         return enemy
 
     @pytest.fixture
@@ -430,6 +432,33 @@ class TestAdvancedAI:
 
         assert ai.target is not None
         assert ai.target.visible is True
+
+    def test_ai_update(self, mock_enemy, mock_mario) -> None:
+        """Test EnemyAI update cycle."""
+        ai = EnemyAI(mock_enemy)
+        game_info = {c.CURRENT_TIME: 1000}
+
+        # Update with target
+        ai.update(game_info, mario=mock_mario)
+
+        # Should have processed target
+        assert ai.last_update == 1000
+
+    def test_ai_update_throttling(self, mock_enemy, mock_mario) -> None:
+        """Test that AI update is throttled."""
+        ai = EnemyAI(mock_enemy)
+        game_info = {c.CURRENT_TIME: 1000}
+
+        # First update
+        ai.update(game_info, mario=mock_mario)
+        first_update = ai.last_update
+
+        # Second update too soon - should be throttled
+        game_info[c.CURRENT_TIME] = 1001
+        ai.update(game_info, mario=mock_mario)
+
+        # Should not have updated again (throttled)
+        assert ai.last_update == first_update
 
     def test_target_out_of_range(self, mock_enemy, mock_mario) -> None:
         """Test target out of range."""
@@ -517,6 +546,11 @@ class TestAdvancedAI:
         director = AIDirector()
         game_info = {c.CURRENT_TIME: 1000}
 
+        # First update - no decisions yet (need time to pass)
+        decisions = director.update(game_info, player_alive=True, player_health=0.8, enemies_remaining=5)
+
+        # Advance time beyond adjustment interval (30 seconds)
+        game_info[c.CURRENT_TIME] = 35000
         decisions = director.update(game_info, player_alive=True, player_health=0.8, enemies_remaining=5)
 
         assert "spawn_rate" in decisions
@@ -528,7 +562,10 @@ class TestAdvancedAI:
         game_info = {c.CURRENT_TIME: 1000}
 
         # Low health, many enemies = high tension
-        director.update(game_info, player_alive=True, player_health=0.1, enemies_remaining=10)  # Very low  # Max
+        # Need multiple updates to build up tension (smooth transition)
+        for i in range(20):
+            game_info[c.CURRENT_TIME] = 1000 + i * 1000
+            director.update(game_info, player_alive=True, player_health=0.1, enemies_remaining=10)
 
         tension = director.get_tension_level()
         assert tension > 0.5

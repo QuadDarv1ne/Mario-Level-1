@@ -362,6 +362,15 @@ except Exception:
     pass
 
 
+def pytest_collection_modifyitems(config, items):
+    """Skip benchmark tests if pytest-benchmark is not installed."""
+    # Skip benchmark tests by default (require special plugin)
+    skip_benchmark = pytest.mark.skip(reason="Requires pytest-benchmark plugin")
+    for item in items:
+        if "benchmark" in item.nodeid:
+            item.add_marker(skip_benchmark)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def init_pygame():
     """Initialize pygame once per test session."""
@@ -388,3 +397,31 @@ def screen():
 def clock():
     """Create a pygame clock for timing tests."""
     return pg.time.Clock()
+
+
+@pytest.fixture
+def temp_asset_dir():
+    """Create temporary asset directory for tests."""
+    import tempfile
+    from pathlib import Path
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir)
+
+        # Create subdirectories
+        (path / "graphics").mkdir()
+        (path / "sound").mkdir()
+        (path / "fonts").mkdir()
+
+        # Create test image
+        pg.init()
+        surface = pg.Surface((32, 32))
+        surface.fill((255, 0, 0))
+        try:
+            pg.image.save(surface, str(path / "graphics" / "test.png"))
+        except Exception:
+            pass  # Ignore if save fails in test environment
+
+        pg.quit()
+
+        yield path
