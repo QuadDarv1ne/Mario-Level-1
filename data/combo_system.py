@@ -105,17 +105,19 @@ class ComboManager:
         """
         self._on_combo_milestone = callback
 
-    def add_action(self, combo_type: ComboType = ComboType.ENEMY_STOMP) -> int:
+    def add_action(self, combo_type: ComboType = ComboType.ENEMY_STOMP, current_time: Optional[float] = None) -> int:
         """
         Add combo action and return new combo count.
 
         Args:
             combo_type: Type of combo action
+            current_time: Optional current time in ms (for testing)
 
         Returns:
             New combo count
         """
-        current_time = time.time() * 1000  # Convert to milliseconds
+        if current_time is None:
+            current_time = time.time() * 1000  # Convert to milliseconds
 
         # Check if combo should reset
         if self.state.is_active:
