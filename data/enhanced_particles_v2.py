@@ -17,11 +17,9 @@ import math
 import random
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pygame as pg
-
-from . import constants as c
 
 
 class ParticleShape(Enum):

@@ -38,8 +38,17 @@ def main() -> int:
         logger.info(f"Python version: {sys.version}")
         logger.info(f"Pygame version: {pg.ver}")
 
+        # Initialize display first
+        setup.initialize_display()
+        logger.info("Display initialized")
+
+        # Load resources
+        setup.load_resources()
+        logger.info(f"Loaded {len(setup.GFX)} graphics, {len(setup.SFX)} sounds")
+
         # Initialize game controller
         run_it = tools.Control(setup.ORIGINAL_CAPTION)
+        logger.info("Controller created")
 
         # Define game states
         state_dict: Dict[str, Any] = {

@@ -31,7 +31,7 @@ DEFAULT_MAPPINGS: Dict[str, int] = {
 }
 
 # Axis mappings
-DEFAULT_AXIS_MAPPINGS: Dict[str, Tuple[int, int]] = {
+DEFAULT_AXIS_MAPPINGS: Dict[str, Tuple[int, float]] = {
     "left_stick_x": (0, 0.3),  # axis_index, deadzone
     "left_stick_y": (1, 0.3),
     "right_stick_x": (2, 0.3),
@@ -121,7 +121,7 @@ class GameController:
         """
         self.id = joystick_id
         self.config = config or ControllerConfig()
-        self._controller: Optional[pg.joystick.Joystick] = None
+        self._controller: Optional[pg.joystick.JoystickType] = None
         self._state = ControllerState()
         self._initialized = False
 
@@ -134,9 +134,8 @@ class GameController:
             if pg.joystick.get_count() > self.id:
                 self._controller = pg.joystick.Joystick(self.id)
                 self._controller.init()
-                self._controller.set_init(True)
-                self._state.connected = True
                 self._initialized = True
+                self._state.connected = True
         except pg.error:
             self._state.connected = False
 
@@ -144,7 +143,10 @@ class GameController:
     def name(self) -> str:
         """Get controller name."""
         if self._controller:
-            return self._controller.get_name()
+            try:
+                return self._controller.get_name()
+            except AttributeError:
+                return "Unknown Controller"
         return "Unknown"
 
     @property
@@ -168,7 +170,7 @@ class GameController:
             try:
                 pressed = self._controller.get_button(button_id)
                 self._state.button_states[name] = pressed
-            except pg.error:
+            except (pg.error, AttributeError):
                 self._state.button_states[name] = False
 
         # Read axes
@@ -179,7 +181,7 @@ class GameController:
                 if abs(value) < deadzone:
                     value = 0.0
                 self._state.axis_values[name] = value
-            except pg.error:
+            except (pg.error, AttributeError):
                 self._state.axis_values[name] = 0.0
 
         # Read triggers (as axes or buttons depending on controller)
@@ -189,7 +191,7 @@ class GameController:
                 # Convert 0-1 range for triggers
                 value = max(0.0, (value + 1) / 2)
                 self._state.trigger_values[name] = value
-            except pg.error:
+            except (pg.error, AttributeError):
                 self._state.trigger_values[name] = 0.0
 
         # Read D-pad (as hat or buttons)
@@ -199,7 +201,7 @@ class GameController:
             self._state.button_states["dpad_down"] = hat[1] < 0
             self._state.button_states["dpad_left"] = hat[0] < 0
             self._state.button_states["dpad_right"] = hat[0] > 0
-        except (pg.error, IndexError):
+        except (pg.error, IndexError, AttributeError):
             pass
 
         return self._state
@@ -220,11 +222,11 @@ class GameController:
 
         try:
             # Check for rumble support
-            if hasattr(self._controller, "rumble"):
+            if self._controller and hasattr(self._controller, "rumble"):
                 self._controller.rumble(
                     0.0,
                     strength * self.config.vibration_strength,
-                    duration * 1000,
+                    int(duration * 1000),
                 )
                 return True
         except pg.error:
@@ -248,12 +250,11 @@ class GameController:
             return False
 
         try:
-            if hasattr(self._controller, "trigger_motor"):
-                motor_id = 0 if trigger == "left_trigger" else 1
+            if self._controller and hasattr(self._controller, "trigger_motor"):
                 self._controller.trigger_motor(
-                    motor_id,
-                    strength * self.config.vibration_strength,
-                    duration * 1000,
+                    motor_id=0 if trigger == "left_trigger" else 1,
+                    strength=strength * self.config.vibration_strength,
+                    duration=int(duration * 1000),
                 )
                 return True
         except pg.error:
@@ -268,7 +269,10 @@ class GameController:
     def close(self) -> None:
         """Close controller."""
         if self._controller:
-            self._controller.quit()
+            try:
+                self._controller.quit()
+            except AttributeError:
+                pass
             self._controller = None
             self._initialized = False
             self._state.connected = False

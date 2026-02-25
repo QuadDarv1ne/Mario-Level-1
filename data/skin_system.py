@@ -84,12 +84,23 @@ class Skin:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Skin":
         """Create from dictionary."""
+        # Safely get enum values
+        try:
+            category = SkinCategory[data["category"]]
+        except (KeyError, ValueError):
+            category = SkinCategory.CLASSIC
+
+        try:
+            rarity = SkinRarity[data["rarity"]]
+        except (KeyError, ValueError):
+            rarity = SkinRarity.COMMON
+
         return cls(
             id=data["id"],
             name=data["name"],
             description=data["description"],
-            category=SkinCategory.get(data["category"], SkinCategory.CLASSIC),
-            rarity=SkinRarity.get(data["rarity"], SkinRarity.COMMON),
+            category=category,
+            rarity=rarity,
             unlocked=data.get("unlocked", False),
             color_primary=tuple(data.get("color_primary", (255, 0, 0))),
             color_secondary=tuple(data.get("color_secondary", (139, 69, 19))),

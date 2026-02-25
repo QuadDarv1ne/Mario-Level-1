@@ -13,11 +13,14 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable, Any, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Callable, Any, Tuple
 
 import pygame as pg
 
 from . import constants as c
+
+if TYPE_CHECKING:
+    from pygame.font import Font
 
 
 @dataclass
@@ -53,6 +56,8 @@ class DebugOverlay:
         self.x, self.y = position
         self.font_size = font_size
 
+        self.font: Optional["Font"] = None
+        self.small_font: Optional["Font"] = None
         self._init_fonts()
 
         self.visible = False
@@ -368,6 +373,7 @@ class DebugConsole:
         self.output: List[str] = []
 
         self.commands: Dict[str, Callable] = {}
+        self.font: Optional["Font"] = None
         self._init_fonts()
         self._register_default_commands()
 

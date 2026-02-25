@@ -478,7 +478,7 @@ class AssetManager:
 
         return False
 
-    def unload_unused(self, max_idle_time: int = None) -> int:
+    def unload_unused(self, max_idle_time: Optional[int] = None) -> int:
         """
         Unload unused assets.
 

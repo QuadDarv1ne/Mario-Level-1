@@ -12,15 +12,12 @@ Features:
 
 from __future__ import annotations
 
-import math
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 import pygame as pg
-
-from . import constants as c
 
 
 class AttackType(Enum):

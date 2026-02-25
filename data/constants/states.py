@@ -27,7 +27,7 @@ BOTTOM_OF_POLE: str = "bottom of pole"
 LEFT: str = "left"
 RIGHT: str = "right"
 JUMPED_ON: str = "jumped on"
-DEATH_JUMP: str = "death jump"
+ENEMY_DEATH_JUMP: str = "death jump"
 HIDDEN: str = "hidden"
 EMERGING: str = "emerging"
 EMERGED: str = "emerged"
@@ -81,7 +81,7 @@ FLAG_AND_FIREWORKS: str = "flag and fireworks"
 # =============================================================================
 TOP_OF_POLE: str = "top of pole"
 SLIDE_DOWN: str = "slide down"
-BOTTOM_OF_POLE: str = "bottom of pole"
+FLAG_BOTTOM_OF_POLE: str = "bottom of pole"
 
 # =============================================================================
 # MAIN MENU STATES

@@ -13,12 +13,15 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Callable, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Callable, Tuple
 
 import pygame as pg
 
 from . import constants as c
 from .animation_system import TweenManager, EasingType
+
+if TYPE_CHECKING:
+    from pygame.font import Font
 
 
 class DialogueAlign(Enum):
@@ -97,6 +100,8 @@ class DialogueBox:
         self.height = height
         self.font_size = font_size
 
+        self.font: Optional["Font"] = None
+        self.name_font: Optional["Font"] = None
         self._init_fonts()
 
         # State
@@ -266,12 +271,13 @@ class DialogueBox:
 
         for word in words:
             test_line = current_line + word + " "
-            test_surface = self.font.render(test_line, True, self.text_color)
-            if test_surface.get_width() <= self.width - 30:
-                current_line = test_line
-            else:
-                lines.append(current_line)
-                current_line = word + " "
+            if self.font:
+                test_surface = self.font.render(test_line, True, self.text_color)
+                if test_surface.get_width() <= self.width - 30:
+                    current_line = test_line
+                else:
+                    lines.append(current_line)
+                    current_line = word + " "
 
         if current_line:
             lines.append(current_line)
@@ -279,8 +285,9 @@ class DialogueBox:
         # Draw each line
         text_y = draw_y + 45
         for line in lines[:4]:  # Max 4 lines
-            line_surface = self.font.render(line, True, self.text_color)
-            line_surface.set_alpha(self.alpha)
+            if self.font:
+                line_surface = self.font.render(line, True, self.text_color)
+                line_surface.set_alpha(self.alpha)
 
             # Alignment
             if self.current_line and self.current_line.align == DialogueAlign.CENTER:

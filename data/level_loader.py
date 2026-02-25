@@ -31,6 +31,7 @@ class LevelData:
         self.checkpoints: list[dict[str, Any]] = []
         self.flag_pole: dict[str, Any] = {}
         self.mario_start: dict[str, Any] = {}
+        self.ground_sections: list[dict[str, Any]] = []
 
         # Background
         self.background_color: tuple[int, int, int] = c.WHITE

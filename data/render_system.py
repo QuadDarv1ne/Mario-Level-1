@@ -11,7 +11,7 @@ Features:
 from __future__ import annotations
 
 import pygame as pg
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Any, Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass, field
 from enum import IntEnum
 
@@ -50,7 +50,7 @@ class RenderStats:
         self.draw_calls = 0
         self.dirty_rects = 0
 
-    def __getitem__(self, key: str) -> int:
+    def __getitem__(self, key: str) -> Any:
         """Allow dict-like access for tests."""
         return getattr(self, key)
 
@@ -152,8 +152,8 @@ class SpriteRenderer:
 
     def add_sprite(
         self,
-        rect: pg.Rect,
-        image: pg.Surface,
+        rect: Optional[pg.Rect],
+        image: Optional[pg.Surface],
         layer: RenderLayer = RenderLayer.ITEMS,
         src_rect: Optional[pg.Rect] = None,
     ) -> None:
@@ -166,6 +166,8 @@ class SpriteRenderer:
             layer: Rendering layer
             src_rect: Source rectangle (for sprite sheets)
         """
+        if rect is None or image is None:
+            return
         self._sprites.append(
             RenderSprite(
                 rect=rect,

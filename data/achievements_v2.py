@@ -18,7 +18,7 @@ import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pygame as pg
 
@@ -106,27 +106,27 @@ class Achievement:
     rarity: AchievementRarity
     tier: AchievementTier = AchievementTier.BRONZE
     reward: AchievementReward = field(default_factory=AchievementReward)
-    
+
     # Progress tracking
     target: int = 1
     current: int = 0
     milestones: List[int] = field(default_factory=list)  # For partial progress
-    
+
     # Metadata
     hidden: bool = False
     hidden_description: str = ""
     prerequisites: List[str] = field(default_factory=list)
     chain_id: Optional[str] = None  # For achievement chains
     chain_order: int = 0
-    
+
     # State
     unlocked: bool = False
     unlocked_at: Optional[float] = None
     progress_percent: float = 0.0
-    
+
     # Statistics
     global_unlock_rate: float = 0.0  # Percentage of players who unlocked
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -536,7 +536,6 @@ class AchievementManager:
                 continue
 
             # Update progress
-            was_unlocked = achievement.unlocked
             if achievement.update_progress(amount):
                 unlocked.append(achievement)
                 self.total_points += achievement.reward.points

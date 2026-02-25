@@ -14,15 +14,13 @@ from __future__ import annotations
 
 import math
 import random
-import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pygame as pg
 
 from .. import setup, tools
 from .. import constants as c
-from ..animation_system import TweenManager, EasingType
-from ..advanced_particles import AdvancedParticleSystem
+from ..animation_system import TweenManager
 from ..player_progression import get_progression_manager
 
 
