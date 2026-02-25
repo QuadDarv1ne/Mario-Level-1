@@ -433,6 +433,33 @@ class TestAdvancedAI:
         assert ai.target is not None
         assert ai.target.visible is True
 
+    def test_ai_update(self, mock_enemy, mock_mario) -> None:
+        """Test EnemyAI update cycle."""
+        ai = EnemyAI(mock_enemy)
+        game_info = {c.CURRENT_TIME: 1000}
+
+        # Update with target
+        ai.update(game_info, mario=mock_mario)
+
+        # Should have processed target
+        assert ai.last_update == 1000
+
+    def test_ai_update_throttling(self, mock_enemy, mock_mario) -> None:
+        """Test that AI update is throttled."""
+        ai = EnemyAI(mock_enemy)
+        game_info = {c.CURRENT_TIME: 1000}
+
+        # First update
+        ai.update(game_info, mario=mock_mario)
+        first_update = ai.last_update
+
+        # Second update too soon - should be throttled
+        game_info[c.CURRENT_TIME] = 1001
+        ai.update(game_info, mario=mock_mario)
+
+        # Should not have updated again (throttled)
+        assert ai.last_update == first_update
+
     def test_target_out_of_range(self, mock_enemy, mock_mario) -> None:
         """Test target out of range."""
         ai = EnemyAI(mock_enemy)
