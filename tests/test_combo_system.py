@@ -115,6 +115,21 @@ class TestComboManager:
             combo_manager.add_action(ComboType.ENEMY_STOMP)
         assert combo_manager.tier == ComboTier.GOLD
 
+    def test_add_action_with_custom_time(self, combo_manager: ComboManager) -> None:
+        """Test add_action with explicit time parameter."""
+        # First action at time 0
+        combo_manager.add_action(ComboType.ENEMY_STOMP, current_time=0)
+        assert combo_manager.combo_count == 1
+
+        # Second action within combo window
+        combo_manager.add_action(ComboType.ENEMY_STOMP, current_time=1000)
+        assert combo_manager.combo_count == 2
+
+        # Third action after combo window (5000ms window)
+        combo_manager.add_action(ComboType.ENEMY_STOMP, current_time=10000)
+        # Combo should have reset and started again
+        assert combo_manager.combo_count == 1
+
     def test_combo_reset(self, combo_manager: ComboManager) -> None:
         """Test combo reset."""
         combo_manager.add_action(ComboType.ENEMY_STOMP)
