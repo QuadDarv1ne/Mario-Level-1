@@ -329,6 +329,10 @@ class ProgressionManager:
         if not self.profile:
             return False
 
+        # Validate XP amount
+        if amount <= 0:
+            return False
+
         self.profile.stats.total_xp += amount
         self.profile.last_played = time.time()
 

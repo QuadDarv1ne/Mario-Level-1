@@ -46,6 +46,18 @@ class TestPlayerProgression:
 
         assert progression.profile.stats.total_xp == 100
 
+    def test_add_xp_validation(self, progression) -> None:
+        """Test XP validation rejects invalid values."""
+        initial_xp = progression.profile.stats.total_xp
+
+        # Negative XP should be rejected
+        assert progression.add_xp(-100) is False
+        assert progression.profile.stats.total_xp == initial_xp
+
+        # Zero XP should be rejected
+        assert progression.add_xp(0) is False
+        assert progression.profile.stats.total_xp == initial_xp
+
     def test_level_up(self, progression) -> None:
         """Test level up from XP."""
         # Need 100 * (2^2) = 400 XP for level 2
