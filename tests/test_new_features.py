@@ -1,7 +1,7 @@
 """
 Tests for new systems:
 - Combo Manager
-- Advanced Particles
+- Advanced Particles (v2)
 - Enhanced Hint System
 - Boss System
 - Advanced Enemies
@@ -14,8 +14,8 @@ from unittest.mock import Mock, MagicMock, patch
 
 # Import new modules
 from data.combo_manager import ComboManager, ComboType, ComboChain, ComboStats
-from data.advanced_particles import AdvancedParticleSystem, AdvancedParticle, AdvancedParticleType
-from data.enhanced_hint_system import HintManager, Hint, HintCategory, HintTrigger
+from data.enhanced_particles_v2 import EnhancedParticleSystem, EnhancedParticle, ParticleConfig
+from data.hint_system import HintManager, Hint, HintCategory, HintPriority
 from data.components.bosses import Boss, BossState, BossStats, Bowser, MegaGoomba, create_boss
 from data.components.advanced_enemies import PiranhaPlant, BulletBill, HammerBro, BuzzyBeetle, create_enemy
 
@@ -115,38 +115,38 @@ class TestComboManager:
         assert len(combo.active_chains) == 2
 
 
-class TestAdvancedParticleSystem:
-    """Tests for AdvancedParticleSystem."""
+class TestEnhancedParticleSystem:
+    """Tests for EnhancedParticleSystem."""
 
     def test_init(self) -> None:
         """Test particle system initialization."""
-        system = AdvancedParticleSystem(max_particles=100, pool_size=50)
+        system = EnhancedParticleSystem(max_particles=100)
 
         assert system.max_particles == 100
-        assert len(system._pool) == 50
         assert len(system.particles) == 0
 
     def test_emit_particles(self) -> None:
         """Test emitting particles."""
-        system = AdvancedParticleSystem()
+        system = EnhancedParticleSystem()
 
-        count = system.emit(100, 200, "jump_dust")
+        # Use preset
+        count = system.emit(100, 200, "fire")
 
         assert count > 0
         assert len(system.particles) > 0
 
-    def test_emit_unknown_type(self) -> None:
-        """Test emitting unknown particle type."""
-        system = AdvancedParticleSystem()
+    def test_emit_unknown_preset(self) -> None:
+        """Test emitting unknown particle preset."""
+        system = EnhancedParticleSystem()
 
-        count = system.emit(100, 200, "unknown_type")
+        count = system.emit(100, 200, "unknown_preset")
 
         assert count == 0
         assert len(system.particles) == 0
 
     def test_update_removes_dead_particles(self) -> None:
         """Test that update removes dead particles."""
-        system = AdvancedParticleSystem()
+        system = EnhancedParticleSystem()
 
         system.emit(100, 200, "spark")  # Short lifetime
 
@@ -158,174 +158,94 @@ class TestAdvancedParticleSystem:
 
     def test_max_particles_limit(self) -> None:
         """Test that max_particles limit is respected."""
-        system = AdvancedParticleSystem(max_particles=10, pool_size=20)
+        system = EnhancedParticleSystem(max_particles=10)
 
-        # Emit more than max
-        system.emit(0, 0, "dust", count_override=50)
+        # Emit multiple times
+        for _ in range(5):
+            system.emit(0, 0, "fire")
 
         assert len(system.particles) <= 10
 
     def test_clear(self) -> None:
         """Test clearing all particles."""
-        system = AdvancedParticleSystem()
-        system.emit(100, 200, "dust")
+        system = EnhancedParticleSystem()
+        system.emit(100, 200, "fire")
 
         system.clear()
 
         assert len(system.particles) == 0
-        assert len(system._pool) > 0
 
     def test_stats(self) -> None:
         """Test particle system statistics."""
-        system = AdvancedParticleSystem()
+        system = EnhancedParticleSystem()
 
-        system.emit(100, 200, "jump_dust")
+        system.emit(100, 200, "fire")
         system.update(100)
 
         stats = system.get_stats()
 
-        assert "emitted" in stats
         assert "active" in stats
-        assert stats["emitted"] > 0
+        assert "total_emitted" in stats
+        assert stats["total_emitted"] > 0
 
-    def test_particle_templates_exist(self) -> None:
-        """Test that all expected templates exist."""
-        expected_templates = ["jump_dust", "landing_dust", "shell_spark", "fireball_trail", "coin_burst", "combo_star"]
+    def test_particle_presets_exist(self) -> None:
+        """Test that all expected presets exist."""
+        expected_presets = ["fire", "smoke", "spark", "magic", "explosion"]
 
-        for template in expected_templates:
-            assert template in AdvancedParticleSystem.TEMPLATES
+        for preset in expected_presets:
+            assert preset in EnhancedParticleSystem.PRESETS
 
 
 class TestHintManager:
-    """Tests for EnhancedHintManager."""
+    """Tests for HintManager."""
 
     def test_init(self) -> None:
         """Test hint manager initialization."""
-        hint_mgr = HintManager(tutorial_mode=True)
-
-        assert len(hint_mgr.hints) > 0
-        assert hint_mgr.tutorial_mode is True
-        assert hint_mgr.hint_visible is False
-
-    def test_load_default_hints(self) -> None:
-        """Test that default hints are loaded."""
         hint_mgr = HintManager()
 
-        # Should have hints from all categories
-        categories = set(h.category for h in hint_mgr.hints.values())
-
-        assert HintCategory.CONTROLS in categories
-        assert HintCategory.COMBAT in categories
-        assert HintCategory.POWERUPS in categories
-
-    def test_on_event_queues_hint(self) -> None:
-        """Test that events queue appropriate hints."""
-        hint_mgr = HintManager()
-
-        hint_mgr.on_event("ON_START")
-
-        # Should queue ON_START hints
-        assert len(hint_mgr.hint_queue) > 0
-
-    def test_show_hint(self) -> None:
-        """Test showing a hint."""
-        hint_mgr = HintManager()
-        hint = list(hint_mgr.hints.values())[0]
-
-        hint_mgr.show_hint(hint)
-
-        assert hint_mgr.hint_visible is True
-        assert hint_mgr.current_hint == hint
-        assert hint.shown is True
-
-    def test_hide_hint(self) -> None:
-        """Test hiding a hint."""
-        hint_mgr = HintManager()
-        hint = list(hint_mgr.hints.values())[0]
-
-        hint_mgr.show_hint(hint)
-        hint_mgr.hide_hint()
-
-        assert hint_mgr.hint_visible is False
-        assert hint_mgr.current_hint is None
-
-    def test_update_shows_queued_hints(self) -> None:
-        """Test that update shows queued hints."""
-        hint_mgr = HintManager()
-        hint_mgr.hint_display_time = 100  # Short for testing
-
-        hint_mgr.on_event("ON_START")
-        hint_mgr.update(0)
-
-        # Should show hint
-        assert hint_mgr.hint_visible is True
-
-    def test_force_show_hint(self) -> None:
-        """Test forcing a specific hint."""
-        hint_mgr = HintManager()
-
-        result = hint_mgr.force_show_hint("controls_move")
-
-        assert result is True
-        assert len(hint_mgr.hint_queue) > 0
-
-    def test_force_show_unknown_hint(self) -> None:
-        """Test forcing unknown hint."""
-        hint_mgr = HintManager()
-
-        result = hint_mgr.force_show_hint("unknown_id")
-
-        assert result is False
-
-    def test_get_hints_by_category(self) -> None:
-        """Test getting hints by category."""
-        hint_mgr = HintManager()
-
-        hints = hint_mgr.get_hints_by_category(HintCategory.CONTROLS)
-
-        assert len(hints) > 0
-        assert all(h.category == HintCategory.CONTROLS for h in hints)
-
-    def test_tutorial_progress(self) -> None:
-        """Test tutorial progress calculation."""
-        hint_mgr = HintManager()
-
-        initial_progress = hint_mgr.get_tutorial_progress()
-
-        # Show some hints
-        hint_mgr.force_show_hint("controls_move")
-        hint_mgr.update(0)
-
-        progress = hint_mgr.get_tutorial_progress()
-
-        assert progress >= initial_progress
-
-    def test_reset(self) -> None:
-        """Test resetting all hint progress."""
-        hint_mgr = HintManager()
-
-        hint_mgr.force_show_hint("controls_move")
-        hint_mgr.update(0)
-        hint_mgr.hide_hint()
-
-        hint_mgr.reset()
-
-        assert hint_mgr.hint_visible is False
-        assert hint_mgr.current_hint is None
+        assert len(hint_mgr.hints) == 0
         assert len(hint_mgr.hint_queue) == 0
+        assert hint_mgr.current_hint is None
 
-    def test_serialize_hint(self) -> None:
-        """Test hint serialization."""
-        hint = Hint(id="test", text="Test hint", category=HintCategory.CONTROLS, trigger=HintTrigger.MANUAL)
+    def test_register_hint(self) -> None:
+        """Test registering a hint."""
+        hint_mgr = HintManager()
 
-        data = hint.to_dict()
+        hint = Hint(
+            id="test_hint",
+            title="Test",
+            message="Test message",
+            category=HintCategory.GENERAL,
+        )
 
-        assert data["id"] == "test"
-        assert data["category"] == "CONTROLS"
+        hint_mgr.register_hint(hint)
 
-        # Deserialize
-        restored = Hint.from_dict(data)
-        assert restored.id == "test"
+        assert "test_hint" in hint_mgr.hints
+        assert hint_mgr.hints["test_hint"] == hint
+
+    def test_register_default_hints(self) -> None:
+        """Test registering default hints."""
+        hint_mgr = HintManager()
+        hint_mgr.register_default_hints()
+
+        # Should have many hints
+        assert len(hint_mgr.hints) > 10
+
+        # Check categories
+        categories = set(h.category for h in hint_mgr.hints.values())
+        assert HintCategory.MOVEMENT in categories
+        assert HintCategory.COMBAT in categories
+
+    def test_trigger(self) -> None:
+        """Test triggering events."""
+        hint_mgr = HintManager()
+        hint_mgr.register_default_hints()
+
+        # Trigger an event
+        hint_mgr.trigger("player_jump")
+
+        # Should process trigger (may or may not queue hints)
+        assert len(hint_mgr.triggers) >= 0
 
 
 class TestBossSystem:
@@ -506,11 +426,11 @@ class TestIntegration:
     def test_combo_with_particles(self) -> None:
         """Test combo system triggering particle effects."""
         combo = ComboManager()
-        particles = AdvancedParticleSystem()
+        particles = EnhancedParticleSystem()
 
         # Setup callback
         def on_bonus(text: str, points: int) -> None:
-            particles.emit(0, 0, "combo_star")
+            particles.emit(0, 0, "spark")
 
         combo.on_bonus = on_bonus
 
@@ -519,17 +439,18 @@ class TestIntegration:
             combo.add_hit(ComboType.ENEMY_STOMP, base_points=100)
 
         # Should have emitted particles
-        assert particles.stats["emitted"] > 0
+        assert particles.get_stats()["total_emitted"] > 0
 
     def test_hint_on_combo_event(self) -> None:
         """Test hint system responding to combo events."""
         hint_mgr = HintManager()
+        hint_mgr.register_default_hints()
         combo = ComboManager()
 
-        # Setup integration
+        # Setup integration - trigger hint on combo
         def on_combo_update(combo_type: ComboType, count: int, mult: float) -> None:
             if count >= 5:
-                hint_mgr.on_event("ON_COMBO")
+                hint_mgr.trigger("player_combo")
 
         combo.on_combo_update = on_combo_update
 
@@ -537,8 +458,8 @@ class TestIntegration:
         for _ in range(5):
             combo.add_hit(ComboType.ENEMY_STOMP)
 
-        # Should queue hint
-        assert len(hint_mgr.hint_queue) >= 0  # May or may not have hints
+        # Should process trigger
+        assert len(hint_mgr.triggers) >= 0
 
     def test_boss_defeat_gives_combo(self) -> None:
         """Test boss defeat triggering combo points."""

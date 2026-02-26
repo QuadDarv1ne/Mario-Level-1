@@ -42,11 +42,11 @@ class TestParticleBenchmark:
 
     def test_particle_creation(self, benchmark, init_pygame):
         """Benchmark particle creation speed."""
-        from data.advanced_particles import AdvancedParticleSystem
+        from data.enhanced_particles_v2 import EnhancedParticleSystem
 
         def create_and_emit():
-            system = AdvancedParticleSystem(max_particles=500)
-            system.emit(400, 300, "jump_dust")
+            system = EnhancedParticleSystem(max_particles=500)
+            system.emit(400, 300, "fire")
             return system
 
         result = benchmark(create_and_emit)
@@ -54,12 +54,12 @@ class TestParticleBenchmark:
 
     def test_particle_update(self, benchmark, init_pygame):
         """Benchmark particle update speed."""
-        from data.advanced_particles import AdvancedParticleSystem
+        from data.enhanced_particles_v2 import EnhancedParticleSystem
 
-        system = AdvancedParticleSystem(max_particles=500)
+        system = EnhancedParticleSystem(max_particles=500)
         # Emit some particles
         for _ in range(10):
-            system.emit(400, 300, "jump_dust")
+            system.emit(400, 300, "fire")
 
         def update_particles():
             system.update(16)  # ~60fps delta
@@ -71,18 +71,19 @@ class TestParticleBenchmark:
     def test_particle_batch_render(self, benchmark, init_pygame):
         """Benchmark batch rendering of particles."""
         import pygame as pg
-        from data.advanced_particles import AdvancedParticleSystem
+        from data.enhanced_particles_v2 import EnhancedParticleSystem
 
-        system = AdvancedParticleSystem(max_particles=500)
+        system = EnhancedParticleSystem(max_particles=500)
         surface = pg.Surface((800, 600))
 
         # Emit particles
         for _ in range(20):
-            system.emit(400, 300, "coin_burst")
+            system.emit(400, 300, "spark")
 
         def render_particles():
             surface.fill((0, 0, 0))
-            system.draw_batch(surface)
+            for particle in system.particles:
+                particle.draw(surface)
             return True
 
         result = benchmark(render_particles)
