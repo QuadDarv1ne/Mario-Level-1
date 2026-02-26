@@ -52,3 +52,4 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --cov=data --cov-report=html --cov-report=term-missing"
+asyncio_default_fixture_loop_scope = "function"
