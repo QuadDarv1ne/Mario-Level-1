@@ -17,11 +17,9 @@ import math
 import random
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pygame as pg
-
-from . import constants as c
 
 
 class ParticleShape(Enum):
@@ -95,7 +93,12 @@ class EnhancedParticle:
     - Behaviors
     - Rotation
     - Size changes
+    - Surface caching for performance
     """
+
+    # Class-level cache for particle surfaces
+    _surface_cache: Dict[Tuple[ParticleShape, int, Tuple[int, int, int], int], pg.Surface] = {}
+    _cache_max_size = 500  # Maximum cached surfaces
 
     def __init__(self, x: float, y: float, config: Optional[ParticleConfig] = None) -> None:
         """
@@ -127,9 +130,12 @@ class EnhancedParticle:
         self._color_delta: Optional[Tuple[float, float, float]] = None
         if self.config.color_end:
             self._color_delta = tuple(
-                (self.config.color_end[i] - self.config.color[i]) / self._lifetime
-                for i in range(3)
+                (self.config.color_end[i] - self.config.color[i]) / self._lifetime for i in range(3)
             )
+
+        # Cached surface
+        self._cached_surface: Optional[pg.Surface] = None
+        self._cache_key: Optional[Tuple] = None
 
     def update(self, dt: float, target: Optional[Tuple[float, float]] = None) -> None:
         """
@@ -180,8 +186,7 @@ class EnhancedParticle:
         # Update color
         if self._color_delta:
             self.current_color = tuple(
-                int(self.config.color[i] + self._color_delta[i] * self.age)  # type: ignore
-                for i in range(3)
+                int(self.config.color[i] + self._color_delta[i] * self.age) for i in range(3)  # type: ignore
             )
 
     def _apply_behavior(self, dt: float, target: Optional[Tuple[float, float]] = None) -> None:
@@ -258,13 +263,53 @@ class EnhancedParticle:
         y = int(self.y - offset[1])
         size = max(1, int(self.current_size))
 
-        # Create surface with alpha
+        # Limit size for performance
         if size > 100:
-            size = 100  # Limit size for performance
+            size = 100
 
+        # Create cache key
+        cache_key = (
+            self.config.shape,
+            size,
+            tuple(int(c) for c in self.current_color),
+            self.current_alpha,
+        )
+
+        # Get or create cached surface
+        if cache_key not in self._surface_cache:
+            # Clear cache if too large
+            if len(self._surface_cache) >= self._cache_max_size:
+                # Remove oldest 20%
+                keys_to_remove = list(self._surface_cache.keys())[:100]
+                for key in keys_to_remove:
+                    del self._surface_cache[key]
+
+            # Create new surface
+            particle_surface = self._create_particle_surface(size)
+            self._surface_cache[cache_key] = particle_surface
+        else:
+            particle_surface = self._surface_cache[cache_key]
+
+        # Rotate if needed
+        if self.config.rotation_speed != 0:
+            rotated = pg.transform.rotate(particle_surface, self.rotation)
+            rect = rotated.get_rect(center=(x + size, y + size))
+            surface.blit(rotated, rect)
+        else:
+            surface.blit(particle_surface, (x - size, y - size))
+
+    def _create_particle_surface(self, size: int) -> pg.Surface:
+        """
+        Create particle surface.
+
+        Args:
+            size: Particle size
+
+        Returns:
+            Particle surface
+        """
         particle_surface = pg.Surface((size * 2, size * 2), pg.SRCALPHA)
         color_with_alpha = (*self.current_color, self.current_alpha)
-
         shape = self.config.shape
 
         if shape == ParticleShape.CIRCLE:
@@ -300,13 +345,20 @@ class EnhancedParticle:
             pg.draw.rect(particle_surface, color_with_alpha, (size - thickness // 2, 0, thickness, size * 2))
             pg.draw.rect(particle_surface, color_with_alpha, (0, size - thickness // 2, size * 2, thickness))
 
-        # Rotate if needed
-        if self.config.rotation_speed != 0:
-            particle_surface = pg.transform.rotate(particle_surface, self.rotation)
-            rect = particle_surface.get_rect(center=(x + size, y + size))
-            surface.blit(particle_surface, rect)
-        else:
-            surface.blit(particle_surface, (x - size, y - size))
+        return particle_surface
+
+    @classmethod
+    def clear_surface_cache(cls) -> None:
+        """Clear the surface cache to free memory."""
+        cls._surface_cache.clear()
+
+    @classmethod
+    def get_cache_stats(cls) -> Dict[str, int]:
+        """Get cache statistics."""
+        return {
+            "cached_surfaces": len(cls._surface_cache),
+            "max_cache_size": cls._cache_max_size,
+        }
 
 
 class EnhancedParticleSystem:

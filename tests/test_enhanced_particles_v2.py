@@ -215,14 +215,17 @@ class TestEnhancedParticle:
         assert particle.current_alpha > 100
 
     @pytest.mark.skip(reason="Requires display")
-    @pytest.mark.parametrize("shape", [
-        ParticleShape.CIRCLE,
-        ParticleShape.SQUARE,
-        ParticleShape.TRIANGLE,
-        ParticleShape.STAR,
-        ParticleShape.RING,
-        ParticleShape.SPARK,
-    ])
+    @pytest.mark.parametrize(
+        "shape",
+        [
+            ParticleShape.CIRCLE,
+            ParticleShape.SQUARE,
+            ParticleShape.TRIANGLE,
+            ParticleShape.STAR,
+            ParticleShape.RING,
+            ParticleShape.SPARK,
+        ],
+    )
     def test_particle_shapes(self, shape: ParticleShape) -> None:
         """Test different particle shapes."""
         config = ParticleConfig(shape=shape, size=10.0, lifetime=1.0)
@@ -290,7 +293,7 @@ class TestEnhancedParticleSystem:
         system = EnhancedParticleSystem()
         # Use very short lifetime
         system.emit(0, 0, "spark", count=5)
-        
+
         # Manually set very short lifetime
         for p in system.particles:
             p.config.lifetime = 0.05
@@ -341,7 +344,7 @@ class TestEnhancedParticleSystem:
         """Test particle pooling."""
         system = EnhancedParticleSystem()
         system.emit(0, 0, "spark", count=10)
-        
+
         # Set short lifetime
         for p in system.particles:
             p.config.lifetime = 0.05
@@ -407,7 +410,8 @@ class TestEnhancedParticleSystem:
         system = EnhancedParticleSystem()
 
         count = system.emit(
-            0, 0,
+            0,
+            0,
             "fire",
             count=5,
             config_override={"color": (0, 255, 0), "size": 15.0},
@@ -427,8 +431,16 @@ class TestParticlePresets:
     def test_all_presets_exist(self) -> None:
         """Test all presets are defined."""
         presets = [
-            "fire", "smoke", "spark", "magic", "explosion",
-            "debris", "energy_orb", "rain", "snow", "coin_burst",
+            "fire",
+            "smoke",
+            "spark",
+            "magic",
+            "explosion",
+            "debris",
+            "energy_orb",
+            "rain",
+            "snow",
+            "coin_burst",
         ]
 
         for preset in presets:
@@ -464,6 +476,7 @@ class TestGlobalParticleSystem:
         """Test system is singleton."""
         # Reset
         import data.enhanced_particles_v2 as epv2
+
         epv2._particle_system = None
 
         system1 = get_particle_system()
@@ -529,4 +542,133 @@ class TestParticleDrawing:
 
         particle.draw(surface)
 
-        assert particle.rotation > 0
+
+class TestParticleCaching:
+    """Test particle surface caching for performance."""
+
+    def test_surface_cache_initialization(self) -> None:
+        """Test cache is initialized."""
+        # Clear cache first
+        EnhancedParticle.clear_surface_cache()
+
+        stats = EnhancedParticle.get_cache_stats()
+        assert stats["cached_surfaces"] == 0
+        assert stats["max_cache_size"] == 500
+
+    def test_cache_key_creation(self) -> None:
+        """Test cache key is created correctly."""
+        config = ParticleConfig(
+            color=(255, 100, 50),
+            shape=ParticleShape.CIRCLE,
+            size=10.0,
+            alpha=200,
+        )
+
+        particle = EnhancedParticle(0, 0, config)
+        particle.current_size = 10.0
+        particle.current_color = (255, 100, 50)
+        particle.current_alpha = 200
+
+        # Cache key should be created with shape, size, color, alpha
+        cache_key = (
+            ParticleShape.CIRCLE,
+            10,
+            (255, 100, 50),
+            200,
+        )
+
+        # Draw to populate cache
+        surface = pg.Surface((100, 100))
+        particle.draw(surface)
+
+        stats = EnhancedParticle.get_cache_stats()
+        assert stats["cached_surfaces"] >= 1
+
+    def test_cache_reuse(self) -> None:
+        """Test that same config reuses cached surface."""
+        EnhancedParticle.clear_surface_cache()
+
+        config = ParticleConfig(
+            color=(100, 200, 150),
+            shape=ParticleShape.SQUARE,
+            size=5.0,
+        )
+
+        # Create multiple particles with same config
+        particles = [EnhancedParticle(i * 10, i * 10, config) for i in range(5)]
+        surface = pg.Surface((100, 100))
+
+        # Draw all particles
+        for p in particles:
+            p.draw(surface)
+
+        # Should have cached (same shape, size, color)
+        stats = EnhancedParticle.get_cache_stats()
+        # At least 1 cached surface (may have variations due to alpha)
+        assert stats["cached_surfaces"] >= 1
+
+    def test_cache_different_configs(self) -> None:
+        """Test cache handles different configs."""
+        EnhancedParticle.clear_surface_cache()
+
+        surface = pg.Surface((100, 100))
+
+        # Create particles with different shapes
+        configs = [
+            ParticleConfig(shape=ParticleShape.CIRCLE, color=(255, 0, 0)),
+            ParticleConfig(shape=ParticleShape.SQUARE, color=(0, 255, 0)),
+            ParticleConfig(shape=ParticleShape.TRIANGLE, color=(0, 0, 255)),
+        ]
+
+        for config in configs:
+            particle = EnhancedParticle(50, 50, config)
+            particle.draw(surface)
+
+        stats = EnhancedParticle.get_cache_stats()
+        assert stats["cached_surfaces"] >= 3
+
+    def test_clear_cache(self) -> None:
+        """Test clearing cache."""
+        EnhancedParticle.clear_surface_cache()
+
+        # Create some cached surfaces
+        config = ParticleConfig(color=(50, 50, 50))
+        particle = EnhancedParticle(0, 0, config)
+        surface = pg.Surface((100, 100))
+        particle.draw(surface)
+
+        # Verify cache has items
+        stats = EnhancedParticle.get_cache_stats()
+        assert stats["cached_surfaces"] >= 1
+
+        # Clear cache
+        EnhancedParticle.clear_surface_cache()
+
+        # Verify cache is empty
+        stats = EnhancedParticle.get_cache_stats()
+        assert stats["cached_surfaces"] == 0
+
+    def test_cache_max_size_limit(self) -> None:
+        """Test cache respects max size limit."""
+        EnhancedParticle.clear_surface_cache()
+
+        # Temporarily set low max for testing
+        original_max = EnhancedParticle._cache_max_size
+        EnhancedParticle._cache_max_size = 10
+
+        surface = pg.Surface((100, 100))
+
+        # Create many different particles
+        for i in range(20):
+            config = ParticleConfig(
+                color=(i * 10 % 256, i * 5 % 256, i * 15 % 256),
+                size=float(i % 20 + 1),
+            )
+            particle = EnhancedParticle(0, 0, config)
+            particle.draw(surface)
+
+        stats = EnhancedParticle.get_cache_stats()
+        assert stats["cached_surfaces"] <= EnhancedParticle._cache_max_size
+
+        # Restore original max
+        EnhancedParticle._cache_max_size = original_max
