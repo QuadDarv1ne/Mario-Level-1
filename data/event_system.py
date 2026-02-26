@@ -144,6 +144,7 @@ class EventManager:
     - Event cancellation
     - Global and typed handlers
     - Statistics tracking
+    - Handler caching for performance
 
     Usage:
         events = EventManager()
@@ -166,6 +167,10 @@ class EventManager:
         }
         self._enabled: bool = True
         self._event_queue: List[Event] = []
+
+        # Cache for sorted handlers (avoids repeated sorting)
+        self._handler_cache: Dict[EventType, List[EventHandler]] = {}
+        self._cache_dirty: Dict[EventType, bool] = {}
 
     def on(
         self,
@@ -193,8 +198,10 @@ class EventManager:
             self._handlers[event_type] = []
 
         self._handlers[event_type].append(handler)
-        # Sort by priority (descending)
-        self._handlers[event_type].sort(key=lambda h: h.priority, reverse=True)
+
+        # Mark cache as dirty (lazy sorting)
+        self._cache_dirty[event_type] = True
+        self._handler_cache.pop(event_type, None)
 
     def off(
         self,
@@ -217,6 +224,8 @@ class EventManager:
         if callback is None:
             count = len(self._handlers[event_type])
             del self._handlers[event_type]
+            self._cache_dirty.pop(event_type, None)
+            self._handler_cache.pop(event_type, None)
             return count
 
         removed = 0
@@ -241,6 +250,30 @@ class EventManager:
         handler = EventHandler(callback=callback, priority=priority)
         self._global_handlers.append(handler)
         self._global_handlers.sort(key=lambda h: h.priority, reverse=True)
+
+    def _get_sorted_handlers(self, event_type: EventType) -> List[EventHandler]:
+        """
+        Get sorted handlers with caching.
+
+        Args:
+            event_type: Type of event
+
+        Returns:
+            List of sorted event handlers
+        """
+        # Check cache first
+        if event_type in self._handler_cache and not self._cache_dirty.get(event_type, False):
+            return self._handler_cache[event_type]
+
+        # Sort and cache
+        if event_type in self._handlers:
+            handlers = self._handlers[event_type]
+            handlers.sort(key=lambda h: h.priority, reverse=True)
+            self._handler_cache[event_type] = handlers
+            self._cache_dirty[event_type] = False
+            return handlers
+
+        return []
 
     def emit(self, event_type: EventType, data: Optional[Dict[str, Any]] = None, source: Optional[Any] = None) -> Event:
         """
@@ -267,9 +300,10 @@ class EventManager:
             self._stats["cancelled"] += 1
             return event
 
-        # Process type-specific handlers
-        if event_type in self._handlers:
-            self._invoke_handlers(self._handlers[event_type], event)
+        # Process type-specific handlers (using cache)
+        handlers = self._get_sorted_handlers(event_type)
+        if handlers:
+            self._invoke_handlers(handlers, event)
 
         return event
 
@@ -323,10 +357,30 @@ class EventManager:
         self._handlers.clear()
         self._global_handlers.clear()
         self._event_queue.clear()
+        self._handler_cache.clear()
+        self._cache_dirty.clear()
+
+    def clear_cache(self, event_type: Optional[EventType] = None) -> None:
+        """
+        Clear handler cache.
+
+        Args:
+            event_type: Specific event type to clear, or None for all
+        """
+        if event_type is not None:
+            self._handler_cache.pop(event_type, None)
+            self._cache_dirty[event_type] = True
+        else:
+            self._handler_cache.clear()
+            self._cache_dirty.clear()
 
     def get_stats(self) -> Dict[str, int]:
         """Get event statistics."""
-        return self._stats.copy()
+        return {
+            **self._stats.copy(),
+            "cached_types": len(self._handler_cache),
+            "dirty_cache": sum(1 for v in self._cache_dirty.values() if v),
+        }
 
     def reset_stats(self) -> None:
         """Reset statistics."""
