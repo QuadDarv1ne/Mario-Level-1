@@ -68,6 +68,7 @@ class WeatherConfig:
     # Wind settings
     wind_strength: float = 0.0
     wind_direction: int = 1  # 1 = right, -1 = left
+    wind_speed: float = 1.0
 
     # Storm settings
     lightning_chance: float = 0.001
@@ -94,9 +95,9 @@ class Drop:
 
     x: float
     y: float
-    speed: float
+    speed: int
     length: float
-    width: float
+    width: int
 
 
 @dataclass
@@ -633,7 +634,7 @@ class SeasonalTheme:
         theme = self.THEMES[self.season]
 
         # Set random weather from theme
-        weather = random.choice(theme["weather"])
+        weather: WeatherType = random.choice(theme["weather"])
         self.weather_manager.set_weather(weather)
 
     def change_season(self, season: str) -> None:

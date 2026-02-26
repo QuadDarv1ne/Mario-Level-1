@@ -36,7 +36,7 @@ class Particle:
         y: float,
         vx: float,
         vy: float,
-        lifetime: int,
+        lifetime: float,
         color: tuple[int, int, int] = c.GOLD,
         size: int = 4,
         gravity: float = 0.5,
@@ -48,7 +48,7 @@ class Particle:
         self.vx = vx
         self.vy = vy
         self.lifetime = lifetime
-        self.age = 0
+        self.age: float = 0
         self.color = color
         self.size = size
         self.gravity = gravity

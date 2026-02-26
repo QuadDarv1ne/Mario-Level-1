@@ -39,7 +39,7 @@ class Control:
         """Initialize the game controller."""
         # ensure pygame modules are initialized (tests may not have done so)
         pg.init()
-        self.screen: Surface = pg.display.get_surface()
+        self.screen: Optional["Surface"] = pg.display.get_surface()
         if not self.screen:
             try:
                 # create a tiny hidden surface to allow key functions
@@ -48,7 +48,7 @@ class Control:
                 self.screen = None  # headless environment
         self.done: bool = False
         self.clock: pg.time.Clock = pg.time.Clock()
-        self.caption: str = caption
+        self.caption: Optional[str] = caption
         self.fps: int = 60
         self.show_fps: bool = False
         self.current_time: float = 0.0
@@ -82,8 +82,9 @@ class Control:
     def update(self) -> None:
         """Update current state and check for state transitions."""
         self.current_time = pg.time.get_ticks()
-        if self.state is None:
+        if self.state is None or self.screen is None:
             return
+
         if self.state.quit:
             self.done = True
         elif self.state.done:
@@ -99,7 +100,8 @@ class Control:
         """Transition to the next state, passing persistent data."""
         if self.state is None:
             return
-        previous, self.state_name = self.state_name, self.state.next
+        previous = self.state_name
+        self.state_name = self.state.next or ""
         persist = self.state.cleanup()
         self.state = self.state_dict[self.state_name]
         self.state.startup(self.current_time, persist)
@@ -130,7 +132,7 @@ class Control:
         """
         if key == pg.K_F5:
             self.show_fps = not self.show_fps
-            if not self.show_fps:
+            if not self.show_fps and self.caption:
                 pg.display.set_caption(self.caption)
 
     def main(self) -> None:
@@ -146,9 +148,10 @@ class Control:
 
             if self.profiler:
                 self.profiler.end_frame()
-                self.profiler.draw_overlay(self.screen)
+                if self.screen:
+                    self.profiler.draw_overlay(self.screen)
 
-            if self.show_fps:
+            if self.show_fps and self.caption:
                 fps = self.clock.get_fps()
                 with_fps = "{} - {:.2f} FPS".format(self.caption, fps)
                 pg.display.set_caption(with_fps)

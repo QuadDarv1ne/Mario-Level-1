@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Callable, Set
+from typing import Any, Dict, List, Optional, Callable, Set
 
 import pygame as pg
 
@@ -130,14 +130,14 @@ class PlayerLevelCondition(HintCondition):
         self.min_level = min_level
         self.is_big = is_big
 
-    def check(self, game_state: dict) -> bool:
+    def check(self, game_state: Dict[str, Any]) -> bool:
         """Check player level condition."""
         player = game_state.get("player", {})
 
         if self.is_big and not player.get("is_big", False):
             return False
 
-        return player.get("level", 0) >= self.min_level
+        return bool(player.get("level", 0) >= self.min_level)
 
 
 class EnemyDefeatCondition(HintCondition):
@@ -154,15 +154,15 @@ class EnemyDefeatCondition(HintCondition):
         self.min_defeats = min_defeats
         self.enemy_type = enemy_type
 
-    def check(self, game_state: dict) -> bool:
+    def check(self, game_state: Dict[str, Any]) -> bool:
         """Check enemy defeat condition."""
         stats = game_state.get("stats", {})
 
         if self.enemy_type:
             key = f"{self.enemy_type}_defeated"
-            return stats.get(key, 0) >= self.min_defeats
+            return bool(stats.get(key, 0) >= self.min_defeats)
 
-        return stats.get("enemies_defeated", 0) >= self.min_defeats
+        return bool(stats.get("enemies_defeated", 0) >= self.min_defeats)
 
 
 class CoinCollectionCondition(HintCondition):
@@ -177,10 +177,10 @@ class CoinCollectionCondition(HintCondition):
         """
         self.min_coins = min_coins
 
-    def check(self, game_state: dict) -> bool:
+    def check(self, game_state: Dict[str, Any]) -> bool:
         """Check coin collection condition."""
         stats = game_state.get("stats", {})
-        return stats.get("coins_collected", 0) >= self.min_coins
+        return bool(stats.get("coins_collected", 0) >= self.min_coins)
 
 
 class DeathCondition(HintCondition):
@@ -197,15 +197,15 @@ class DeathCondition(HintCondition):
         self.min_deaths = min_deaths
         self.in_area = in_area
 
-    def check(self, game_state: dict) -> bool:
+    def check(self, game_state: Dict[str, Any]) -> bool:
         """Check death condition."""
         stats = game_state.get("stats", {})
 
         if self.in_area:
             key = f"deaths_in_{self.in_area}"
-            return stats.get(key, 0) >= self.min_deaths
+            return bool(stats.get(key, 0) >= self.min_deaths)
 
-        return stats.get("deaths", 0) >= self.min_deaths
+        return bool(stats.get("deaths", 0) >= self.min_deaths)
 
 
 class HintManager:

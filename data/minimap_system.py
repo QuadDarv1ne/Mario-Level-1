@@ -320,10 +320,8 @@ class Minimap:
             return
 
         # Pulse animation
-        alpha = 255
         if entity.pulse:
             self.pulse_timer += 0.05
-            alpha = int(128 + 127 * math.sin(self.pulse_timer * entity.pulse_speed))
 
         # Get color
         color = entity.color

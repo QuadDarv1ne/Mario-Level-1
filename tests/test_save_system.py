@@ -194,3 +194,155 @@ class TestGameInfoConversion:
         save_system.update_game_info_from_save(game_info, save)
         assert game_info[c.SCORE] == 2000
         assert game_info[c.LIVES] == 5
+
+
+class TestSaveManagerCaching:
+    """Tests for SaveManager caching functionality."""
+
+    def test_cache_on_load(self, tmp_path):
+        """Test that loaded data is cached."""
+        original_dir = save_system.SAVE_DIR
+        save_system.SAVE_DIR = str(tmp_path)
+
+        try:
+            manager = save_system.SaveManager()
+
+            # Create and save game data
+            game_data = save_system.GameData(score=1000, coin_total=50)
+            manager.save_game(1, game_data)
+
+            # Load and check cache
+            loaded = manager.load_game(1)
+            assert loaded is not None
+            assert loaded.score == 1000
+
+            # Check cache stats
+            stats = manager.get_cache_stats()
+            assert stats["cached_slots"] >= 1
+
+        finally:
+            save_system.SAVE_DIR = original_dir
+
+    def test_cache_hit_on_repeated_load(self, tmp_path):
+        """Test that repeated loads use cache."""
+        original_dir = save_system.SAVE_DIR
+        save_system.SAVE_DIR = str(tmp_path)
+
+        try:
+            manager = save_system.SaveManager()
+
+            # Create and save game data
+            game_data = save_system.GameData(score=2000)
+            manager.save_game(1, game_data)
+
+            # Load twice - second should use cache
+            loaded1 = manager.load_game(1)
+            loaded2 = manager.load_game(1)
+
+            assert loaded1 is not None
+            assert loaded2 is not None
+            assert loaded1.score == 2000
+            assert loaded2.score == 2000
+
+            # Should be same object (cached)
+            assert loaded1 is loaded2
+
+        finally:
+            save_system.SAVE_DIR = original_dir
+
+    def test_cache_invalidation_on_save(self, tmp_path):
+        """Test that cache is invalidated on new save."""
+        original_dir = save_system.SAVE_DIR
+        save_system.SAVE_DIR = str(tmp_path)
+
+        try:
+            manager = save_system.SaveManager()
+
+            # Create and save game data
+            game_data1 = save_system.GameData(score=1000)
+            manager.save_game(1, game_data1)
+
+            # Load to populate cache
+            loaded = manager.load_game(1)
+            assert loaded.score == 1000
+
+            # Save new data
+            game_data2 = save_system.GameData(score=2000)
+            manager.save_game(1, game_data2)
+
+            # Load should return new data from cache
+            loaded2 = manager.load_game(1)
+            assert loaded2.score == 2000
+
+        finally:
+            save_system.SAVE_DIR = original_dir
+
+    def test_clear_cache(self, tmp_path):
+        """Test clearing cache."""
+        original_dir = save_system.SAVE_DIR
+        save_system.SAVE_DIR = str(tmp_path)
+
+        try:
+            manager = save_system.SaveManager()
+
+            # Create and save game data
+            game_data = save_system.GameData(score=3000)
+            manager.save_game(1, game_data)
+            manager.load_game(1)  # Populate cache
+
+            # Check cache has data
+            stats = manager.get_cache_stats()
+            assert stats["cached_slots"] >= 1
+
+            # Clear cache
+            manager.clear_cache()
+
+            # Cache should be empty
+            stats = manager.get_cache_stats()
+            assert stats["cached_slots"] == 0
+
+        finally:
+            save_system.SAVE_DIR = original_dir
+
+    def test_clear_cache_single_slot(self, tmp_path):
+        """Test clearing cache for single slot."""
+        original_dir = save_system.SAVE_DIR
+        save_system.SAVE_DIR = str(tmp_path)
+
+        try:
+            manager = save_system.SaveManager()
+
+            # Create saves in multiple slots
+            manager.save_game(1, save_system.GameData(score=1000))
+            manager.save_game(2, save_system.GameData(score=2000))
+
+            # Load both
+            manager.load_game(1)
+            manager.load_game(2)
+
+            # Clear only slot 1
+            manager.clear_cache(slot=1)
+
+            # Slot 2 should still be cached
+            stats = manager.get_cache_stats()
+            assert stats["cached_slots"] == 1
+
+        finally:
+            save_system.SAVE_DIR = original_dir
+
+    def test_cache_stats(self, tmp_path):
+        """Test cache statistics."""
+        original_dir = save_system.SAVE_DIR
+        save_system.SAVE_DIR = str(tmp_path)
+
+        try:
+            manager = save_system.SaveManager()
+
+            # Initial stats
+            stats = manager.get_cache_stats()
+            assert stats["cached_slots"] == 0
+            assert stats["max_slots"] == save_system.MAX_SAVE_SLOTS
+            assert stats["metadata_loaded"] == 1
+
+        finally:
+            save_system.SAVE_DIR = original_dir

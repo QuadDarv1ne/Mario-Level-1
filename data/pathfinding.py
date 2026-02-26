@@ -12,13 +12,8 @@ Features:
 from __future__ import annotations
 
 import heapq
-import math
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-import pygame as pg
-
-from . import constants as c
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Set, Tuple
 
 
 @dataclass

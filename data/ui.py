@@ -14,12 +14,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Tuple, Callable
+from typing import TYPE_CHECKING, List, Optional, Tuple, Callable
 
 import pygame as pg
 
 from . import constants as c
 from .animation_system import TweenManager, EasingType
+
+if TYPE_CHECKING:
+    from pygame.font import Font
 
 
 class UIState(Enum):
@@ -115,6 +118,7 @@ class UIButton:
         self.alpha = 255
 
         # Font
+        self.font: Optional["Font"] = None
         self._init_font()
 
         # Click animation
@@ -293,6 +297,7 @@ class UILabel:
         self.color = color
         self.center = center
 
+        self.font: Optional["Font"] = None
         self._init_font(font_size)
         self.alpha = 255
         self.visible = True
@@ -494,9 +499,10 @@ class AnimatedMenu:
                 self.selected_index = (self.selected_index + 1) % len(self.buttons)
                 return MenuAction.NAVIGATE_DOWN
             elif event.key in (pg.K_RETURN, pg.K_SPACE):
-                if self.buttons:
-                    if self.buttons[self.selected_index].callback:
-                        self.buttons[self.selected_index].callback()
+                if self.buttons and self.selected_index < len(self.buttons):
+                    btn = self.buttons[self.selected_index]
+                    if btn and btn.callback:
+                        btn.callback()
                     return MenuAction.SELECT
 
         return None
@@ -630,9 +636,9 @@ class HUD:
     def _init_fonts(self) -> None:
         """Initialize HUD fonts."""
         try:
-            self.font_large = pg.font.Font(None, 48)
-            self.font_medium = pg.font.Font(None, 36)
-            self.font_small = pg.font.Font(None, 24)
+            self.font_large: Optional["Font"] = pg.font.Font(None, 48)
+            self.font_medium: Optional["Font"] = pg.font.Font(None, 36)
+            self.font_small: Optional["Font"] = pg.font.Font(None, 24)
         except pg.error:
             self.font_large = None
             self.font_medium = None

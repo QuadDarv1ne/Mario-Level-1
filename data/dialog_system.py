@@ -282,8 +282,9 @@ class DialogManager:
 
     def get_text(self, dialog_id: str) -> str:
         """Get localized text for dialog."""
-        if dialog_id in self.translations.get(self.language, {}):
-            return self.translations[self.language][dialog_id]
+        lang_translations = self.translations.get(self.language)
+        if lang_translations and dialog_id in lang_translations:
+            return lang_translations[dialog_id]
         return dialog_id
 
     def start(self, dialog_id: str) -> bool:
@@ -502,11 +503,12 @@ class DialogManager:
                 color = self.text_color if available else (128, 128, 128)
 
                 prefix = "> " if i == self.state.choice_index else "  "
-                choice_text = self.font.render(prefix + choice.text, True, color)
-                surface.blit(choice_text, (text_x, choice_y + i * self.line_height))
+                if self.font:
+                    choice_text = self.font.render(prefix + choice.text, True, color)
+                    surface.blit(choice_text, (text_x, choice_y + i * self.line_height))
 
         # Draw continue indicator
-        if self.state.waiting_for_input and not dialog.choices:
+        if self.state.waiting_for_input and not dialog.choices and self.font:
             indicator = self.font.render("▼", True, self.border_color)
             surface.blit(indicator, (box_rect.right - 40, box_rect.bottom - 30))
 
@@ -515,11 +517,11 @@ class DialogManager:
         width = screen_size[0] - 2 * self.padding
         height = 150
 
+        position = DialogPosition.BOTTOM
         if self.state.current_dialog:
-            dialog = self.dialogs[self.state.current_dialog]
-            position = dialog.position
-        else:
-            position = DialogPosition.BOTTOM
+            dialog = self.dialogs.get(self.state.current_dialog)
+            if dialog:
+                position = dialog.position
 
         if position == DialogPosition.TOP:
             x = self.padding

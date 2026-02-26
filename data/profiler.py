@@ -249,8 +249,11 @@ class Profiler:
         Returns:
             Decorated function
         """
+        from typing import TypeVar
 
-        def decorator(func: Callable) -> Callable:
+        T = TypeVar("T", bound=Callable[..., Any])
+
+        def decorator(func: T) -> T:
             def wrapper(*args, **kwargs):
                 if name not in self._timers:
                     self._timers[name] = FunctionTimer(name)
@@ -318,7 +321,7 @@ class Profiler:
 
         # Check for slow frame
         if frame_time > self.slow_frame_threshold:
-            stats.slow_frames = 1  # type: ignore
+            stats.slow_frames = 1
             for callback in self._slow_frame_callbacks:
                 callback(stats)
 
@@ -400,7 +403,9 @@ class Profiler:
         # Add timer stats
         for name, timer_stats in self._timers.items():
             if timer_stats:
-                lines.append(f"{name}: {timer_stats['avg_ms']:.3f}ms ({timer_stats['calls']} calls)")
+                if hasattr(timer_stats, 'to_dict'):
+                    stats_dict = timer_stats.to_dict()
+                    lines.append(f"{name}: {stats_dict['avg_ms']:.3f}ms ({stats_dict['calls']} calls)")
 
         # Draw background
         y_offset = 10

@@ -153,6 +153,7 @@ class SaveManager:
     - Save compression
     - Backup creation
     - Save validation
+    - Data caching for performance
     """
 
     def __init__(self) -> None:
@@ -162,6 +163,10 @@ class SaveManager:
         self.metadata: Dict[int, SaveMetadata] = {}
         self._last_auto_save: float = 0
         self._auto_save_enabled: bool = True
+
+        # Cache for loaded game data
+        self._data_cache: Dict[int, GameData] = {}
+        self._metadata_cache_loaded: bool = False
 
         self._ensure_save_dir()
         self._load_metadata()
@@ -177,8 +182,12 @@ class SaveManager:
                 with open(self.metadata_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 self.metadata = {int(k): SaveMetadata.from_dict(v) for k, v in data.items()}
+                self._metadata_cache_loaded = True
             except (json.JSONDecodeError, IOError):
                 self.metadata = {}
+                self._metadata_cache_loaded = True
+        else:
+            self._metadata_cache_loaded = True
 
     def _save_metadata(self) -> None:
         """Save metadata to file."""
@@ -192,6 +201,13 @@ class SaveManager:
                 )
         except IOError:
             pass
+
+    def _invalidate_cache(self, slot: Optional[int] = None) -> None:
+        """Invalidate cache for slot or all slots."""
+        if slot is not None:
+            self._data_cache.pop(slot, None)
+        else:
+            self._data_cache.clear()
 
     def _get_save_path(self, slot: int, compressed: bool = True) -> str:
         """Get file path for save slot."""
@@ -279,6 +295,9 @@ class SaveManager:
             )
             self._save_metadata()
 
+            # Update cache
+            self._data_cache[slot] = game_data
+
             return True
 
         except (IOError, OSError, json.JSONEncodeError) as e:
@@ -298,6 +317,10 @@ class SaveManager:
         if slot < 1 or slot > MAX_SAVE_SLOTS:
             return None
 
+        # Check cache first
+        if slot in self._data_cache:
+            return self._data_cache[slot]
+
         save_path = self._get_save_path(slot)
         if not os.path.exists(save_path):
             # Try uncompressed version
@@ -315,7 +338,12 @@ class SaveManager:
                 with open(save_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
 
-            return GameData.from_dict(data)
+            game_data = GameData.from_dict(data)
+
+            # Cache the loaded data
+            self._data_cache[slot] = game_data
+
+            return game_data
 
         except (IOError, OSError, json.JSONDecodeError, gzip.BadGzipFile) as e:
             print(f"Load error: {e}")
@@ -398,6 +426,23 @@ class SaveManager:
             return self.save_game(slot, game_data)
 
         return False
+
+    def clear_cache(self, slot: Optional[int] = None) -> None:
+        """
+        Clear cached game data.
+
+        Args:
+            slot: Specific slot to clear, or None to clear all
+        """
+        self._invalidate_cache(slot)
+
+    def get_cache_stats(self) -> Dict[str, int]:
+        """Get cache statistics."""
+        return {
+            "cached_slots": len(self._data_cache),
+            "max_slots": MAX_SAVE_SLOTS,
+            "metadata_loaded": 1 if self._metadata_cache_loaded else 0,
+        }
 
 
 # Backwards-compatible API for tests and simple save file usage

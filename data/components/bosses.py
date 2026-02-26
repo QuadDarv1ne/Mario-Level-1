@@ -497,6 +497,7 @@ class MegaGoomba(Boss):
             # Be resilient in tests — if summon isn't required, silently continue
             pass
 
+
 class KoopaTroopaBoss(Boss):
     """
     Giant Koopa Troopa - Mini Boss.

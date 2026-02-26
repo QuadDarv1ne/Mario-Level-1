@@ -159,7 +159,7 @@ class SoundPool:
         """
         # First, try to find inactive channel
         for i, channel in enumerate(self.channels):
-            if not channel.get_busy():
+            if channel and not channel.get_busy():
                 self.channel_usage[i] = False
                 return channel
 
@@ -168,7 +168,7 @@ class SoundPool:
         lowest_idx = -1
 
         for i, channel in enumerate(self.channels):
-            if channel.get_busy():
+            if channel and channel.get_busy():
                 # Could track priority per channel
                 if lowest_idx == -1:
                     lowest_idx = i
@@ -190,7 +190,7 @@ class SoundPool:
         elif name in self.sounds:
             # Stop all channels playing this sound
             for channel in self.channels:
-                if channel.get_sound() == self.sounds[name]:
+                if channel and channel.get_sound() == self.sounds[name]:
                     channel.stop()
 
     def stop_all(self) -> None:
@@ -207,7 +207,7 @@ class SoundPool:
 
     def get_active_count(self) -> int:
         """Get number of active sounds."""
-        return sum(1 for ch in self.channels if ch.get_busy())
+        return sum(1 for ch in self.channels if ch and ch.get_busy())
 
     def unload(self, name: str) -> None:
         """

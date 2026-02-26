@@ -96,7 +96,8 @@ class ScreenshotManager:
         if os.path.exists(self._metadata_file):
             try:
                 with open(self._metadata_file, "r", encoding="utf-8") as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    return data if isinstance(data, list) else []
             except (json.JSONDecodeError, IOError):
                 pass
         return []
