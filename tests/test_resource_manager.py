@@ -18,6 +18,10 @@ from data.resource_manager import (
     SpriteSheet,
     PRESET_CONFIGS,
     create_asset_manager,
+    LoadPriority,
+    LoadRequest,
+    AsyncAssetLoader,
+    ResourcePreloader,
 )
 
 
@@ -564,3 +568,228 @@ class TestAssetManagerIntegration:
         assert data_info.state == AssetState.LOADED
 
         pg.quit()
+
+
+# Fixtures for async tests
+@pytest.fixture
+def asset_manager():
+    """Create asset manager for async tests."""
+    return AssetManager()
+
+
+@pytest.fixture
+def temp_image(tmp_path):
+    """Create temporary image file."""
+    pg.init()
+    image_path = tmp_path / "test_image.png"
+    surface = pg.Surface((32, 32))
+    surface.fill((255, 0, 0))
+    pg.image.save(surface, str(image_path))
+    
+    class ImageFile:
+        def __init__(self, path):
+            self.name = str(path)
+    
+    yield ImageFile(image_path)
+    pg.quit()
+
+
+# Tests for async loading
+class TestAsyncAssetLoader:
+    """Test async asset loading."""
+
+    def test_async_loader_creation(self, asset_manager):
+        """Test async loader initialization."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=2)
+
+        assert loader.asset_manager == asset_manager
+        assert loader.num_workers == 2
+        assert not loader._running
+
+    def test_start_stop_workers(self, asset_manager):
+        """Test starting and stopping worker threads."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=2)
+
+        loader.start()
+        assert loader._running
+        assert len(loader._workers) == 2
+
+        loader.stop()
+        assert not loader._running
+
+    def test_load_async(self, asset_manager, temp_image):
+        """Test async asset loading."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=1)
+        loader.start()
+
+        loaded_assets = []
+
+        def callback(name, data):
+            loaded_assets.append(name)
+
+        loader.load_async("test_async", temp_image.name, AssetType.IMAGE, LoadPriority.HIGH, callback)
+
+        # Wait for completion
+        loader.wait_for_completion(timeout=2.0)
+        loader.stop()
+
+        assert "test_async" in loaded_assets
+        assert asset_manager.get("test_async") is not None
+
+    def test_load_priority(self, asset_manager, temp_image):
+        """Test priority-based loading."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=1)
+        loader.start()
+
+        load_order = []
+
+        def callback(name, data):
+            load_order.append(name)
+
+        # Queue in reverse priority order
+        loader.load_async("low", temp_image.name, AssetType.IMAGE, LoadPriority.LOW, callback)
+        loader.load_async("critical", temp_image.name, AssetType.IMAGE, LoadPriority.CRITICAL, callback)
+        loader.load_async("normal", temp_image.name, AssetType.IMAGE, LoadPriority.NORMAL, callback)
+
+        loader.wait_for_completion(timeout=2.0)
+        loader.stop()
+
+        # Critical should load first
+        assert load_order[0] == "critical"
+
+    def test_load_batch_async(self, asset_manager, temp_image):
+        """Test batch async loading."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=2)
+        loader.start()
+
+        assets = [
+            ("batch1", temp_image.name, AssetType.IMAGE, LoadPriority.NORMAL),
+            ("batch2", temp_image.name, AssetType.IMAGE, LoadPriority.HIGH),
+        ]
+
+        loader.load_batch_async(assets)
+        loader.wait_for_completion(timeout=2.0)
+        loader.stop()
+
+        assert asset_manager.get("batch1") is not None
+        assert asset_manager.get("batch2") is not None
+
+    def test_get_stats(self, asset_manager, temp_image):
+        """Test loader statistics."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=1)
+        loader.start()
+
+        loader.load_async("stats_test", temp_image.name, AssetType.IMAGE)
+
+        # Check stats before completion
+        stats = loader.get_stats()
+        assert stats["pending"] >= 0
+
+        loader.wait_for_completion(timeout=2.0)
+        loader.stop()
+
+        # Check stats after completion
+        stats = loader.get_stats()
+        assert stats["completed"] > 0
+
+    def test_is_loading(self, asset_manager, temp_image):
+        """Test loading status check."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=1)
+        loader.start()
+
+        assert not loader.is_loading()
+
+        loader.load_async("loading_test", temp_image.name, AssetType.IMAGE)
+        # May or may not be loading depending on timing
+        # Just check it doesn't crash
+        loader.is_loading()
+
+        loader.wait_for_completion(timeout=2.0)
+        loader.stop()
+
+    def test_clear_queue(self, asset_manager, temp_image):
+        """Test clearing load queue."""
+        loader = AsyncAssetLoader(asset_manager, num_workers=1)
+
+        # Queue without starting workers
+        loader.load_async("clear1", temp_image.name, AssetType.IMAGE)
+        loader.load_async("clear2", temp_image.name, AssetType.IMAGE)
+
+        loader.clear_queue()
+
+        stats = loader.get_stats()
+        assert stats["pending"] == 0
+
+
+class TestResourcePreloader:
+    """Test resource preloader."""
+
+    def test_preloader_creation(self, asset_manager):
+        """Test preloader initialization."""
+        preloader = ResourcePreloader(asset_manager)
+
+        assert preloader.asset_manager == asset_manager
+        assert preloader.get_progress() == 1.0
+
+    def test_preload_assets(self, asset_manager, temp_image):
+        """Test preloading assets."""
+        preloader = ResourcePreloader(asset_manager)
+
+        assets = [
+            ("preload1", temp_image.name, AssetType.IMAGE),
+            ("preload2", temp_image.name, AssetType.IMAGE),
+        ]
+
+        results = preloader.preload(assets)
+
+        assert len(results) == 2
+        assert "preload1" in results
+        assert "preload2" in results
+        assert preloader.get_progress() == 1.0
+
+    def test_preload_with_progress(self, asset_manager, temp_image):
+        """Test preloading with progress callback."""
+        preloader = ResourcePreloader(asset_manager)
+
+        progress_updates = []
+
+        def progress_callback(progress, asset_name):
+            progress_updates.append((progress, asset_name))
+
+        assets = [
+            ("progress1", temp_image.name, AssetType.IMAGE),
+            ("progress2", temp_image.name, AssetType.IMAGE),
+        ]
+
+        preloader.preload(assets, progress_callback)
+
+        assert len(progress_updates) == 2
+        assert progress_updates[0][0] == 0.5  # 50% after first asset
+        assert progress_updates[1][0] == 1.0  # 100% after second asset
+
+    def test_get_current_asset(self, asset_manager, temp_image):
+        """Test getting current asset name."""
+        preloader = ResourcePreloader(asset_manager)
+
+        assets = [("current_test", temp_image.name, AssetType.IMAGE)]
+
+        preloader.preload(assets)
+
+        assert preloader.get_current_asset() == "current_test"
+
+
+class TestLoadPriority:
+    """Test load priority enum."""
+
+    def test_priority_values(self):
+        """Test priority value ordering."""
+        assert LoadPriority.CRITICAL.value < LoadPriority.HIGH.value
+        assert LoadPriority.HIGH.value < LoadPriority.NORMAL.value
+        assert LoadPriority.NORMAL.value < LoadPriority.LOW.value
+
+    def test_load_request_comparison(self):
+        """Test load request priority comparison."""
+        req1 = LoadRequest(LoadPriority.CRITICAL, "test1", "path1", AssetType.IMAGE)
+        req2 = LoadRequest(LoadPriority.LOW, "test2", "path2", AssetType.IMAGE)
+
+        assert req1 < req2  # Critical has higher priority (lower value)
