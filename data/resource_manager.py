@@ -725,3 +725,282 @@ def create_asset_manager(preset: str = "production", base_path: Optional[Union[s
         manager.set_base_path(base_path)
 
     return manager
+
+
+# Async loading support
+import threading
+from queue import PriorityQueue, Empty
+from typing import Tuple
+
+
+class LoadPriority(Enum):
+    """Loading priority levels."""
+
+    CRITICAL = 0  # Must load immediately (UI, player)
+    HIGH = 1  # Important (enemies, items)
+    NORMAL = 2  # Standard (decorations)
+    LOW = 3  # Can wait (background music, effects)
+
+
+@dataclass
+class LoadRequest:
+    """Async load request."""
+
+    priority: LoadPriority
+    name: str
+    file_path: str
+    asset_type: AssetType
+    kwargs: dict = field(default_factory=dict)
+    callback: Optional[Callable[[str, Any], None]] = None
+
+    def __lt__(self, other: "LoadRequest") -> bool:
+        """Compare by priority for queue ordering."""
+        return self.priority.value < other.priority.value
+
+
+class AsyncAssetLoader:
+    """
+    Asynchronous asset loader with priority queue.
+
+    Loads assets in background thread without blocking main game loop.
+    """
+
+    def __init__(self, asset_manager: AssetManager, num_workers: int = 2) -> None:
+        """
+        Initialize async loader.
+
+        Args:
+            asset_manager: Asset manager to use
+            num_workers: Number of worker threads
+        """
+        self.asset_manager = asset_manager
+        self.num_workers = num_workers
+
+        # Priority queue for load requests
+        self._queue: PriorityQueue[LoadRequest] = PriorityQueue()
+
+        # Worker threads
+        self._workers: List[threading.Thread] = []
+        self._running = False
+        self._lock = threading.Lock()
+
+        # Statistics
+        self._pending_count = 0
+        self._completed_count = 0
+        self._failed_count = 0
+
+    def start(self) -> None:
+        """Start worker threads."""
+        if self._running:
+            return
+
+        self._running = True
+
+        for i in range(self.num_workers):
+            worker = threading.Thread(target=self._worker_loop, name=f"AssetLoader-{i}", daemon=True)
+            worker.start()
+            self._workers.append(worker)
+
+    def stop(self) -> None:
+        """Stop worker threads."""
+        self._running = False
+
+        # Wait for workers to finish
+        for worker in self._workers:
+            worker.join(timeout=1.0)
+
+        self._workers.clear()
+
+    def load_async(
+        self,
+        name: str,
+        file_path: str,
+        asset_type: AssetType,
+        priority: LoadPriority = LoadPriority.NORMAL,
+        callback: Optional[Callable[[str, Any], None]] = None,
+        **kwargs,
+    ) -> None:
+        """
+        Queue asset for async loading.
+
+        Args:
+            name: Asset name
+            file_path: File path
+            asset_type: Asset type
+            priority: Loading priority
+            callback: Completion callback (name, data)
+            **kwargs: Loading options
+        """
+        request = LoadRequest(
+            priority=priority,
+            name=name,
+            file_path=file_path,
+            asset_type=asset_type,
+            kwargs=kwargs,
+            callback=callback,
+        )
+
+        self._queue.put(request)
+
+        with self._lock:
+            self._pending_count += 1
+
+    def load_batch_async(
+        self,
+        assets: List[Tuple[str, str, AssetType, LoadPriority]],
+        callback: Optional[Callable[[str, Any], None]] = None,
+        **kwargs,
+    ) -> None:
+        """
+        Queue multiple assets for async loading.
+
+        Args:
+            assets: List of (name, file_path, asset_type, priority) tuples
+            callback: Completion callback
+            **kwargs: Loading options
+        """
+        for name, file_path, asset_type, priority in assets:
+            self.load_async(name, file_path, asset_type, priority, callback, **kwargs)
+
+    def _worker_loop(self) -> None:
+        """Worker thread main loop."""
+        while self._running:
+            try:
+                # Get request with timeout
+                request = self._queue.get(timeout=0.1)
+
+                # Load asset
+                try:
+                    info = self.asset_manager.load(
+                        request.name, request.file_path, request.asset_type, **request.kwargs
+                    )
+
+                    with self._lock:
+                        self._completed_count += 1
+                        self._pending_count -= 1
+
+                    # Call callback if provided
+                    if request.callback and info.state == AssetState.LOADED:
+                        request.callback(request.name, info.data)
+
+                except Exception as e:
+                    with self._lock:
+                        self._failed_count += 1
+                        self._pending_count -= 1
+
+                    print(f"[AsyncLoader] Failed to load {request.name}: {e}")
+
+                finally:
+                    self._queue.task_done()
+
+            except Empty:
+                # No requests, continue
+                continue
+
+    def wait_for_completion(self, timeout: Optional[float] = None) -> bool:
+        """
+        Wait for all pending loads to complete.
+
+        Args:
+            timeout: Max wait time in seconds
+
+        Returns:
+            True if all completed, False if timeout
+        """
+        try:
+            self._queue.join()
+            return True
+        except Exception:
+            return False
+
+    def is_loading(self) -> bool:
+        """Check if any assets are loading."""
+        with self._lock:
+            return self._pending_count > 0
+
+    def get_stats(self) -> Dict[str, int]:
+        """Get loader statistics."""
+        with self._lock:
+            return {
+                "pending": self._pending_count,
+                "completed": self._completed_count,
+                "failed": self._failed_count,
+                "queue_size": self._queue.qsize(),
+            }
+
+    def clear_queue(self) -> None:
+        """Clear pending load requests."""
+        while not self._queue.empty():
+            try:
+                self._queue.get_nowait()
+                self._queue.task_done()
+            except Empty:
+                break
+
+        with self._lock:
+            self._pending_count = 0
+
+
+class ResourcePreloader:
+    """
+    Resource preloader for loading screens.
+
+    Loads assets with progress tracking.
+    """
+
+    def __init__(self, asset_manager: AssetManager) -> None:
+        """
+        Initialize preloader.
+
+        Args:
+            asset_manager: Asset manager to use
+        """
+        self.asset_manager = asset_manager
+        self._total_assets = 0
+        self._loaded_assets = 0
+        self._current_asset = ""
+
+    def preload(
+        self,
+        assets: List[Tuple[str, str, AssetType]],
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+    ) -> Dict[str, AssetInfo]:
+        """
+        Preload assets with progress tracking.
+
+        Args:
+            assets: List of (name, file_path, asset_type) tuples
+            progress_callback: Progress callback (progress, current_asset)
+
+        Returns:
+            Dictionary of loaded assets
+        """
+        self._total_assets = len(assets)
+        self._loaded_assets = 0
+        results = {}
+
+        for name, file_path, asset_type in assets:
+            self._current_asset = name
+
+            # Load asset
+            info = self.asset_manager.load(name, file_path, asset_type)
+            results[name] = info
+
+            self._loaded_assets += 1
+
+            # Call progress callback
+            if progress_callback:
+                progress = self._loaded_assets / self._total_assets
+                progress_callback(progress, name)
+
+        return results
+
+    def get_progress(self) -> float:
+        """Get loading progress (0.0 to 1.0)."""
+        if self._total_assets == 0:
+            return 1.0
+        return self._loaded_assets / self._total_assets
+
+    def get_current_asset(self) -> str:
+        """Get currently loading asset name."""
+        return self._current_asset
