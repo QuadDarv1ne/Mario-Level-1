@@ -449,4 +449,4 @@ class StatsDisplay:
 try:
     import pygame as pg
 except ImportError:
-    pg = None  # type: ignore
+    pg = None  # type: ignore[assignment]

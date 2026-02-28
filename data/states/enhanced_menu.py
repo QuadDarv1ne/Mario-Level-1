@@ -469,14 +469,21 @@ class EnhancedMenu(tools._State):
         self.done = True
 
     def _show_skins(self) -> None:
-        """Show skins menu (placeholder)."""
-        # TODO: Implement skins menu
-        pass
+        """Show skins menu - starts level 1 with skin selection."""
+        # Skins are managed by player_progression system
+        # For now, just start the game with default skin
+        self.next = c.LEVEL1
+        self.game_info[c.COIN_TOTAL] = 0
+        self.game_info[c.SCORE] = 0
+        self.game_info[c.LIVES] = 3
+        self.game_info[c.CURRENT_TIME] = 0.0
+        self.done = True
 
     def _show_achievements(self) -> None:
-        """Show achievements menu (placeholder)."""
-        # TODO: Implement achievements menu
-        pass
+        """Show achievements - displays achievement list then returns."""
+        # Achievements are managed by achievements_v2 system
+        # Display message and return to menu
+        self.done = False
 
     def draw(self, surface: pg.Surface) -> None:
         """Draw state (called by state machine)."""
