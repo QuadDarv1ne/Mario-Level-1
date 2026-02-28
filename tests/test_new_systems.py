@@ -1,9 +1,8 @@
 """
 Tests for screenshot, debug, and statistics systems.
 
-Note: Dialogue system tests are in test_wave2_systems.py
+Note: Dialogue system tests are in test_wave2_systems.py (DialogManager)
 """
-import os
 import tempfile
 from pathlib import Path
 
@@ -67,7 +66,8 @@ class TestScreenshotManager:
     @pytest.fixture
     def screenshot_manager(self) -> ScreenshotManager:
         """Create screenshot manager."""
-        return ScreenshotManager()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yield ScreenshotManager(save_dir=tmpdir)
 
     def test_manager_creation(self, screenshot_manager: ScreenshotManager) -> None:
         """Test screenshot manager initialization."""
@@ -78,12 +78,26 @@ class TestScreenshotManager:
         """Test capturing screenshot."""
         pg.init()
         screen = pg.display.set_mode((800, 600))
+        screen.fill((255, 255, 255))
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            screenshot_manager.save_dir = Path(tmpdir)
-            screenshot_manager.capture(screen, "test")
+        info = screenshot_manager.capture(screen, "test")
 
-            assert screenshot_manager.screenshot_count >= 0
+        assert info is not None
+        assert "test" in info.filename
+
+        pg.quit()
+
+    def test_capture_cooldown(self, screenshot_manager: ScreenshotManager) -> None:
+        """Test capture cooldown."""
+        pg.init()
+        screen = pg.display.set_mode((800, 600))
+
+        # First capture
+        screenshot_manager.capture(screen)
+
+        # Immediate second capture should return None (cooldown)
+        info = screenshot_manager.capture(screen)
+        assert info is None
 
         pg.quit()
 
@@ -99,6 +113,18 @@ class TestAutoScreenshot:
 
         assert auto.manager == manager
         assert len(auto.triggers) == 0
+
+        pg.quit()
+
+    def test_enable_trigger(self) -> None:
+        """Test enabling trigger."""
+        pg.init()
+        manager = ScreenshotManager()
+        auto = AutoScreenshot(manager)
+        
+        auto.enable_trigger("level_complete")
+
+        assert auto.triggers["level_complete"] is True
 
         pg.quit()
 
@@ -141,6 +167,113 @@ class TestDebugOverlay:
         overlay.toggle()
         assert overlay.visible is False
 
+    def test_update_stats(self, overlay: DebugOverlay) -> None:
+        """Test updating stats."""
+        pg.init()
+        clock = pg.time.Clock()
+        clock.tick(60)
+
+        overlay.update(clock, [1, 2, 3], collisions=5)
+
+        assert overlay.stats.fps > 0
+        assert overlay.stats.sprite_count == 3
+        assert overlay.stats.collision_count == 5
+
+        pg.quit()
+
+
+class TestCollisionVisualizer:
+    """Tests for CollisionVisualizer."""
+
+    @pytest.fixture
+    def visualizer(self) -> CollisionVisualizer:
+        """Create collision visualizer."""
+        return CollisionVisualizer()
+
+    def test_visualizer_creation(self, visualizer: CollisionVisualizer) -> None:
+        """Test visualizer initialization."""
+        assert visualizer.enabled is False
+
+    def test_toggle_visualizer(self, visualizer: CollisionVisualizer) -> None:
+        """Test toggling visualizer."""
+        visualizer.toggle()
+        assert visualizer.enabled is True
+
+
+class TestDebugConsole:
+    """Tests for DebugConsole."""
+
+    @pytest.fixture
+    def console(self) -> DebugConsole:
+        """Create debug console."""
+        return DebugConsole()
+
+    def test_console_creation(self, console: DebugConsole) -> None:
+        """Test console initialization."""
+        assert console.visible is False
+        assert len(console.commands) > 0
+
+    def test_register_command(self, console: DebugConsole) -> None:
+        """Test registering command."""
+
+        def test_cmd(args: str) -> str:
+            return "test"
+
+        console.register_command("test", test_cmd)
+        assert "test" in console.commands
+
+    def test_help_command(self, console: DebugConsole) -> None:
+        """Test help command."""
+        result = console.cmd_help("")
+        assert "Commands" in result
+
+
+class TestPerformanceProfiler:
+    """Tests for PerformanceProfiler."""
+
+    @pytest.fixture
+    def profiler(self) -> PerformanceProfiler:
+        """Create performance profiler."""
+        return PerformanceProfiler()
+
+    def test_profiler_creation(self, profiler: PerformanceProfiler) -> None:
+        """Test profiler initialization."""
+        assert profiler.enabled is True
+        assert len(profiler.timings) == 0
+
+    def test_start_stop_timer(self, profiler: PerformanceProfiler) -> None:
+        """Test starting and stopping timer."""
+        profiler.start("test_op")
+
+        import time
+        time.sleep(0.01)  # 10ms
+
+        duration = profiler.stop("test_op")
+        assert duration is not None
+        assert duration >= 10
+
+    def test_get_stats(self, profiler: PerformanceProfiler) -> None:
+        """Test getting stats."""
+        profiler.start("test")
+        
+        import time
+        time.sleep(0.01)
+        profiler.stop("test")
+
+        stats = profiler.get_stats("test")
+
+        assert "count" in stats
+        assert "avg" in stats
+
+    def test_reset(self, profiler: PerformanceProfiler) -> None:
+        """Test resetting profiler."""
+        profiler.start("test")
+        profiler.stop("test")
+
+        profiler.reset()
+
+        assert len(profiler.timings) == 0
+
 
 class TestDebugManager:
     """Tests for DebugManager."""
@@ -153,6 +286,19 @@ class TestDebugManager:
     def test_manager_creation(self, debug_manager: DebugManager) -> None:
         """Test debug manager initialization."""
         assert debug_manager.overlay is not None
+        assert debug_manager.console is not None
+        assert debug_manager.profiler is not None
+
+    def test_handle_event_overlay(self, debug_manager: DebugManager) -> None:
+        """Test handling overlay toggle event."""
+        pg.init()
+
+        event = pg.event.Event(pg.KEYDOWN, {"key": pg.K_F3})
+        result = debug_manager.handle_event(event)
+
+        assert result is True
+
+        pg.quit()
 
 
 # =============================================================================
@@ -194,19 +340,42 @@ class TestStatisticsManager:
     @pytest.fixture
     def stats_manager(self) -> StatisticsManager:
         """Create statistics manager."""
-        return StatisticsManager()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            save_path = str(Path(tmpdir) / "stats.json")
+            yield StatisticsManager(save_path=save_path)
 
     def test_manager_creation(self, stats_manager: StatisticsManager) -> None:
         """Test statistics manager initialization."""
-        assert stats_manager.session is not None
-        assert stats_manager.lifetime is not None
+        assert stats_manager.session.score == 0
+        assert stats_manager.lifetime.total_sessions == 0
+
+    def test_increment_stat(self, stats_manager: StatisticsManager) -> None:
+        """Test incrementing statistic."""
+        stats_manager.increment("score", 100)
+
+        assert stats_manager.session.score == 100
+
+    def test_increment_multiple(self, stats_manager: StatisticsManager) -> None:
+        """Test incrementing multiple times."""
+        stats_manager.increment("coins_collected", 5)
+        stats_manager.increment("coins_collected", 3)
+
+        assert stats_manager.session.coins_collected == 8
+
+    def test_get_stat(self, stats_manager: StatisticsManager) -> None:
+        """Test getting statistic."""
+        stats_manager.increment("score", 500)
+
+        value = stats_manager.get_stat("score")
+        assert value == 500
 
     def test_save_and_load(self, stats_manager: StatisticsManager) -> None:
         """Test save and load statistics."""
+        stats_manager.increment("score", 1000)
         stats_manager.save()
         stats_manager.load()
 
-        assert stats_manager.lifetime is not None
+        assert stats_manager.session.score >= 0
 
 
 class TestStatsDisplay:
@@ -221,3 +390,13 @@ class TestStatsDisplay:
     def test_stats_display_creation(self, stats_display: StatsDisplay) -> None:
         """Test stats display initialization."""
         assert stats_display.stats is not None
+
+    def test_draw_session_stats(self, stats_display: StatsDisplay) -> None:
+        """Test drawing session stats."""
+        pg.init()
+        surface = pg.Surface((800, 600))
+
+        # Should not crash
+        stats_display.draw_session_stats(surface)
+
+        pg.quit()
