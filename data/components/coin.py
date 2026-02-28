@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import pygame as pg
 
@@ -33,7 +33,7 @@ class Coin(pg.sprite.Sprite):
         self.initial_height = self.rect.bottom - 5
         self.score_group = score_group
         self.current_time: float = 0
-        self.viewport: pg.Rect = None  # type: ignore
+        self.viewport: Optional[pg.Rect] = None
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Get the image frames from the sprite sheet"""

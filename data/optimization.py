@@ -5,13 +5,15 @@ Includes:
 - Object pooling for frequently created/destroyed objects
 - Sprite batching for efficient rendering
 - Performance timing utilities
+- Computation caching
 """
 from __future__ import annotations
 
 import time
 from collections import deque
-from typing import Any, Callable, Generic, Optional, TypeVar, List
+from typing import Any, Callable, Generic, Optional, TypeVar, List, Dict, Tuple, Hashable
 import pygame as pg
+from functools import wraps
 
 from . import constants as c
 
@@ -47,7 +49,7 @@ class ObjectPool(Generic[T]):
         self._reset_func = reset_func
         self._max_size = max_size
         self._available: deque[T] = deque()
-        self._in_use: set[T] = set()
+        self._in_use: List[T] = []
 
     def acquire(self) -> T:
         """
@@ -61,7 +63,7 @@ class ObjectPool(Generic[T]):
         else:
             obj = self._factory()
 
-        self._in_use.add(obj)
+        self._in_use.append(obj)
         return obj
 
     def release(self, obj: T) -> None:
@@ -345,3 +347,207 @@ class FrameRateMonitor:
         """
         min_acceptable = target_fps * (1 - tolerance)
         return self.get_fps() >= min_acceptable
+
+
+class ComputationCache:
+    """
+    LRU cache for expensive computations.
+    
+    Caches results of expensive operations to avoid recomputation.
+    Automatically evicts least recently used entries when full.
+    """
+
+    def __init__(self, max_size: int = 100) -> None:
+        """
+        Initialize computation cache.
+
+        Args:
+            max_size: Maximum number of cached entries
+        """
+        self.max_size = max_size
+        self._cache: Dict[Hashable, Any] = {}
+        self._access_order: deque[Hashable] = deque()
+        self._hits = 0
+        self._misses = 0
+
+    def get(self, key: Hashable) -> Optional[Any]:
+        """
+        Get cached value.
+
+        Args:
+            key: Cache key
+
+        Returns:
+            Cached value or None if not found
+        """
+        if key in self._cache:
+            self._hits += 1
+            # Move to end (most recently used)
+            self._access_order.remove(key)
+            self._access_order.append(key)
+            return self._cache[key]
+        
+        self._misses += 1
+        return None
+
+    def put(self, key: Hashable, value: Any) -> None:
+        """
+        Store value in cache.
+
+        Args:
+            key: Cache key
+            value: Value to cache
+        """
+        if key in self._cache:
+            # Update existing entry
+            self._access_order.remove(key)
+        elif len(self._cache) >= self.max_size:
+            # Evict least recently used
+            lru_key = self._access_order.popleft()
+            del self._cache[lru_key]
+
+        self._cache[key] = value
+        self._access_order.append(key)
+
+    def clear(self) -> None:
+        """Clear all cached entries."""
+        self._cache.clear()
+        self._access_order.clear()
+        self._hits = 0
+        self._misses = 0
+
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Get cache statistics.
+
+        Returns:
+            Dictionary with cache stats
+        """
+        total = self._hits + self._misses
+        hit_rate = (self._hits / total * 100) if total > 0 else 0
+
+        return {
+            "size": len(self._cache),
+            "max_size": self.max_size,
+            "hits": self._hits,
+            "misses": self._misses,
+            "hit_rate": round(hit_rate, 2),
+        }
+
+
+def memoize(max_size: int = 128):
+    """
+    Decorator for memoizing function results.
+
+    Args:
+        max_size: Maximum cache size
+
+    Example:
+        @memoize(max_size=100)
+        def expensive_calculation(x, y):
+            return x ** y
+    """
+    def decorator(func: Callable) -> Callable:
+        cache = ComputationCache(max_size=max_size)
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Create cache key from args and kwargs
+            key = (args, tuple(sorted(kwargs.items())))
+            
+            result = cache.get(key)
+            if result is not None:
+                return result
+
+            result = func(*args, **kwargs)
+            cache.put(key, result)
+            return result
+
+        wrapper.cache = cache  # type: ignore
+        return wrapper
+
+    return decorator
+
+
+class SpatialHash:
+    """
+    Spatial hashing for efficient collision detection.
+    
+    Divides space into grid cells for fast proximity queries.
+    """
+
+    def __init__(self, cell_size: int = 64) -> None:
+        """
+        Initialize spatial hash.
+
+        Args:
+            cell_size: Size of each grid cell
+        """
+        self.cell_size = cell_size
+        self._grid: Dict[Tuple[int, int], List[Any]] = {}
+
+    def _get_cell(self, x: float, y: float) -> Tuple[int, int]:
+        """Get grid cell for position."""
+        return (int(x // self.cell_size), int(y // self.cell_size))
+
+    def insert(self, obj: Any, x: float, y: float, width: float, height: float) -> None:
+        """
+        Insert object into spatial hash.
+
+        Args:
+            obj: Object to insert
+            x, y: Position
+            width, height: Size
+        """
+        # Get all cells the object overlaps
+        min_cell = self._get_cell(x, y)
+        max_cell = self._get_cell(x + width, y + height)
+
+        for cx in range(min_cell[0], max_cell[0] + 1):
+            for cy in range(min_cell[1], max_cell[1] + 1):
+                cell = (cx, cy)
+                if cell not in self._grid:
+                    self._grid[cell] = []
+                if obj not in self._grid[cell]:
+                    self._grid[cell].append(obj)
+
+    def query(self, x: float, y: float, width: float, height: float) -> List[Any]:
+        """
+        Query objects in area.
+
+        Args:
+            x, y: Position
+            width, height: Size
+
+        Returns:
+            List of objects in area
+        """
+        results = []
+        seen = set()
+        min_cell = self._get_cell(x, y)
+        max_cell = self._get_cell(x + width, y + height)
+
+        for cx in range(min_cell[0], max_cell[0] + 1):
+            for cy in range(min_cell[1], max_cell[1] + 1):
+                cell = (cx, cy)
+                if cell in self._grid:
+                    for obj in self._grid[cell]:
+                        obj_id = id(obj)
+                        if obj_id not in seen:
+                            seen.add(obj_id)
+                            results.append(obj)
+
+        return results
+
+    def clear(self) -> None:
+        """Clear all objects from spatial hash."""
+        self._grid.clear()
+
+    def get_stats(self) -> Dict[str, int]:
+        """Get spatial hash statistics."""
+        total_objects = sum(len(cell) for cell in self._grid.values())
+        return {
+            "cells": len(self._grid),
+            "objects": total_objects,
+            "avg_per_cell": total_objects // len(self._grid) if self._grid else 0,
+        }
