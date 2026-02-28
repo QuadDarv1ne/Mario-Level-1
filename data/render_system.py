@@ -7,6 +7,7 @@ Features:
 - Layer-based rendering
 - Dirty rectangle tracking
 - Surface caching
+- Texture atlas support
 """
 from __future__ import annotations
 
@@ -28,6 +29,104 @@ class RenderLayer(IntEnum):
     PARTICLES = 6
     UI = 7
     OVERLAY = 8
+
+
+@dataclass
+class AtlasRegion:
+    """Region within a texture atlas."""
+
+    x: int
+    y: int
+    width: int
+    height: int
+    name: str = ""
+
+    def to_rect(self) -> pg.Rect:
+        """Convert to pygame Rect."""
+        return pg.Rect(self.x, self.y, self.width, self.height)
+
+
+class TextureAtlas:
+    """
+    Texture atlas for efficient sprite rendering.
+
+    Combines multiple small textures into one large texture
+    to reduce texture switching overhead.
+    """
+
+    def __init__(self, width: int = 2048, height: int = 2048) -> None:
+        """
+        Initialize texture atlas.
+
+        Args:
+            width: Atlas width
+            height: Atlas height
+        """
+        self.width = width
+        self.height = height
+        self.surface = pg.Surface((width, height), pg.SRCALPHA)
+        self.regions: Dict[str, AtlasRegion] = {}
+        self._current_x = 0
+        self._current_y = 0
+        self._row_height = 0
+
+    def add_texture(self, name: str, texture: pg.Surface) -> Optional[AtlasRegion]:
+        """
+        Add texture to atlas.
+
+        Args:
+            name: Texture identifier
+            texture: Texture surface
+
+        Returns:
+            Atlas region or None if doesn't fit
+        """
+        if name in self.regions:
+            return self.regions[name]
+
+        w, h = texture.get_size()
+
+        # Check if fits in current row
+        if self._current_x + w > self.width:
+            # Move to next row
+            self._current_x = 0
+            self._current_y += self._row_height
+            self._row_height = 0
+
+        # Check if fits in atlas
+        if self._current_y + h > self.height:
+            return None
+
+        # Blit texture to atlas
+        self.surface.blit(texture, (self._current_x, self._current_y))
+
+        # Create region
+        region = AtlasRegion(
+            x=self._current_x,
+            y=self._current_y,
+            width=w,
+            height=h,
+            name=name,
+        )
+        self.regions[name] = region
+
+        # Update position
+        self._current_x += w
+        self._row_height = max(self._row_height, h)
+
+        return region
+
+    def get_region(self, name: str) -> Optional[AtlasRegion]:
+        """Get atlas region by name."""
+        return self.regions.get(name)
+
+    def clear(self) -> None:
+        """Clear atlas."""
+        self.surface.fill((0, 0, 0, 0))
+        self.regions.clear()
+        self._current_x = 0
+        self._current_y = 0
+        self._row_height = 0
 
 
 @dataclass
@@ -120,6 +219,7 @@ class SpriteRenderer:
     - Viewport culling
     - Layer-based rendering
     - Statistics tracking
+    - Texture atlas support
 
     Usage:
         renderer = SpriteRenderer(screen)
@@ -127,12 +227,13 @@ class SpriteRenderer:
         renderer.render(viewport_rect)
     """
 
-    def __init__(self, surface: pg.Surface) -> None:
+    def __init__(self, surface: pg.Surface, use_atlas: bool = False) -> None:
         """
         Initialize sprite renderer.
 
         Args:
             surface: Target surface for rendering
+            use_atlas: Enable texture atlas optimization
         """
         self.surface = surface
         self.stats = RenderStats()
@@ -149,6 +250,33 @@ class SpriteRenderer:
         # Dirty rect tracking
         self._dirty_rects: Set[pg.Rect] = set()
         self._use_dirty: bool = False
+
+        # Texture atlas
+        self._use_atlas = use_atlas
+        self._atlas: Optional[TextureAtlas] = None
+        if use_atlas:
+            self._atlas = TextureAtlas()
+
+    def get_atlas(self) -> Optional[TextureAtlas]:
+        """Get texture atlas."""
+        return self._atlas
+
+    def add_to_atlas(self, name: str, texture: pg.Surface) -> bool:
+        """
+        Add texture to atlas.
+
+        Args:
+            name: Texture identifier
+            texture: Texture surface
+
+        Returns:
+            True if added successfully
+        """
+        if not self._use_atlas or self._atlas is None:
+            return False
+
+        region = self._atlas.add_texture(name, texture)
+        return region is not None
 
     def add_sprite(
         self,
@@ -339,6 +467,18 @@ class SpriteRenderer:
     def get_stats(self) -> RenderStats:
         """Get rendering statistics."""
         return self.stats
+
+    def get_atlas_stats(self) -> Dict[str, Any]:
+        """Get texture atlas statistics."""
+        if not self._use_atlas or self._atlas is None:
+            return {"enabled": False}
+
+        return {
+            "enabled": True,
+            "size": (self._atlas.width, self._atlas.height),
+            "regions": len(self._atlas.regions),
+            "usage": f"{self._atlas._current_y / self._atlas.height * 100:.1f}%",
+        }
 
 
 @dataclass

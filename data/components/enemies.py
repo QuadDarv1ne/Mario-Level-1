@@ -13,6 +13,12 @@ from .. import constants as c
 class Enemy(pg.sprite.Sprite):
     """Base class for all enemies (Goombas, Koopas, etc.)"""
 
+    __slots__ = [
+        'sprite_sheet', 'frames', 'frame_index', 'animate_timer', 'death_timer',
+        'gravity', 'state', 'name', 'direction', 'x_vel', 'y_vel',
+        'current_time', 'mario', 'image', 'rect'
+    ]
+
     def __init__(self) -> None:
         pg.sprite.Sprite.__init__(self)
         self.sprite_sheet: pg.Surface = setup.GFX["smb_enemies_sheet"]
@@ -103,8 +109,10 @@ class Enemy(pg.sprite.Sprite):
             self.y_vel += self.gravity
 
     def jumped_on(self) -> None:
-        """Placeholder for when the enemy is stomped on"""
-        pass
+        """When the enemy is stomped on - kills it"""
+        self.state = c.JUMPED_ON
+        self.frame_index = 0
+        self.death_timer = self.current_time
 
     def death_jumping(self) -> None:
         """Death animation"""

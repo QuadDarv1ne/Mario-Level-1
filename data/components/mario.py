@@ -16,6 +16,27 @@ if TYPE_CHECKING:
 class Mario(pg.sprite.Sprite):
     """Mario player sprite."""
 
+    __slots__ = [
+        'sprite_sheet',
+        'walking_timer', 'invincible_animation_timer', 'invincible_start_timer',
+        'fire_transition_timer', 'death_timer', 'transition_timer', 'last_fireball_time',
+        'hurt_invisible_timer', 'hurt_invisible_timer2', 'flag_pole_timer',
+        'facing_right', 'allow_jump', 'dead', 'invincible', 'big', 'fire',
+        'allow_fireball', 'in_transition_state', 'hurt_invincible', 'in_castle',
+        'crouching', 'losing_invincibility',
+        'x_vel', 'y_vel', 'max_x_vel', 'max_y_vel', 'x_accel', 'jump_vel', 'gravity',
+        'frame_index', 'invincible_index', 'fire_transition_index', 'fireball_count',
+        'flag_pole_right',
+        'state', 'image', 'rect', 'mask', 'key_timer',
+        'right_frames', 'left_frames',
+        'right_small_normal_frames', 'left_small_normal_frames',
+        'right_small_green_frames', 'left_small_green_frames',
+        'right_small_red_frames', 'left_small_red_frames',
+        'right_small_black_frames', 'left_small_black_frames',
+        'right_big_normal_frames', 'left_big_normal_frames',
+        'right_big_green_frames', 'left_big_green_frames',
+    ]
+
     def __init__(self) -> None:
         pg.sprite.Sprite.__init__(self)
         self.sprite_sheet = setup.GFX["mario_bros"]
