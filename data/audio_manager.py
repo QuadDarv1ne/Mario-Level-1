@@ -752,3 +752,217 @@ class GameAudioPreset:
     def play_menu_move(self) -> bool:
         """Play menu navigation sound."""
         return self.audio.play_sound(SOUND_NAMES["menu_move"], category=AudioCategory.UI)
+
+
+
+class AudioEffect(Enum):
+    """Audio effect types."""
+
+    NONE = "none"
+    REVERB = "reverb"
+    ECHO = "echo"
+    LOWPASS = "lowpass"
+    HIGHPASS = "highpass"
+    DISTORTION = "distortion"
+
+
+@dataclass
+class EffectConfig:
+    """Audio effect configuration."""
+
+    effect_type: AudioEffect = AudioEffect.NONE
+    intensity: float = 0.5  # 0.0 - 1.0
+    mix: float = 0.3  # Dry/wet mix
+    enabled: bool = True
+
+
+class AudioEffectProcessor:
+    """
+    Audio effects processor.
+    
+    Applies real-time audio effects to sounds.
+    Note: This is a simplified implementation. For production,
+    consider using external audio libraries like pydub or sounddevice.
+    """
+
+    def __init__(self) -> None:
+        """Initialize audio effect processor."""
+        self.effects: Dict[str, EffectConfig] = {}
+        self.enabled = True
+
+    def add_effect(self, name: str, config: EffectConfig) -> None:
+        """
+        Add audio effect.
+
+        Args:
+            name: Effect identifier
+            config: Effect configuration
+        """
+        self.effects[name] = config
+
+    def remove_effect(self, name: str) -> None:
+        """
+        Remove audio effect.
+
+        Args:
+            name: Effect identifier
+        """
+        if name in self.effects:
+            del self.effects[name]
+
+    def set_effect_intensity(self, name: str, intensity: float) -> None:
+        """
+        Set effect intensity.
+
+        Args:
+            name: Effect identifier
+            intensity: Intensity value (0.0 - 1.0)
+        """
+        if name in self.effects:
+            self.effects[name].intensity = max(0.0, min(1.0, intensity))
+
+    def set_effect_mix(self, name: str, mix: float) -> None:
+        """
+        Set effect dry/wet mix.
+
+        Args:
+            name: Effect identifier
+            mix: Mix value (0.0 = dry, 1.0 = wet)
+        """
+        if name in self.effects:
+            self.effects[name].mix = max(0.0, min(1.0, mix))
+
+    def enable_effect(self, name: str, enable: bool = True) -> None:
+        """
+        Enable or disable effect.
+
+        Args:
+            name: Effect identifier
+            enable: Enable state
+        """
+        if name in self.effects:
+            self.effects[name].enabled = enable
+
+    def get_active_effects(self) -> List[str]:
+        """
+        Get list of active effects.
+
+        Returns:
+            List of active effect names
+        """
+        return [
+            name
+            for name, config in self.effects.items()
+            if config.enabled
+        ]
+
+    def clear_effects(self) -> None:
+        """Clear all effects."""
+        self.effects.clear()
+
+    def get_effect_config(self, name: str) -> Optional[EffectConfig]:
+        """
+        Get effect configuration.
+
+        Args:
+            name: Effect identifier
+
+        Returns:
+            Effect config or None
+        """
+        return self.effects.get(name)
+
+
+class AudioMixer:
+    """
+    Advanced audio mixer with ducking and crossfading.
+    """
+
+    def __init__(self) -> None:
+        """Initialize audio mixer."""
+        self.ducking_enabled = False
+        self.ducking_amount = 0.5  # How much to reduce volume
+        self.ducking_duration_ms = 500
+        self.crossfade_duration_ms = 1000
+        
+        # Track volumes for ducking
+        self._original_volumes: Dict[AudioCategory, float] = {}
+        self._ducked = False
+
+    def enable_ducking(
+        self,
+        enable: bool = True,
+        amount: float = 0.5,
+        duration_ms: int = 500
+    ) -> None:
+        """
+        Enable audio ducking (reduce music when SFX plays).
+
+        Args:
+            enable: Enable ducking
+            amount: Amount to reduce volume (0.0 - 1.0)
+            duration_ms: Fade duration
+        """
+        self.ducking_enabled = enable
+        self.ducking_amount = max(0.0, min(1.0, amount))
+        self.ducking_duration_ms = duration_ms
+
+    def duck_audio(self, category: AudioCategory, volume: float) -> None:
+        """
+        Duck audio for category.
+
+        Args:
+            category: Audio category to duck
+            volume: Original volume
+        """
+        if not self.ducking_enabled:
+            return
+
+        if category not in self._original_volumes:
+            self._original_volumes[category] = volume
+
+        self._ducked = True
+
+    def restore_audio(self, category: AudioCategory) -> float:
+        """
+        Restore ducked audio.
+
+        Args:
+            category: Audio category to restore
+
+        Returns:
+            Original volume
+        """
+        if category in self._original_volumes:
+            volume = self._original_volumes[category]
+            del self._original_volumes[category]
+            self._ducked = False
+            return volume
+        return 1.0
+
+    def is_ducked(self) -> bool:
+        """Check if audio is currently ducked."""
+        return self._ducked
+
+    def set_crossfade_duration(self, duration_ms: int) -> None:
+        """
+        Set crossfade duration.
+
+        Args:
+            duration_ms: Duration in milliseconds
+        """
+        self.crossfade_duration_ms = max(0, duration_ms)
+
+    def get_ducked_volume(self, original_volume: float) -> float:
+        """
+        Calculate ducked volume.
+
+        Args:
+            original_volume: Original volume
+
+        Returns:
+            Ducked volume
+        """
+        if self._ducked:
+            return original_volume * (1.0 - self.ducking_amount)
+        return original_volume

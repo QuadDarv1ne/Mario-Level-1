@@ -510,3 +510,195 @@ class TestAudioIntegration:
             pg.mixer.quit()
         except Exception:
             pass
+
+
+
+class TestAudioEffect:
+    """Tests for audio effects."""
+
+    def test_effect_config_creation(self):
+        """Test effect config creation."""
+        from data.audio_manager import EffectConfig, AudioEffect
+
+        config = EffectConfig(
+            effect_type=AudioEffect.REVERB,
+            intensity=0.7,
+            mix=0.5
+        )
+
+        assert config.effect_type == AudioEffect.REVERB
+        assert config.intensity == 0.7
+        assert config.mix == 0.5
+        assert config.enabled
+
+    def test_effect_processor_creation(self):
+        """Test effect processor initialization."""
+        from data.audio_manager import AudioEffectProcessor
+
+        processor = AudioEffectProcessor()
+        assert processor.enabled
+        assert len(processor.effects) == 0
+
+    def test_add_effect(self):
+        """Test adding effect."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+        config = EffectConfig(effect_type=AudioEffect.ECHO)
+
+        processor.add_effect("echo1", config)
+        assert "echo1" in processor.effects
+
+    def test_remove_effect(self):
+        """Test removing effect."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+        config = EffectConfig(effect_type=AudioEffect.REVERB)
+
+        processor.add_effect("reverb1", config)
+        processor.remove_effect("reverb1")
+        assert "reverb1" not in processor.effects
+
+    def test_set_effect_intensity(self):
+        """Test setting effect intensity."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+        config = EffectConfig(effect_type=AudioEffect.LOWPASS, intensity=0.5)
+
+        processor.add_effect("lowpass1", config)
+        processor.set_effect_intensity("lowpass1", 0.8)
+
+        assert processor.effects["lowpass1"].intensity == 0.8
+
+    def test_intensity_clamping(self):
+        """Test intensity value clamping."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+        config = EffectConfig(effect_type=AudioEffect.DISTORTION)
+
+        processor.add_effect("dist1", config)
+        processor.set_effect_intensity("dist1", 1.5)  # Over max
+        assert processor.effects["dist1"].intensity == 1.0
+
+        processor.set_effect_intensity("dist1", -0.5)  # Under min
+        assert processor.effects["dist1"].intensity == 0.0
+
+    def test_set_effect_mix(self):
+        """Test setting effect mix."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+        config = EffectConfig(effect_type=AudioEffect.REVERB)
+
+        processor.add_effect("reverb1", config)
+        processor.set_effect_mix("reverb1", 0.7)
+
+        assert processor.effects["reverb1"].mix == 0.7
+
+    def test_enable_disable_effect(self):
+        """Test enabling/disabling effect."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+        config = EffectConfig(effect_type=AudioEffect.ECHO)
+
+        processor.add_effect("echo1", config)
+        processor.enable_effect("echo1", False)
+        assert not processor.effects["echo1"].enabled
+
+        processor.enable_effect("echo1", True)
+        assert processor.effects["echo1"].enabled
+
+    def test_get_active_effects(self):
+        """Test getting active effects."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+
+        processor.add_effect("reverb1", EffectConfig(effect_type=AudioEffect.REVERB))
+        processor.add_effect("echo1", EffectConfig(effect_type=AudioEffect.ECHO))
+        processor.enable_effect("echo1", False)
+
+        active = processor.get_active_effects()
+        assert "reverb1" in active
+        assert "echo1" not in active
+
+    def test_clear_effects(self):
+        """Test clearing all effects."""
+        from data.audio_manager import AudioEffectProcessor, EffectConfig, AudioEffect
+
+        processor = AudioEffectProcessor()
+        processor.add_effect("reverb1", EffectConfig(effect_type=AudioEffect.REVERB))
+        processor.add_effect("echo1", EffectConfig(effect_type=AudioEffect.ECHO))
+
+        processor.clear_effects()
+        assert len(processor.effects) == 0
+
+
+class TestAudioMixer:
+    """Tests for audio mixer."""
+
+    def test_mixer_creation(self):
+        """Test mixer initialization."""
+        from data.audio_manager import AudioMixer
+
+        mixer = AudioMixer()
+        assert not mixer.ducking_enabled
+        assert mixer.ducking_amount == 0.5
+
+    def test_enable_ducking(self):
+        """Test enabling ducking."""
+        from data.audio_manager import AudioMixer
+
+        mixer = AudioMixer()
+        mixer.enable_ducking(True, amount=0.7, duration_ms=300)
+
+        assert mixer.ducking_enabled
+        assert mixer.ducking_amount == 0.7
+        assert mixer.ducking_duration_ms == 300
+
+    def test_duck_audio(self):
+        """Test ducking audio."""
+        from data.audio_manager import AudioMixer, AudioCategory
+
+        mixer = AudioMixer()
+        mixer.enable_ducking(True)
+
+        mixer.duck_audio(AudioCategory.MUSIC, 1.0)
+        assert mixer.is_ducked()
+
+    def test_restore_audio(self):
+        """Test restoring ducked audio."""
+        from data.audio_manager import AudioMixer, AudioCategory
+
+        mixer = AudioMixer()
+        mixer.enable_ducking(True)
+
+        mixer.duck_audio(AudioCategory.MUSIC, 0.8)
+        volume = mixer.restore_audio(AudioCategory.MUSIC)
+
+        assert volume == 0.8
+        assert not mixer.is_ducked()
+
+    def test_get_ducked_volume(self):
+        """Test calculating ducked volume."""
+        from data.audio_manager import AudioMixer, AudioCategory
+
+        mixer = AudioMixer()
+        mixer.enable_ducking(True, amount=0.5)
+        mixer.duck_audio(AudioCategory.MUSIC, 1.0)
+
+        ducked = mixer.get_ducked_volume(1.0)
+        assert ducked == 0.5
+
+    def test_set_crossfade_duration(self):
+        """Test setting crossfade duration."""
+        from data.audio_manager import AudioMixer
+
+        mixer = AudioMixer()
+        mixer.set_crossfade_duration(2000)
+
+        assert mixer.crossfade_duration_ms == 2000
