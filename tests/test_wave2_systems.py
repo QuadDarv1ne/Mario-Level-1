@@ -172,6 +172,49 @@ class TestRenderSystem:
         assert stats["visible_sprites"] == 1
         assert stats["culled_sprites"] == 1
 
+    def test_texture_atlas(self, init_pygame):
+        """Test texture atlas functionality."""
+        import pygame as pg
+        from data.render_system import TextureAtlas
+
+        atlas = TextureAtlas(512, 512)
+
+        # Add textures
+        tex1 = pg.Surface((64, 64))
+        tex2 = pg.Surface((32, 32))
+
+        region1 = atlas.add_texture("tex1", tex1)
+        region2 = atlas.add_texture("tex2", tex2)
+
+        assert region1 is not None
+        assert region2 is not None
+        assert len(atlas.regions) == 2
+
+        # Get regions
+        assert atlas.get_region("tex1") == region1
+        assert atlas.get_region("tex2") == region2
+
+    def test_renderer_with_atlas(self, init_pygame):
+        """Test renderer with texture atlas."""
+        import pygame as pg
+        from data.render_system import SpriteRenderer
+
+        screen = pg.display.set_mode((800, 600))
+        renderer = SpriteRenderer(screen, use_atlas=True)
+
+        atlas = renderer.get_atlas()
+        assert atlas is not None
+
+        # Add texture to atlas
+        texture = pg.Surface((32, 32))
+        success = renderer.add_to_atlas("test_tex", texture)
+        assert success
+
+        # Check atlas stats
+        stats = renderer.get_atlas_stats()
+        assert stats["enabled"]
+        assert stats["regions"] == 1
+
 
 class TestProfiler:
     """Tests for profiler."""

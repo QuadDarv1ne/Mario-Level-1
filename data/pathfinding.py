@@ -154,22 +154,28 @@ class Grid:
 
 class AStarPathfinder:
     """
-    A* pathfinding algorithm.
+    A* pathfinding algorithm with path caching.
 
     Features:
     - Optimal path finding
     - Multiple heuristics
     - Jump support
+    - Path caching for performance
     """
 
-    def __init__(self, grid: Grid) -> None:
+    def __init__(self, grid: Grid, cache_size: int = 100) -> None:
         """
         Initialize pathfinder.
 
         Args:
             grid: Pathfinding grid
+            cache_size: Maximum cached paths
         """
         self.grid = grid
+        self.cache_size = cache_size
+        self._path_cache: Dict[Tuple[Tuple[int, int], Tuple[int, int]], PathResult] = {}
+        self._cache_hits = 0
+        self._cache_misses = 0
 
     def find_path(
         self,
@@ -177,19 +183,29 @@ class AStarPathfinder:
         goal: Tuple[int, int],
         allow_diagonal: bool = False,
         max_iterations: int = 10000,
+        use_cache: bool = True,
     ) -> PathResult:
         """
-        Find path using A*.
+        Find path using A* with caching.
 
         Args:
             start: Start position (grid coords)
             goal: Goal position (grid coords)
             allow_diagonal: Allow diagonal movement
             max_iterations: Maximum iterations
+            use_cache: Use cached paths
 
         Returns:
             Path result
         """
+        cache_key = (start, goal)
+
+        if use_cache and cache_key in self._path_cache:
+            self._cache_hits += 1
+            return self._path_cache[cache_key]
+
+        self._cache_misses += 1
+
         start_node = self.grid.get_node(start[0], start[1])
         goal_node = self.grid.get_node(goal[0], goal[1])
 
@@ -217,7 +233,9 @@ class AStarPathfinder:
         while open_set:
             iterations += 1
             if iterations > max_iterations:
-                return PathResult([], False, 0, 0, "Max iterations reached")
+                result = PathResult([], False, 0, 0, "Max iterations reached")
+                self._add_to_cache(cache_key, result)
+                return result
 
             # Get node with lowest f_cost
             current = heapq.heappop(open_set)
@@ -225,13 +243,15 @@ class AStarPathfinder:
             # Check if reached goal
             if current == goal_node:
                 path = self._reconstruct_path(current)
-                return PathResult(
+                result = PathResult(
                     path,
                     True,
                     len(path),
                     current.g_cost,
                     "Path found"
                 )
+                self._add_to_cache(cache_key, result)
+                return result
 
             closed_set.add(current)
 
@@ -255,7 +275,36 @@ class AStarPathfinder:
                     if neighbor not in open_set:
                         heapq.heappush(open_set, neighbor)
 
-        return PathResult([], False, 0, 0, "No path found")
+        result = PathResult([], False, 0, 0, "No path found")
+        self._add_to_cache(cache_key, result)
+        return result
+
+    def _add_to_cache(self, key: Tuple[Tuple[int, int], Tuple[int, int]], result: PathResult) -> None:
+        """Add path to cache with LRU eviction."""
+        if len(self._path_cache) >= self.cache_size:
+            # Remove oldest entry (first key)
+            first_key = next(iter(self._path_cache))
+            del self._path_cache[first_key]
+
+        self._path_cache[key] = result
+
+    def clear_cache(self) -> None:
+        """Clear path cache."""
+        self._path_cache.clear()
+        self._cache_hits = 0
+        self._cache_misses = 0
+
+    def get_cache_stats(self) -> Dict[str, int]:
+        """Get cache statistics."""
+        total = self._cache_hits + self._cache_misses
+        hit_rate = (self._cache_hits / total * 100) if total > 0 else 0
+
+        return {
+            "hits": self._cache_hits,
+            "misses": self._cache_misses,
+            "size": len(self._path_cache),
+            "hit_rate": round(hit_rate, 2),
+        }
 
     def _heuristic(self, a: Node, b: Node) -> float:
         """Calculate heuristic (Manhattan distance)."""
@@ -348,6 +397,7 @@ class AStarPathfinder:
             y += y_inc
 
         return True
+
 
 
 class JumpPathfinder:

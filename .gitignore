@@ -72,7 +72,12 @@ Thumbs.db
 
 # Game save files
 *.save
+*.sav
 save_data.json
+stats.json
+hints.json
+game.sav
+saves/
 
 # Executables
 *.exe
