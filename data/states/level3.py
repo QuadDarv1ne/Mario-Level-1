@@ -387,7 +387,7 @@ class Level3(tools._State):
             if group:
                 group.draw(self.level)
 
-        if self.mario:
+        if self.mario and hasattr(self.mario, "draw"):
             self.mario.draw(self.level)
         if self.overhead_info_display:
             self.overhead_info_display.draw(self.level)
@@ -396,5 +396,5 @@ class Level3(tools._State):
 
     def get_event(self, event: pg.event.Event) -> None:
         """Handle events"""
-        if self.mario:
+        if self.mario and hasattr(self.mario, "get_event"):
             self.mario.get_event(event)
