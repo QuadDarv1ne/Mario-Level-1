@@ -8,9 +8,10 @@ import pygame as pg
 
 from .. import constants as c
 from .. import setup
+from . import score
 
 if TYPE_CHECKING:
-    from . import score
+    pass
 
 
 class Coin(pg.sprite.Sprite):

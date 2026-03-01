@@ -8,10 +8,10 @@ import pygame as pg
 
 from .. import setup
 from .. import constants as c
+from . import coin
 
 if TYPE_CHECKING:
     from . import powerups
-    from . import coin
 
 
 class CoinBox(pg.sprite.Sprite):
