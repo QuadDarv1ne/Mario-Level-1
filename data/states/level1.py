@@ -77,6 +77,7 @@ class Level1(tools._State):
         self.enemy_group_list: Optional[List[pg.sprite.Group]] = None
 
         self.setup_background()
+        self.setup_ground()
         self.setup_pipes()
         self.setup_steps()
         self.setup_bricks()
