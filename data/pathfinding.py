@@ -342,7 +342,7 @@ class AStarPathfinder:
         if not result.success:
             return []
 
-        return self._smooth_path(result.path)
+        return self._smooth_path(result.path)  # type: ignore[arg-type]
 
     def _smooth_path(self, path: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
         """Smooth path by removing unnecessary waypoints."""

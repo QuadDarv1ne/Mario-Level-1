@@ -361,7 +361,7 @@ class MeleeCombat:
             List of hit events
         """
         current_time = time.time()
-        hits: List[HitEvent] = []
+        hits: List[Dict[str, Any]] = []
 
         # Update attack state
         if self.current_attack:

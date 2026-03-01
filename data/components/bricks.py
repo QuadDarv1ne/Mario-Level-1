@@ -96,6 +96,8 @@ class Brick(pg.sprite.Sprite):
 
     def bumped(self) -> None:
         """Action during a BUMPED state"""
+        if self.rect is None:
+            return
         self.rect.y += self.y_vel
         self.y_vel += self.gravity
 
@@ -118,8 +120,8 @@ class Brick(pg.sprite.Sprite):
         if self.contents == "6coins":
             setup.SFX["coin"].play()
 
-            if self.coin_total > 0:
-                self.group.add(coin.Coin(self.rect.centerx, self.rect.y, score_group))
+            if self.coin_total > 0 and self.rect is not None and self.group is not None:
+                self.group.add(coin.Coin(int(self.rect.centerx), int(self.rect.y), list(score_group)))
                 self.coin_total -= 1
                 if self.coin_total == 0:
                     self.frame_index = 1
@@ -137,7 +139,8 @@ class Brick(pg.sprite.Sprite):
         self.image = self.frames[self.frame_index]
 
         if self.contents == "star" and self.powerup_in_box:
-            self.group.add(powerups.Star(self.rect.centerx, self.rest_height))
+            if self.rect is not None and self.group is not None:
+                self.group.add(powerups.Star(self.rect.centerx, self.rest_height))
             self.powerup_in_box = False
 
 

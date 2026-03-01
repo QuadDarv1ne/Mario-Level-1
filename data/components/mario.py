@@ -621,7 +621,8 @@ class Mario(pg.sprite.Sprite):
         if self.death_timer == 0:
             self.death_timer = self.current_time
         elif (self.current_time - self.death_timer) > 500:
-            self.rect.y += self.y_vel
+            if self.rect is not None:
+                self.rect.y += self.y_vel
             self.y_vel += self.gravity
 
     def start_death_jump(self, game_info: Dict[str, Any]) -> None:
@@ -685,11 +686,12 @@ class Mario(pg.sprite.Sprite):
             self.image = self.normal_small_frames[0][7]
         else:
             self.image = self.normal_small_frames[1][7]
-        bottom = self.rect.bottom
-        centerx = self.rect.centerx
-        self.rect = self.image.get_rect()
-        self.rect.bottom = bottom
-        self.rect.centerx = centerx
+        if self.rect is not None:
+            bottom = self.rect.bottom
+            centerx = self.rect.centerx
+            self.rect = self.image.get_rect()
+            self.rect.bottom = bottom
+            self.rect.centerx = centerx
 
     def set_mario_to_small_image(self) -> None:
         """During a change from small to big, sets mario's image to small"""
@@ -697,11 +699,12 @@ class Mario(pg.sprite.Sprite):
             self.image = self.normal_small_frames[0][0]
         else:
             self.image = self.normal_small_frames[1][0]
-        bottom = self.rect.bottom
-        centerx = self.rect.centerx
-        self.rect = self.image.get_rect()
-        self.rect.bottom = bottom
-        self.rect.centerx = centerx
+        if self.rect is not None:
+            bottom = self.rect.bottom
+            centerx = self.rect.centerx
+            self.rect = self.image.get_rect()
+            self.rect.bottom = bottom
+            self.rect.centerx = centerx
 
     def set_mario_to_big_image(self) -> None:
         """During a change from small to big, sets mario's image to big"""
@@ -709,11 +712,12 @@ class Mario(pg.sprite.Sprite):
             self.image = self.normal_big_frames[0][0]
         else:
             self.image = self.normal_big_frames[1][0]
-        bottom = self.rect.bottom
-        centerx = self.rect.centerx
-        self.rect = self.image.get_rect()
-        self.rect.bottom = bottom
-        self.rect.centerx = centerx
+        if self.rect is not None:
+            bottom = self.rect.bottom
+            centerx = self.rect.centerx
+            self.rect = self.image.get_rect()
+            self.rect.bottom = bottom
+            self.rect.centerx = centerx
 
     def become_big(self) -> None:
         self.big = True
@@ -856,6 +860,8 @@ class Mario(pg.sprite.Sprite):
     def adjust_rect(self) -> None:
         """Makes sure new Rect has the same bottom and left
         location as previous Rect"""
+        if self.rect is None:
+            return
         x = self.rect.x
         bottom = self.rect.bottom
         self.rect = self.image.get_rect()
@@ -866,6 +872,8 @@ class Mario(pg.sprite.Sprite):
         self.big = False
         self.right_frames = self.right_small_normal_frames
         self.left_frames = self.left_small_normal_frames
+        if self.rect is None:
+            return
         bottom = self.rect.bottom
         left = self.rect.x
         image = self.right_frames[0]
@@ -882,7 +890,7 @@ class Mario(pg.sprite.Sprite):
 
         if self.flag_pole_timer == 0:
             self.flag_pole_timer = self.current_time
-        elif self.rect.bottom < 493:
+        elif self.rect is not None and self.rect.bottom < 493:
             if (self.current_time - self.flag_pole_timer) < 65:
                 self.image = self.right_frames[9]
             elif (self.current_time - self.flag_pole_timer) < 130:
@@ -890,14 +898,15 @@ class Mario(pg.sprite.Sprite):
             elif (self.current_time - self.flag_pole_timer) >= 130:
                 self.flag_pole_timer = self.current_time
 
-            self.rect.right = self.flag_pole_right
-            self.y_vel = 5
-            self.rect.y += self.y_vel
+            if self.rect is not None:
+                self.rect.right = self.flag_pole_right
+                self.y_vel = 5
+                self.rect.y += self.y_vel
 
-            if self.rect.bottom >= 488:
+            if self.rect is not None and self.rect.bottom >= 488:
                 self.flag_pole_timer = self.current_time
 
-        elif self.rect.bottom >= 493:
+        elif self.rect is not None and self.rect.bottom >= 493:
             self.image = self.right_frames[10]
 
     def sitting_at_bottom_of_pole(self) -> None:

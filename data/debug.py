@@ -122,9 +122,9 @@ class DebugOverlay:
 
         # Memory
         try:
-            import resource  # type: ignore[import-not-found]
+            import resource  # type: ignore[import-not-found,attr-defined]
 
-            self.stats.memory_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024  # type: ignore[attr-defined]
+            self.stats.memory_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
         except (ImportError, AttributeError):
             # Windows doesn't have resource module
             self.stats.memory_mb = 0
