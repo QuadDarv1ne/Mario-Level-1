@@ -1,1 +1,3 @@
-Ошибка в синтаксисе команды.
+rm: cannot remove '$null': Device or resource busy
+rm: cannot remove '$null': Device or resource busy
+rm: cannot remove 'img': Is a directory

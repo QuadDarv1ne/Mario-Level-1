@@ -31,7 +31,7 @@ class LevelSelect(tools._State):
 
     def startup(self, current_time: float, persist: Dict[str, Any]) -> None:
         """Called every time the game's state becomes this one"""
-        self.next = c.LOAD_SCREEN
+        self.next = c.MAIN_MENU  # Default to main menu, will change to LOAD_SCREEN when level selected
         self.persist = persist
         self.game_info = persist
         self.overhead_info = info.OverheadInfo(self.game_info, c.MAIN_MENU)
@@ -96,27 +96,39 @@ class LevelSelect(tools._State):
 
     def setup_background(self) -> None:
         """Setup the background image"""
-        level_1_img = setup.GFX.get("level_1")
-        if level_1_img is None:
-            level_1_img = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        self.background = level_1_img
-        self.background_rect = self.background.get_rect()
-        scaled_background = pg.transform.scale(
-            self.background,
-            (
-                int(self.background_rect.width * c.BACKGROUND_MULTIPLIER),
-                int(self.background_rect.height * c.BACKGROUND_MULTIPLIER),
-            ),
-        )
-        if scaled_background:
-            self.background = scaled_background
+        try:
+            # Try to load custom background image
+            bg_image = pg.image.load("img/sky_background.png")
+            self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
             self.background_rect = self.background.get_rect()
-        screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
-        if screen_rect:
-            self.viewport = screen_rect
+            self.viewport = pg.Rect(0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT)
+        except (pg.error, FileNotFoundError):
+            # Fallback to level_1 image
+            level_1_img = setup.GFX.get("level_1")
+            if level_1_img is None:
+                level_1_img = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+            self.background = level_1_img
+            self.background_rect = self.background.get_rect()
+            scaled_background = pg.transform.scale(
+                self.background,
+                (
+                    int(self.background_rect.width * c.BACKGROUND_MULTIPLIER),
+                    int(self.background_rect.height * c.BACKGROUND_MULTIPLIER),
+                ),
+            )
+            if scaled_background:
+                self.background = scaled_background
+                self.background_rect = self.background.get_rect()
+
+            if self.background_rect:
+                screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+                if screen_rect:
+                    self.viewport = screen_rect
 
         self.image_dict = {}
-        self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), setup.GFX.get("title_screen"))
+        title_screen = setup.GFX.get("title_screen")
+        if title_screen:
+            self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), title_screen)
 
     def get_image(
         self, x: int, y: int, width: int, height: int, dest: Tuple[int, int], sprite_sheet: Optional[pg.Surface]
@@ -146,37 +158,93 @@ class LevelSelect(tools._State):
         self.update_cursor(keys)
         self.overhead_info.update(self.game_info)
 
+        # Clear and draw background
         surface.fill(c.BLACK)
-        if self.background and self.background_rect and self.viewport:
-            surface.blit(self.background, self.viewport, self.viewport)
+        if self.background:
+            surface.blit(self.background, (0, 0))
+        
+        # Draw lighter semi-transparent overlay
+        overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+        overlay.set_alpha(90)  # Reduced from 120
+        overlay.fill((0, 0, 0))
+        surface.blit(overlay, (0, 0))
 
         # Draw title
-        self._draw_text(surface, "SELECT LEVEL", 350, 150, c.WHITE, 40)
+        self._draw_text(surface, "SELECT LEVEL", 400, 80, c.YELLOW, 50)
+        
+        # Draw level descriptions
+        level_descriptions = [
+            "Classic overworld - Goombas & Koopas",
+            "Underground - Pipes & secret areas",
+            "Tree platforms - Koopa Paratroopas",
+            "Castle - Fire Bars & fake Bowser",
+            "Overworld - Spring board challenge",
+            "Underwater - Bloobers & Cheep-Cheeps",
+            "Bridge - Jumping Cheep-Cheeps",
+            "Castle - Podoboos & fake Bowser",
+        ]
 
-        # Draw level options
+        # Draw level grid (2 columns)
+        levels_per_column = 4
+        column_width = 350
+        start_x = 150
+        start_y = 180
+        
         for i, level_name in enumerate(self.level_names):
-            color = c.YELLOW if i == self.selected_level else c.WHITE
-            self._draw_text(surface, level_name, 350, 280 + (i * 40), color, 30)
+            col = i // levels_per_column
+            row = i % levels_per_column
+            
+            x_pos = start_x + (col * column_width)
+            y_pos = start_y + (row * 100)
+            
+            # Highlight selected level
+            if i == self.selected_level:
+                color = c.YELLOW
+                size = 33
+                # Draw selection box with glow effect
+                box_rect = pg.Rect(x_pos - 10, y_pos - 15, 320, 80)
+                # Background for better visibility
+                box_bg = pg.Surface((320, 80))
+                box_bg.set_alpha(120)
+                box_bg.fill((60, 60, 80))
+                surface.blit(box_bg, (x_pos - 10, y_pos - 15))
+                
+                pg.draw.rect(surface, c.GOLD, box_rect, 4, border_radius=8)
+            else:
+                color = c.WHITE
+                size = 28
+                # Draw subtle border with background
+                box_rect = pg.Rect(x_pos - 10, y_pos - 15, 320, 80)
+                box_bg = pg.Surface((320, 80))
+                box_bg.set_alpha(80)
+                box_bg.fill((40, 40, 50))
+                surface.blit(box_bg, (x_pos - 10, y_pos - 15))
+                pg.draw.rect(surface, (120, 120, 120), box_rect, 2, border_radius=8)
+            
+            # Draw level name
+            self._draw_text(surface, level_name, x_pos + 150, y_pos, color, size)
+            
+            # Draw description
+            desc_color = c.YELLOW if i == self.selected_level else (210, 210, 210)
+            self._draw_text(surface, level_descriptions[i], x_pos + 150, y_pos + 30, desc_color, 17)
 
-        # Draw cursor
-        if self.cursor and self.cursor.image and hasattr(self.cursor, "rect") and self.cursor.rect:
-            surface.blit(self.cursor.image, self.cursor.rect)
+        # Draw instructions with icons
+        self._draw_text(surface, "↑↓←→ Navigate  |  ENTER Start  |  ESC Back", 400, 550, c.WHITE, 22)
 
-        # Draw Mario
-        if self.mario and self.mario.image and self.mario.rect:
-            surface.blit(self.mario.image, self.mario.rect)
-
-        # Draw instructions
-        self._draw_text(surface, "UP/DOWN to select, ENTER to start", 400, 520, c.WHITE, 20)
-        self._draw_text(surface, "ESC to return to main menu", 400, 550, c.WHITE, 20)
-
-        self.overhead_info.draw(surface)
+        # Don't draw overhead_info - it causes issues
 
     def _draw_text(
         self, surface: pg.Surface, text: str, x: int, y: int, color: Tuple[int, int, int], size: int = 30
     ) -> None:
-        """Draw text on surface"""
+        """Draw text on surface with shadow"""
         font = pg.font.Font(None, size)
+        
+        # Draw shadow
+        shadow_surface = font.render(text, True, c.BLACK)
+        shadow_rect = shadow_surface.get_rect(center=(x + 2, y + 2))
+        surface.blit(shadow_surface, shadow_rect)
+        
+        # Draw text
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=(x, y))
         surface.blit(text_surface, text_rect)
@@ -187,18 +255,37 @@ class LevelSelect(tools._State):
         current_time = pg.time.get_ticks()
         can_input = current_time - self.input_timer > self.input_delay
         
+        levels_per_column = 4
+        
         if can_input and keys[pg.K_DOWN]:
-            self.selected_level = (self.selected_level + 1) % len(self.level_names)
-            self._update_cursor_position()
+            # Move down in current column
+            if self.selected_level % levels_per_column < levels_per_column - 1:
+                self.selected_level += 1
             self.input_timer = current_time
+            
         elif can_input and keys[pg.K_UP]:
-            self.selected_level = (self.selected_level - 1) % len(self.level_names)
-            self._update_cursor_position()
+            # Move up in current column
+            if self.selected_level % levels_per_column > 0:
+                self.selected_level -= 1
             self.input_timer = current_time
+            
+        elif can_input and keys[pg.K_RIGHT]:
+            # Move to next column
+            if self.selected_level < levels_per_column:
+                self.selected_level += levels_per_column
+            self.input_timer = current_time
+            
+        elif can_input and keys[pg.K_LEFT]:
+            # Move to previous column
+            if self.selected_level >= levels_per_column:
+                self.selected_level -= levels_per_column
+            self.input_timer = current_time
+            
         elif keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
             self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
             self.next = c.LOAD_SCREEN
             self.done = True
+            
         elif keys[pg.K_ESCAPE]:
             self.next = c.MAIN_MENU
             self.done = True
