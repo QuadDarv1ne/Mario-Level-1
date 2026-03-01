@@ -17,6 +17,9 @@ if TYPE_CHECKING:
 class CoinBox(pg.sprite.Sprite):
     """Coin box sprite"""
 
+    image: pg.Surface
+    rect: pg.Rect
+
     def __init__(self, x: int, y: int, contents: str = "coin", group: Optional[pg.sprite.Group] = None) -> None:
         pg.sprite.Sprite.__init__(self)
         self.sprite_sheet = setup.GFX["tile_set"]
@@ -31,9 +34,9 @@ class CoinBox(pg.sprite.Sprite):
         self.animation_timer: float = 0
         self.first_half = True
         self.state = c.RESTING
-        self.rest_height = y
-        self.gravity = 1.2
-        self.y_vel = 0
+        self.rest_height: float = y
+        self.gravity: float = 1.2
+        self.y_vel: float = 0
         self.contents = contents
         self.group = group
         self.powerup: Optional[Any] = None

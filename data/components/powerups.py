@@ -13,6 +13,9 @@ from .. import setup
 class Powerup(pg.sprite.Sprite):
     """Base class for all powerup_group"""
 
+    image: pg.Surface
+    rect: pg.Rect
+
     def __init__(self, x: int, y: int) -> None:
         super(Powerup, self).__init__()
         self.sprite_sheet: pg.Surface = setup.GFX["item_objects"]
@@ -238,6 +241,9 @@ class Star(Powerup):
 class FireBall(pg.sprite.Sprite):
     """Shot from Fire Mario"""
 
+    image: pg.Surface
+    rect: pg.Rect
+
     def __init__(self, x: int, y: int, facing_right: bool, name: str = c.FIREBALL) -> None:
         super(FireBall, self).__init__()
         self.sprite_sheet = setup.GFX["item_objects"]
@@ -249,10 +255,10 @@ class FireBall(pg.sprite.Sprite):
         else:
             self.direction = c.LEFT
             self.x_vel = -12
-        self.y_vel = 10
-        self.gravity = 0.9
-        self.frame_index = 0
-        self.animation_timer = 0
+        self.y_vel: float = 10
+        self.gravity: float = 0.9
+        self.frame_index: int = 0
+        self.animation_timer: float = 0
         self.state = c.FLYING
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_rect()

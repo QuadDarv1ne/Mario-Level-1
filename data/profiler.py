@@ -249,12 +249,12 @@ class Profiler:
         Returns:
             Decorated function
         """
-        from typing import TypeVar
+        from typing import TypeVar, cast
 
         T = TypeVar("T", bound=Callable[..., Any])
 
         def decorator(func: T) -> T:
-            def wrapper(*args, **kwargs):
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
                 if name not in self._timers:
                     self._timers[name] = FunctionTimer(name)
 
@@ -265,7 +265,7 @@ class Profiler:
                 finally:
                     timer.stop()
 
-            return wrapper
+            return cast(T, wrapper)
 
         return decorator
 

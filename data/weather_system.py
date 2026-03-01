@@ -14,7 +14,7 @@ import math
 import random
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import pygame as pg
 
@@ -139,7 +139,7 @@ class WeatherEffect:
 
         # Lightning
         self.lightning_timer = 0
-        self.lightning_alpha = 0
+        self.lightning_alpha: float = 0
 
         # Wind offset
         self.wind_offset = 0.0
@@ -305,7 +305,7 @@ class WeatherEffect:
         if self.lightning_alpha > 0:
             flash = pg.Surface((self.screen_width, self.screen_height))
             flash.fill(c.WHITE)
-            flash.set_alpha(self.lightning_alpha)
+            flash.set_alpha(int(self.lightning_alpha))
             surface.blit(flash, (0, 0))
 
     def _draw_rain(self, surface: pg.Surface) -> None:
@@ -648,6 +648,7 @@ class SeasonalTheme:
             self.season = season
             self.apply_theme()
 
-    def get_season_colors(self) -> dict:
+    def get_season_colors(self) -> dict[str, tuple[int, int, int]]:
         """Get color palette for current season."""
-        return self.THEMES.get(self.season, self.THEMES["spring"])["colors"]
+        theme = self.THEMES.get(self.season, self.THEMES["spring"])
+        return theme["colors"]  # type: ignore[return-value]

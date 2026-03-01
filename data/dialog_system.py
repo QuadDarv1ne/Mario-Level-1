@@ -284,7 +284,8 @@ class DialogManager:
         """Get localized text for dialog."""
         lang_translations = self.translations.get(self.language)
         if lang_translations and dialog_id in lang_translations:
-            return lang_translations[dialog_id]
+            text = lang_translations[dialog_id]
+            return text if isinstance(text, str) else str(text)
         return dialog_id
 
     def start(self, dialog_id: str) -> bool:
@@ -357,7 +358,11 @@ class DialogManager:
         if not self.state.active:
             return
 
-        dialog = self.dialogs.get(self.state.current_dialog)
+        current_id = self.state.current_dialog
+        if not current_id:
+            return
+
+        dialog = self.dialogs.get(current_id)
         if not dialog:
             return
 
@@ -382,7 +387,11 @@ class DialogManager:
         if not self.state.active:
             return False
 
-        dialog = self.dialogs.get(self.state.current_dialog)
+        current_id = self.state.current_dialog
+        if not current_id:
+            return False
+
+        dialog = self.dialogs.get(current_id)
         if not dialog:
             return False
 
@@ -419,7 +428,11 @@ class DialogManager:
         if not self.state.active or not self.state.waiting_for_choice:
             return False
 
-        dialog = self.dialogs.get(self.state.current_dialog)
+        current_id = self.state.current_dialog
+        if not current_id:
+            return False
+
+        dialog = self.dialogs.get(current_id)
         if not dialog or index >= len(dialog.choices):
             return False
 
@@ -454,7 +467,11 @@ class DialogManager:
         if not self.state.active:
             return
 
-        dialog = self.dialogs.get(self.state.current_dialog)
+        current_id = self.state.current_dialog
+        if not current_id:
+            return
+
+        dialog = self.dialogs.get(current_id)
         if not dialog:
             return
 
