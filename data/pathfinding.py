@@ -310,13 +310,13 @@ class AStarPathfinder:
         """Calculate heuristic (Manhattan distance)."""
         return abs(a.x - b.x) + abs(a.y - b.y)
 
-    def _reconstruct_path(self, node: Node) -> List[Tuple[int, int]]:
+    def _reconstruct_path(self, node: Node) -> List[Tuple[float, float]]:
         """Reconstruct path from goal to start."""
-        path: List[Tuple[int, int]] = []
+        path: List[Tuple[float, float]] = []
         current: Optional[Node] = node
 
         while current:
-            path.append(current.pos)
+            path.append((float(current.pos[0]), float(current.pos[1])))
             current = current.parent
 
         path.reverse()
@@ -344,7 +344,7 @@ class AStarPathfinder:
 
         return self._smooth_path(result.path)
 
-    def _smooth_path(self, path: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    def _smooth_path(self, path: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
         """Smooth path by removing unnecessary waypoints."""
         if len(path) <= 2:
             return path
@@ -371,10 +371,10 @@ class AStarPathfinder:
 
         return smoothed
 
-    def _can_see(self, a: Tuple[int, int], b: Tuple[int, int]) -> bool:
+    def _can_see(self, a: Tuple[float, float], b: Tuple[float, float]) -> bool:
         """Check if two points have line of sight."""
-        x0, y0 = a
-        x1, y1 = b
+        x0, y0 = int(a[0]), int(a[1])
+        x1, y1 = int(b[0]), int(b[1])
 
         dx = abs(x1 - x0)
         dy = abs(y1 - y0)
@@ -533,7 +533,9 @@ class JumpPathfinder:
 
         if result.success:
             # Convert to world coords
-            world_path = [self.grid.grid_to_world(x, y) for x, y in result.path]
+            world_path: List[Tuple[float, float]] = [
+                (float(x), float(y)) for x, y in result.path
+            ]
             return world_path
 
         # Try with jumps
