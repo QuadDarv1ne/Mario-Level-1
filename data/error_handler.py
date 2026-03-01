@@ -136,22 +136,23 @@ class SpriteValidator:
     @staticmethod
     def safe_get_image(frame_list: list, frame_index: int, default: Optional[pg.Surface] = None) -> Optional[pg.Surface]:
         """Safely get image from frame list with bounds checking.
-        
+
         Args:
             frame_list: List of frames
             frame_index: Index to retrieve
             default: Default surface if index invalid
-            
+
         Returns:
             Surface or default
         """
         if not frame_list:
             return default
-        
+
         if 0 <= frame_index < len(frame_list):
-            return frame_list[frame_index]
-        
-        return default or (frame_list[0] if frame_list else None)
+            result = frame_list[frame_index]
+            return result if isinstance(result, pg.Surface) else default
+
+        return default
 
 
 class AudioErrorHandler:

@@ -209,16 +209,17 @@ class Level2(tools._State):
         else:
             mario_start = {"x": 110, "y": c.GROUND_HEIGHT}
         self.mario = mario.Mario()
-        if self.mario:
+        if self.mario and self.mario.rect is not None:
             self.mario.rect.x = mario_start.get("x", 110)
             self.mario.rect.y = mario_start.get("y", c.GROUND_HEIGHT)
-            self.mario_and_enemy_group.add(self.mario)
+            if self.mario_and_enemy_group is not None:
+                self.mario_and_enemy_group.add(self.mario)
 
     def _update_mario_enemy_group(self) -> None:
         """Update mario and enemy group"""
-        if self.mario:
+        if self.mario and self.mario_and_enemy_group is not None:
             self.mario_and_enemy_group.add(self.mario)
-        if self.enemy_group:
+        if self.enemy_group and self.mario_and_enemy_group is not None:
             self.mario_and_enemy_group.add(self.enemy_group)
 
     def setup_checkpoints(self) -> None:
