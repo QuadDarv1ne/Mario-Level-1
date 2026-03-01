@@ -72,14 +72,18 @@ class Menu(tools._State):
         """Setup the background image to blit"""
         try:
             # Try to load custom background image
-            bg_image = pg.image.load("img/mario_background.jpg")
+            bg_image = pg.image.load("img/sky_background.png")
+            # Scale to screen size
             self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
             self.background_rect = self.background.get_rect()
-        except (pg.error, FileNotFoundError):
+            self.viewport = pg.Rect(0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT)
+        except (pg.error, FileNotFoundError) as e:
+            print(f"Could not load background image: {e}")
             # Fallback to level_1 image
             level_1_img = setup.GFX.get("level_1")
             if level_1_img is None:
                 level_1_img = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+                level_1_img.fill(c.SKY_BLUE)
             self.background = level_1_img
             self.background_rect = self.background.get_rect()
             scaled_background = pg.transform.scale(
@@ -92,10 +96,10 @@ class Menu(tools._State):
             if scaled_background:
                 self.background = scaled_background
                 self.background_rect = self.background.get_rect()
-        
-        screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
-        if screen_rect:
-            self.viewport = screen_rect
+            
+            screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+            if screen_rect:
+                self.viewport = screen_rect
 
         self.image_dict = {}
         title_screen = setup.GFX.get("title_screen")
@@ -135,54 +139,95 @@ class Menu(tools._State):
         self.animation_timer += 1
         self.title_y_offset = int(5 * pg.math.Vector2(0, 1).rotate(self.animation_timer * 2).y)
 
+        # Clear screen first
+        surface.fill(c.BLACK)
+        
         # Draw background
-        surface.blit(self.background, self.viewport, self.viewport)
+        if self.background and self.viewport:
+            surface.blit(self.background, (0, 0))
         
         # Draw semi-transparent overlay for better text visibility
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        overlay.set_alpha(100)
+        overlay.set_alpha(110)
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
         
+        # Draw decorative top bar
+        top_bar = pg.Surface((c.SCREEN_WIDTH, 220))
+        top_bar.set_alpha(180)
+        top_bar.fill((50, 50, 50))
+        surface.blit(top_bar, (0, 0))
+        pg.draw.line(surface, c.GOLD, (0, 220), (c.SCREEN_WIDTH, 220), 3)
+        
         # Draw title with animation
-        game_box = self.image_dict["GAME_NAME_BOX"]
-        title_rect = game_box[1].copy()
-        title_rect.y += self.title_y_offset
-        surface.blit(game_box[0], title_rect)
+        if "GAME_NAME_BOX" in self.image_dict:
+            game_box = self.image_dict["GAME_NAME_BOX"]
+            title_rect = game_box[1].copy()
+            title_rect.y += self.title_y_offset
+            surface.blit(game_box[0], title_rect)
 
-        # Draw version info
-        self._draw_text(surface, "v2.7.0 - Enhanced Edition", 400, 180, c.YELLOW, 20)
+        # Draw version info and subtitle
+        self._draw_text(surface, "v2.7.0 - Enhanced Edition", 400, 185, c.YELLOW, 22)
+        
+        # Draw decorative menu panel
+        menu_panel = pg.Surface((400, 260))
+        menu_panel.set_alpha(200)
+        menu_panel.fill((30, 30, 30))
+        surface.blit(menu_panel, (200, 260))
+        menu_panel_rect = pg.Rect(200, 260, 400, 260)
+        pg.draw.rect(surface, c.GOLD, menu_panel_rect, 3, border_radius=15)
 
         # Draw menu options with enhanced styling
-        menu_start_y = 320
+        menu_start_y = 300
+        menu_descriptions = [
+            "Start from Level 1-1",
+            "Choose any level",
+            "Adjust game settings",
+            "Quit game",
+        ]
+        
         for i, option in enumerate(self.menu_options):
-            y_pos = menu_start_y + (i * 50)
+            y_pos = menu_start_y + (i * 55)
             
             # Highlight selected option
             if i == self.selected_option:
                 color = c.YELLOW
-                size = 35
-                # Draw selection box
-                box_rect = pg.Rect(250, y_pos - 20, 300, 40)
-                pg.draw.rect(surface, c.GOLD, box_rect, 3, border_radius=5)
+                size = 38
+                # Draw selection highlight
+                highlight = pg.Surface((360, 48))
+                highlight.set_alpha(40)
+                highlight.fill((255, 215, 0))
+                surface.blit(highlight, (220, y_pos - 22))
+                
+                highlight_rect = pg.Rect(220, y_pos - 22, 360, 48)
+                pg.draw.rect(surface, c.GOLD, highlight_rect, 3, border_radius=8)
+                
+                # Draw description
+                desc_color = (200, 200, 200)
+                self._draw_text(surface, menu_descriptions[i], 400, y_pos + 20, desc_color, 16)
             else:
                 color = c.WHITE
-                size = 30
+                size = 32
             
             self._draw_text(surface, option, 400, y_pos, color, size)
 
-        # Draw instructions
-        self._draw_text(surface, "↑↓ to select  |  ENTER to confirm  |  ESC to exit", 400, 550, c.WHITE, 18)
+        # Draw instructions bar at bottom
+        bottom_bar = pg.Surface((c.SCREEN_WIDTH, 60))
+        bottom_bar.set_alpha(200)
+        bottom_bar.fill((20, 20, 20))
+        surface.blit(bottom_bar, (0, 540))
+        pg.draw.line(surface, c.GOLD, (0, 540), (c.SCREEN_WIDTH, 540), 2)
+        self._draw_text(surface, "↑↓ Navigate  |  ENTER Select  |  ESC Exit", 400, 565, c.WHITE, 20)
 
-        # Draw Mario
+        # Draw Mario (animated) - in bottom left corner
         if self.mario and self.mario.image and self.mario.rect:
-            surface.blit(self.mario.image, self.mario.rect)
-            
-        # Draw cursor
-        if self.cursor and self.cursor.image and hasattr(self.cursor, "rect") and self.cursor.rect:
-            surface.blit(self.cursor.image, self.cursor.rect)
-            
-        self.overhead_info.draw(surface)
+            # Add slight bounce animation
+            mario_y_offset = int(3 * abs(pg.math.Vector2(0, 1).rotate(self.animation_timer * 3).y))
+            mario_rect = self.mario.rect.copy()
+            mario_rect.y += mario_y_offset
+            surface.blit(self.mario.image, mario_rect)
+        
+        # DON'T draw overhead_info on main menu - it shows old menu elements
 
     def _draw_text(
         self, surface: pg.Surface, text: str, x: int, y: int, color: Tuple[int, int, int], size: int = 30

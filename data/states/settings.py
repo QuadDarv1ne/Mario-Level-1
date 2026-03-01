@@ -55,7 +55,7 @@ class Settings(tools._State):
         """Setup the background"""
         try:
             # Try to load custom background image
-            bg_image = pg.image.load("img/mario_background.jpg")
+            bg_image = pg.image.load("img/sky_background.png")
             self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
         except (pg.error, FileNotFoundError):
             # Fallback to black background

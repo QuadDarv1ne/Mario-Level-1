@@ -98,9 +98,10 @@ class LevelSelect(tools._State):
         """Setup the background image"""
         try:
             # Try to load custom background image
-            bg_image = pg.image.load("img/mario_background.jpg")
+            bg_image = pg.image.load("img/sky_background.png")
             self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
             self.background_rect = self.background.get_rect()
+            self.viewport = pg.Rect(0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT)
         except (pg.error, FileNotFoundError):
             # Fallback to level_1 image
             level_1_img = setup.GFX.get("level_1")
@@ -118,10 +119,10 @@ class LevelSelect(tools._State):
             if scaled_background:
                 self.background = scaled_background
                 self.background_rect = self.background.get_rect()
-        
-        screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
-        if screen_rect:
-            self.viewport = screen_rect
+            
+            screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+            if screen_rect:
+                self.viewport = screen_rect
 
         self.image_dict = {}
         self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), setup.GFX.get("title_screen"))
