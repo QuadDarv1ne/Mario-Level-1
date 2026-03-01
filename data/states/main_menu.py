@@ -90,10 +90,10 @@ class Menu(tools._State):
             image.set_colorkey((255, 0, 220))
             image = pg.transform.scale(
                 image, (int(rect.width * c.SIZE_MULTIPLIER), int(rect.height * c.SIZE_MULTIPLIER))
-            )
+            )  # type: ignore[assignment]
         else:
             image.set_colorkey(c.BLACK)
-            image = pg.transform.scale(image, (int(rect.width * 3), int(rect.height * 3)))
+            image = pg.transform.scale(image, (int(rect.width * 3), int(rect.height * 3)))  # type: ignore[assignment]
 
         rect = image.get_rect()
         rect.x = dest[0]
@@ -121,18 +121,18 @@ class Menu(tools._State):
         """Update the position of the cursor"""
         input_list = [pg.K_RETURN, pg.K_a, pg.K_s]
 
-        if self.cursor.state == c.PLAYER1:
-            self.cursor.rect.y = 358
+        if self.cursor.state == c.PLAYER1:  # type: ignore[union-attr]
+            self.cursor.rect.y = 358  # type: ignore[union-attr]
             if keys[pg.K_DOWN]:
-                self.cursor.state = c.PLAYER2
+                self.cursor.state = c.PLAYER2  # type: ignore[union-attr]
             for input in input_list:
                 if keys[input]:
                     self.reset_game_info()
                     self.done = True
-        elif self.cursor.state == c.PLAYER2:
-            self.cursor.rect.y = 403
+        elif self.cursor.state == c.PLAYER2:  # type: ignore[union-attr]
+            self.cursor.rect.y = 403  # type: ignore[union-attr]
             if keys[pg.K_UP]:
-                self.cursor.state = c.PLAYER1
+                self.cursor.state = c.PLAYER1  # type: ignore[union-attr]
 
     def reset_game_info(self) -> None:
         """Resets the game info in case of a Game Over and restart"""

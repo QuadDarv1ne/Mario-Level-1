@@ -56,7 +56,6 @@ class OverheadInfo:
         self.player_one_label: List[Character] = []
         self.player_two_label: List[Character] = []
         self.main_menu_labels: List[List[Character]] = []
-        self.center_labels: List[List[Character]] = []
 
         self.create_image_dict()
         self.create_score_group()
@@ -195,7 +194,6 @@ class OverheadInfo:
         """Get the mario image"""
         self.life_times_image = self.get_image(75, 247, 6, 6)
         self.life_times_rect = self.life_times_image.get_rect(center=(378, 295))
-        self.life_total_label = []
         self.create_label(self.life_total_label, str(self.total_lives), 450, 285)
 
         self.sprite_sheet = setup.GFX["mario_bros"]
