@@ -53,21 +53,21 @@ class Level4(tools._State):
         self.level: Optional[pg.Surface] = None
         self.level_rect: Optional[pg.Rect] = None
         self.viewport: Optional[pg.Rect] = None
-        self.ground_group: Optional[pg.sprite.Group] = None
-        self.pipe_group: Optional[pg.sprite.Group] = None
-        self.step_group: Optional[pg.sprite.Group] = None
-        self.brick_group: Optional[pg.sprite.Group] = None
-        self.coin_box_group: Optional[pg.sprite.Group] = None
-        self.flag_pole_group: Optional[pg.sprite.Group] = None
-        self.enemy_group: Optional[pg.sprite.Group] = None
+        self.ground_group: pg.sprite.Group = pg.sprite.Group()
+        self.pipe_group: pg.sprite.Group = pg.sprite.Group()
+        self.step_group: pg.sprite.Group = pg.sprite.Group()
+        self.brick_group: pg.sprite.Group = pg.sprite.Group()
+        self.coin_box_group: pg.sprite.Group = pg.sprite.Group()
+        self.flag_pole_group: pg.sprite.Group = pg.sprite.Group()
+        self.enemy_group: pg.sprite.Group = pg.sprite.Group()
         self.mario: Optional[mario.Mario] = None
-        self.checkpoint_group: Optional[pg.sprite.Group] = None
+        self.checkpoint_group: pg.sprite.Group = pg.sprite.Group()
         self.flag: Optional[flagpole.Flag] = None
         self.pole: Optional[flagpole.Pole] = None
         self.finial: Optional[flagpole.Finial] = None
-        self.coin_group: Optional[pg.sprite.Group] = None
-        self.powerup_group: Optional[pg.sprite.Group] = None
-        self.fire_group: Optional[pg.sprite.Group] = None
+        self.coin_group: pg.sprite.Group = pg.sprite.Group()
+        self.powerup_group: pg.sprite.Group = pg.sprite.Group()
+        self.fire_group: pg.sprite.Group = pg.sprite.Group()
 
         try:
             self.level_data = level_loader.load_level_from_json(self.level_file)
@@ -111,8 +111,8 @@ class Level4(tools._State):
         self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
-        width = self.back_rect.width
-        height = self.back_rect.height
+        width = self.back_rect.width if self.back_rect else 0
+        height = self.back_rect.height if self.back_rect else 0
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
@@ -123,29 +123,29 @@ class Level4(tools._State):
         """Creates ground collision rectangles"""
         for section in getattr(self.level_data, "ground_sections", []):
             ground_rect = collider.Collider(section["x"], section["y"], section["width"], section["height"])
-            self.ground_group.add(ground_rect)  # type: ignore[union-attr]
+            self.ground_group.add(ground_rect)
 
     def setup_pipes(self) -> None:
         """Create pipe obstacles"""
         for p in getattr(self.level_data, "pipes", []):
-            self.pipe_group.add(collider.Collider(p["x"], p["y"], p["width"], p["height"]))  # type: ignore[union-attr]
+            self.pipe_group.add(collider.Collider(p["x"], p["y"], p["width"], p["height"]))
 
     def setup_steps(self) -> None:
         """Create step obstacles"""
         for s in getattr(self.level_data, "steps", []):
-            self.step_group.add(collider.Collider(s["x"], s["y"], s["width"], s["height"]))  # type: ignore[union-attr]
+            self.step_group.add(collider.Collider(s["x"], s["y"], s["width"], s["height"]))
 
     def setup_bricks(self) -> None:
         """Creates breakable bricks"""
-        self.brick_pieces_group: Optional[pg.sprite.Group] = None
+        self.brick_pieces_group: pg.sprite.Group = pg.sprite.Group()
         for brick_info in getattr(self.level_data, "bricks", []):
             brick = bricks.Brick(brick_info["x"], brick_info["y"], contents=brick_info.get("contents"))
-            self.brick_group.add(brick)  # type: ignore[union-attr]
+            self.brick_group.add(brick)
 
     def setup_coin_boxes(self) -> None:
         """Creates coin boxes"""
         for box_info in getattr(self.level_data, "coin_boxes", []):
-            self.coin_box_group.add(coin_box.CoinBox(box_info["x"], box_info["y"], contents=box_info.get("contents")))  # type: ignore[union-attr]
+            self.coin_box_group.add(coin_box.CoinBox(box_info["x"], box_info["y"], contents=box_info.get("contents")))
 
     def setup_flag_pole(self) -> None:
         """Creates flag pole"""
@@ -154,7 +154,7 @@ class Level4(tools._State):
             self.flag = flagpole.Flag(flag_pole_data["x"], flag_pole_data["y"])
             self.pole = flagpole.Pole(flag_pole_data["x"], flag_pole_data["y"])
             self.finial = flagpole.Finial(flag_pole_data["x"], flag_pole_data["y"])
-            self.flag_pole_group.add(self.flag, self.pole, self.finial)  # type: ignore[union-attr]
+            self.flag_pole_group.add(self.flag, self.pole, self.finial)
 
     def setup_enemies(self) -> None:
         """Setup enemies"""
@@ -292,8 +292,9 @@ class Level4(tools._State):
             flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)
             if flag_pole and hasattr(flag_pole, "state") and flag_pole.state == c.TOP_OF_POLE:
                 self.state = c.FLAG_AND_FIREWORKS
-                self.flag_score = score.Score(self.mario.rect.centerx, self.mario.rect.y, c.SCORE_FLAG_POLE_TOP)
-                self.moving_score_list.append(self.flag_score)
+                if self.mario.rect:
+                    self.flag_score = score.Score(int(self.mario.rect.centerx), int(self.mario.rect.y), c.SCORE_FLAG_POLE_TOP)
+                    self.moving_score_list.append(self.flag_score)
 
     def update_viewport(self) -> None:
         """Update viewport"""
@@ -301,19 +302,21 @@ class Level4(tools._State):
             return
 
         level_rect = self.level_rect
-        if self.mario.rect.right > self.viewport.centerx:
+        if self.mario.rect and self.mario.rect.right > self.viewport.centerx:
             self.viewport.centerx = self.mario.rect.centerx
-            self.viewport.right = min(self.viewport.right, level_rect.right)
+            if level_rect:
+                self.viewport.right = min(self.viewport.right, level_rect.right)
 
-        if self.mario.rect.left < self.viewport.x:
+        if self.mario.rect and self.mario.rect.left < self.viewport.x:
             self.mario.rect.left = self.viewport.x
 
         self.viewport.x = max(0, self.viewport.x)
-        self.viewport.right = min(self.viewport.right, level_rect.right)
+        if level_rect:
+            self.viewport.right = min(self.viewport.right, level_rect.right)
 
     def draw(self, surface: pg.Surface) -> None:
         """Render level"""
-        if self.level is None or self.background is None:
+        if self.level is None or self.background is None or self.viewport is None:
             return
 
         self.level.blit(self.background, self.back_rect, self.viewport)

@@ -83,13 +83,13 @@ class Level2(tools._State):
         self.step_group = pg.sprite.Group()
         self.brick_group = pg.sprite.Group()
         self.coin_box_group = pg.sprite.Group()
-        self.flag_pole_group = pg.sprite.Group()
-        self.enemy_group = pg.sprite.Group()
-        self.checkpoint_group = pg.sprite.Group()
-        self.coin_group = pg.sprite.Group()
-        self.powerup_group = pg.sprite.Group()
-        self.fire_group = pg.sprite.Group()
-        self.mario_and_enemy_group = pg.sprite.Group()
+        self.flag_pole_group: pg.sprite.Group = pg.sprite.Group()
+        self.enemy_group: pg.sprite.Group = pg.sprite.Group()
+        self.checkpoint_group: pg.sprite.Group = pg.sprite.Group()
+        self.coin_group: pg.sprite.Group = pg.sprite.Group()
+        self.powerup_group: pg.sprite.Group = pg.sprite.Group()
+        self.fire_group: pg.sprite.Group = pg.sprite.Group()
+        self.mario_and_enemy_group: pg.sprite.Group = pg.sprite.Group()
 
     def setup_all(self) -> None:
         """Setup all level components"""
