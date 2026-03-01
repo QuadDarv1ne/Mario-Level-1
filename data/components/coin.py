@@ -69,7 +69,8 @@ class Coin(pg.sprite.Sprite):
     def spinning(self) -> None:
         """Action when the coin is in the SPIN state"""
         self.image = self.frames[self.frame_index]
-        self.rect.y += self.y_vel
+        if self.rect:
+            self.rect.y += self.y_vel
         self.y_vel += self.gravity
 
         if (self.current_time - self.animation_timer) > 80:
@@ -80,6 +81,7 @@ class Coin(pg.sprite.Sprite):
 
             self.animation_timer = self.current_time
 
-        if self.rect.bottom > self.initial_height:
+        if self.rect and self.rect.bottom > self.initial_height:
             self.kill()
-            self.score_group.append(score.Score(self.rect.centerx - self.viewport.x, self.rect.y, 200))
+            if self.rect and self.viewport:
+                self.score_group.append(score.Score(int(self.rect.centerx - self.viewport.x), int(self.rect.y), 200))
