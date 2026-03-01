@@ -78,7 +78,9 @@ class Menu(tools._State):
         )
         self.background = scaled_background
         self.background_rect = self.background.get_rect()
-        self.viewport = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+        screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+        if screen_rect:
+            self.viewport = screen_rect
 
         self.image_dict = {}
         self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), setup.GFX["title_screen"])
