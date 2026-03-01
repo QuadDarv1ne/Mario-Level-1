@@ -375,7 +375,7 @@ class HammerBro(Enemy):
     def throw_hammer(self) -> None:
         """Throw a hammer."""
         if self.hammer_group is not None:
-            from .components.powerups import Hammer
+            from .powerups import Hammer
 
             direction = c.LEFT if self.mario and self.mario.rect.x < self.rect.x else c.RIGHT
 
