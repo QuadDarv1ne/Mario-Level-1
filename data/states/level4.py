@@ -194,7 +194,7 @@ class Level4(tools._State):
         """Setup Mario"""
         mario_start = getattr(self.level_data, "mario_start", {"x": 110, "y": c.GROUND_HEIGHT})
         self.mario = mario.Mario()
-        if self.mario:
+        if self.mario and self.mario.rect is not None:
             self.mario.rect.x = mario_start.get("x", 110)
             self.mario.rect.y = mario_start.get("y", c.GROUND_HEIGHT)
 
@@ -365,7 +365,7 @@ class Level4(tools._State):
             if group:
                 group.draw(self.level)
 
-        if self.mario:
+        if self.mario and hasattr(self.mario, "draw"):
             self.mario.draw(self.level)
         if self.overhead_info_display:
             self.overhead_info_display.draw(self.level)
@@ -374,5 +374,5 @@ class Level4(tools._State):
 
     def get_event(self, event: pg.event.Event) -> None:
         """Handle events"""
-        if self.mario:
+        if self.mario and hasattr(self.mario, "get_event"):
             self.mario.get_event(event)
