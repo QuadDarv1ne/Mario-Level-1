@@ -72,52 +72,98 @@ class Settings(tools._State):
         # Draw background
         surface.blit(self.background, (0, 0))
         
-        # Draw gradient overlay
-        for i in range(c.SCREEN_HEIGHT):
-            alpha = int(100 * (1 - i / c.SCREEN_HEIGHT))
-            color = (0, 50, 100, alpha)
-            pg.draw.line(surface, color[:3], (0, i), (c.SCREEN_WIDTH, i))
+        # Draw semi-transparent overlay
+        overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+        overlay.set_alpha(120)
+        overlay.fill((0, 0, 0))
+        surface.blit(overlay, (0, 0))
 
         # Draw title
-        self._draw_text(surface, "SETTINGS", 400, 80, c.YELLOW, 50)
+        self._draw_text(surface, "SETTINGS", 400, 70, c.YELLOW, 55)
         
-        # Draw settings options
-        menu_start_y = 200
+        # Draw settings options with visual indicators
+        menu_start_y = 180
+        option_descriptions = [
+            "Adjust background music volume",
+            "Adjust sound effects volume",
+            "Toggle fullscreen mode",
+            "Show FPS counter (F5)",
+            "Return to main menu",
+        ]
+        
         for i, option in enumerate(self.menu_options):
-            y_pos = menu_start_y + (i * 60)
+            y_pos = menu_start_y + (i * 70)
             
             # Get value for display
             if option == "Music Volume":
                 value = f"{self.settings['music_volume']}%"
+                show_bar = True
+                bar_value = self.settings['music_volume']
             elif option == "SFX Volume":
                 value = f"{self.settings['sfx_volume']}%"
+                show_bar = True
+                bar_value = self.settings['sfx_volume']
             elif option == "Fullscreen":
                 value = "ON" if self.settings['fullscreen'] else "OFF"
+                show_bar = False
+                bar_value = 0
             elif option == "Show FPS":
                 value = "ON" if self.settings['show_fps'] else "OFF"
+                show_bar = False
+                bar_value = 0
             else:
                 value = ""
+                show_bar = False
+                bar_value = 0
             
             # Highlight selected option
             if i == self.selected_option:
                 color = c.YELLOW
-                size = 35
-                # Draw selection box
-                box_rect = pg.Rect(150, y_pos - 20, 500, 40)
-                pg.draw.rect(surface, c.GOLD, box_rect, 3, border_radius=5)
+                size = 36
+                # Draw selection box with glow
+                box_rect = pg.Rect(100, y_pos - 25, 600, 60)
+                pg.draw.rect(surface, c.GOLD, box_rect, 4, border_radius=8)
+                # Inner glow
+                inner_rect = pg.Rect(105, y_pos - 20, 590, 50)
+                pg.draw.rect(surface, (255, 215, 0, 30), inner_rect, 2, border_radius=6)
             else:
                 color = c.WHITE
                 size = 30
+                # Draw subtle border
+                box_rect = pg.Rect(100, y_pos - 25, 600, 60)
+                pg.draw.rect(surface, (80, 80, 80), box_rect, 2, border_radius=8)
             
             # Draw option name
-            self._draw_text(surface, option, 250, y_pos, color, size)
+            self._draw_text(surface, option, 200, y_pos - 5, color, size)
             
-            # Draw value
+            # Draw value or toggle
             if value:
-                self._draw_text(surface, value, 550, y_pos, color, size)
+                value_color = c.GREEN if value == "ON" else c.RED if value == "OFF" else color
+                self._draw_text(surface, value, 580, y_pos - 5, value_color, size)
+            
+            # Draw volume bar
+            if show_bar:
+                bar_x = 120
+                bar_y = y_pos + 18
+                bar_width = 560
+                bar_height = 8
+                
+                # Background bar
+                pg.draw.rect(surface, (60, 60, 60), (bar_x, bar_y, bar_width, bar_height), border_radius=4)
+                
+                # Filled bar
+                filled_width = int(bar_width * (bar_value / 100))
+                if filled_width > 0:
+                    bar_color = c.GREEN if bar_value > 50 else c.YELLOW if bar_value > 25 else c.RED
+                    pg.draw.rect(surface, bar_color, (bar_x, bar_y, filled_width, bar_height), border_radius=4)
+            
+            # Draw description for selected option
+            if i == self.selected_option:
+                desc_color = (180, 180, 180)
+                self._draw_text(surface, option_descriptions[i], 400, y_pos + 30, desc_color, 18)
 
         # Draw instructions
-        self._draw_text(surface, "↑↓ to select  |  ←→ to change  |  ESC to back", 400, 550, c.WHITE, 18)
+        self._draw_text(surface, "↑↓ Select  |  ←→ Change  |  ENTER/ESC Back", 400, 560, c.WHITE, 20)
 
         self.overhead_info.draw(surface)
 
