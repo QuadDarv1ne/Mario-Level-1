@@ -53,22 +53,22 @@ class Level5(tools._State):
         self.level: Optional[pg.Surface] = None
         self.level_rect: Optional[pg.Rect] = None
         self.viewport: Optional[pg.Rect] = None
-        self.ground_group: Optional[pg.sprite.Group] = None
-        self.pipe_group: Optional[pg.sprite.Group] = None
-        self.step_group: Optional[pg.sprite.Group] = None
-        self.brick_group: Optional[pg.sprite.Group] = None
-        self.coin_box_group: Optional[pg.sprite.Group] = None
-        self.flag_pole_group: Optional[pg.sprite.Group] = None
-        self.enemy_group: Optional[pg.sprite.Group] = None
+        self.ground_group: pg.sprite.Group = pg.sprite.Group()
+        self.pipe_group: pg.sprite.Group = pg.sprite.Group()
+        self.step_group: pg.sprite.Group = pg.sprite.Group()
+        self.brick_group: pg.sprite.Group = pg.sprite.Group()
+        self.coin_box_group: pg.sprite.Group = pg.sprite.Group()
+        self.flag_pole_group: pg.sprite.Group = pg.sprite.Group()
+        self.enemy_group: pg.sprite.Group = pg.sprite.Group()
         self.mario: Optional[mario.Mario] = None
-        self.checkpoint_group: Optional[pg.sprite.Group] = None
+        self.checkpoint_group: pg.sprite.Group = pg.sprite.Group()
         self.flag: Optional[flagpole.Flag] = None
         self.pole: Optional[flagpole.Pole] = None
         self.finial: Optional[flagpole.Finial] = None
-        self.coin_group: Optional[pg.sprite.Group] = None
-        self.powerup_group: Optional[pg.sprite.Group] = None
-        self.fire_group: Optional[pg.sprite.Group] = None
-        self.brick_pieces_group: Optional[pg.sprite.Group] = None
+        self.coin_group: pg.sprite.Group = pg.sprite.Group()
+        self.powerup_group: pg.sprite.Group = pg.sprite.Group()
+        self.fire_group: pg.sprite.Group = pg.sprite.Group()
+        self.brick_pieces_group: pg.sprite.Group = pg.sprite.Group()
 
         try:
             self.level_data = level_loader.load_level_from_json(self.level_file)
@@ -112,8 +112,8 @@ class Level5(tools._State):
         self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
-        width = self.back_rect.width
-        height = self.back_rect.height
+        width = self.back_rect.width if self.back_rect else 0
+        height = self.back_rect.height if self.back_rect else 0
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
@@ -302,22 +302,24 @@ class Level5(tools._State):
             return
 
         level_rect = self.level_rect
-        if self.mario.rect.right > self.viewport.centerx:
+        if self.mario.rect and self.mario.rect.right > self.viewport.centerx:
             self.viewport.centerx = self.mario.rect.centerx
-            self.viewport.right = min(self.viewport.right, level_rect.right)
+            if level_rect:
+                self.viewport.right = min(self.viewport.right, level_rect.right)
 
-        if self.mario.rect.left < self.viewport.x:
+        if self.mario.rect and self.mario.rect.left < self.viewport.x:
             self.mario.rect.left = self.viewport.x
 
         self.viewport.x = max(0, self.viewport.x)
-        self.viewport.right = min(self.viewport.right, level_rect.right)
+        if level_rect:
+            self.viewport.right = min(self.viewport.right, level_rect.right)
 
     def draw(self, surface: pg.Surface) -> None:
         """Render level"""
-        if self.level is None or self.background is None:
+        if self.level is None or self.background is None or self.viewport is None:
             return
 
-        self.level.blit(self.background, self.back_rect, self.viewport)  # type: ignore[arg-type]
+        self.level.blit(self.background, self.back_rect, self.viewport)
 
         for group in [
             self.ground_group,

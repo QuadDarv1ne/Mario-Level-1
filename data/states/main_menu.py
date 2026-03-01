@@ -110,10 +110,10 @@ class Menu(tools._State):
         surface.blit(self.background, self.viewport, self.viewport)
         game_box = self.image_dict["GAME_NAME_BOX"]
         surface.blit(game_box[0], game_box[1])
-        if self.mario.image and self.mario.rect:  # type: ignore[union-attr]
-            surface.blit(self.mario.image, self.mario.rect)  # type: ignore[union-attr]
-        if self.cursor.image and self.cursor.rect:  # type: ignore[union-attr]
-            surface.blit(self.cursor.image, self.cursor.rect)  # type: ignore[union-attr]
+        if self.mario and self.mario.image and self.mario.rect:
+            surface.blit(self.mario.image, self.mario.rect)
+        if self.cursor and self.cursor.image and hasattr(self.cursor, "rect") and self.cursor.rect:
+            surface.blit(self.cursor.image, self.cursor.rect)
         self.overhead_info.draw(surface)
 
     def update_cursor(self, keys: Tuple[bool, ...]) -> None:
