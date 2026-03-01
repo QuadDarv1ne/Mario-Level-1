@@ -63,6 +63,9 @@ def main() -> int:
             c.LEVEL3: setup.create_level3(),
             c.LEVEL4: setup.create_level4(),
             c.LEVEL5: setup.create_level5(),
+            c.LEVEL6: setup.create_level6(),
+            c.LEVEL7: setup.create_level7(),
+            c.LEVEL8: setup.create_level8(),
         }
 
         # Validate states
