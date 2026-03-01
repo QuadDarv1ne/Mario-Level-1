@@ -68,6 +68,7 @@ class Level3(tools._State):
         self.coin_group: Optional[pg.sprite.Group] = None
         self.powerup_group: Optional[pg.sprite.Group] = None
         self.fire_group: Optional[pg.sprite.Group] = None
+        self.brick_pieces_group: Optional[pg.sprite.Group] = None
 
         try:
             self.level_data = level_loader.load_level_from_json(self.level_file)
@@ -111,8 +112,8 @@ class Level3(tools._State):
         self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
-        width = self.back_rect.width
-        height = self.back_rect.height
+        width = self.back_rect.width  # type: ignore[union-attr]
+        height = self.back_rect.height  # type: ignore[union-attr]
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
@@ -149,7 +150,7 @@ class Level3(tools._State):
         brick_data = getattr(self.level_data, "bricks", [])
         for brick_info in brick_data:
             brick = bricks.Brick(brick_info["x"], brick_info["y"], contents=brick_info.get("contents"))
-            self.brick_group.add(brick)
+            self.brick_group.add(brick)  # type: ignore[union-attr]
         if not hasattr(self, "brick_group") or self.brick_group is None:
             self.brick_group = pg.sprite.Group()
 
@@ -158,7 +159,7 @@ class Level3(tools._State):
         coin_box_data = getattr(self.level_data, "coin_boxes", [])
         for box_info in coin_box_data:
             coin_box_obj = coin_box.CoinBox(box_info["x"], box_info["y"], contents=box_info.get("contents"))
-            self.coin_box_group.add(coin_box_obj)
+            self.coin_box_group.add(coin_box_obj)  # type: ignore[union-attr]
         if not hasattr(self, "coin_box_group") or self.coin_box_group is None:
             self.coin_box_group = pg.sprite.Group()
 
@@ -193,7 +194,7 @@ class Level3(tools._State):
             y = enemy_info.get("y", c.GROUND_HEIGHT)
             direction = enemy_info.get("direction", "left")
             enemy = enemy_class(x, y, direction)
-            self.enemy_group.add(enemy)
+            self.enemy_group.add(enemy)  # type: ignore[union-attr]
         if not hasattr(self, "enemy_group") or self.enemy_group is None:
             self.enemy_group = pg.sprite.Group()
 
@@ -208,7 +209,7 @@ class Level3(tools._State):
     def setup_checkpoints(self) -> None:
         """Setup checkpoints"""
         for cp_info in getattr(self.level_data, "checkpoints", []):
-            self.checkpoint_group.add(
+            self.checkpoint_group.add(  # type: ignore[union-attr]
                 checkpoint.Checkpoint(
                     cp_info["x"],
                     cp_info["name"],
@@ -227,12 +228,12 @@ class Level3(tools._State):
             return
 
         if self.state == c.NOT_FROZEN:
-            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []
+            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []  # type: ignore[attr-defined]
 
             if self.game_info.get(c.MARIO_DEAD):
                 self.death_timer += 1
                 if self.death_timer == 90 and self.mario:
-                    self.mario.update((), self.game_info, self.fire_group)
+                    self.mario.update((), self.game_info, self.fire_group)  # type: ignore[arg-type]
                 elif self.death_timer == 120:
                     self.next = c.GAME_OVER
                     self.done = True
@@ -255,7 +256,7 @@ class Level3(tools._State):
     def update_entities(self, keys: tuple, current_time: float) -> None:
         """Update all entities"""
         if self.mario:
-            self.mario.update(keys, self.game_info, self.fire_group)
+            self.mario.update(keys, self.game_info, self.fire_group)  # type: ignore[arg-type]
         if self.enemy_group:
             self.enemy_group.update(current_time)
         if self.powerup_group:
@@ -277,7 +278,7 @@ class Level3(tools._State):
             if group:
                 collide = pg.sprite.spritecollideany(self.mario, group)
                 if collide:
-                    self.mario.adjust_for_collisions(collide)
+                    self.mario.adjust_for_collisions(collide)  # type: ignore[attr-defined]
 
         if self.powerup_group:
             powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
@@ -305,19 +306,20 @@ class Level3(tools._State):
             self.game_info[c.MARIO_DEAD] = True
 
         if self.mario and self.flag_pole_group:
-            flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)
+            flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)  # type: ignore[arg-type]
             if flag_pole and hasattr(flag_pole, "state") and flag_pole.state == c.TOP_OF_POLE:
                 self.state = c.FLAG_AND_FIREWORKS
-                self.flag_score = score.Score(self.mario.rect.centerx, self.mario.rect.y, c.SCORE_FLAG_POLE_TOP)
-                self.moving_score_list.append(self.flag_score)
+                if self.mario.rect:
+                    self.flag_score = score.Score(int(self.mario.rect.centerx), int(self.mario.rect.y), c.SCORE_FLAG_POLE_TOP)
+                    self.moving_score_list.append(self.flag_score)
 
     def update_viewport(self) -> None:
         """Update viewport"""
         if not self.mario or not self.viewport:
             return
 
-        level_rect = self.level_rect
-        if self.mario.rect.right > self.viewport.centerx:
+        level_rect = self.level_rect  # type: ignore[assignment]
+        if self.mario.rect.right > self.viewport.centerx:  # type: ignore[union-attr]
             self.viewport.centerx = self.mario.rect.centerx
             self.viewport.right = (
                 min(self.viewport.right, level_rect.right)
@@ -336,7 +338,7 @@ class Level3(tools._State):
         if self.level is None or self.background is None:
             return
 
-        self.level.blit(self.background, self.back_rect, self.viewport)
+        self.level.blit(self.background, self.back_rect, self.viewport)  # type: ignore[arg-type]
 
         for group_name in [
             "ground_group",
@@ -355,13 +357,13 @@ class Level3(tools._State):
                 group.draw(self.level)
 
         if self.mario:
-            self.mario.draw(self.level)
+            self.mario.draw(self.level)  # type: ignore[attr-defined]
         if self.overhead_info_display:
             self.overhead_info_display.draw(self.level)
 
-        surface.blit(self.level, (0, 0), self.viewport)
+        surface.blit(self.level, (0, 0), self.viewport)  # type: ignore[arg-type]
 
     def get_event(self, event: pg.event.Event) -> None:
         """Handle events"""
         if self.mario:
-            self.mario.get_event(event)
+            self.mario.get_event(event)  # type: ignore[attr-defined]
