@@ -546,12 +546,16 @@ class Level1(tools._State):
                     mushroom_box = coin_box.CoinBox(
                         int(checkpoint.rect.x), int(checkpoint.rect.bottom - 40), "1up_mushroom", self.powerup_group
                     )
-                    mushroom_box.start_bump(self.moving_score_list)
+                    temp_score_group = pg.sprite.Group()
+                    mushroom_box.start_bump(temp_score_group)
+                    for s in temp_score_group:
+                        self.moving_score_list.append(s)
                     if self.coin_box_group is not None:
                         self.coin_box_group.add(mushroom_box)
 
                     self.mario.y_vel = 7
-                    self.mario.rect.y = mushroom_box.rect.bottom
+                    if mushroom_box.rect is not None:
+                        self.mario.rect.y = mushroom_box.rect.bottom
                     self.mario.state = c.FALL
 
             if self.mario_and_enemy_group is not None and self.enemy_group is not None:
@@ -644,12 +648,14 @@ class Level1(tools._State):
             if self.mario.invincible:
                 setup.SFX["kick"].play()
                 self.game_info[c.SCORE] += 100
-                self.moving_score_list.append(
-                    score.Score(self.mario.rect.right - self.viewport.x, self.mario.rect.y, 100)
-                )
+                if self.mario.rect is not None and self.viewport is not None:
+                    self.moving_score_list.append(
+                        score.Score(int(self.mario.rect.right - self.viewport.x), int(self.mario.rect.y), 100)
+                    )
                 enemy.kill()
                 enemy.start_death_jump(c.RIGHT)
-                self.sprites_about_to_die_group.add(enemy)
+                if self.sprites_about_to_die_group is not None:
+                    self.sprites_about_to_die_group.add(enemy)
             elif self.mario.big:
                 setup.SFX["pipe"].play()
                 self.mario.fire = False
@@ -669,35 +675,39 @@ class Level1(tools._State):
             if powerup.name == c.STAR:
                 self.game_info[c.SCORE] += 1000
 
-                self.moving_score_list.append(
-                    score.Score(self.mario.rect.centerx - self.viewport.x, self.mario.rect.y, 1000)
-                )
+                if self.mario.rect is not None and self.viewport is not None:
+                    self.moving_score_list.append(
+                        score.Score(int(self.mario.rect.centerx - self.viewport.x), int(self.mario.rect.y), 1000)
+                    )
                 self.mario.invincible = True
                 self.mario.invincible_start_timer = self.current_time
             elif powerup.name == c.MUSHROOM:
                 setup.SFX["powerup"].play()
                 self.game_info[c.SCORE] += 1000
-                self.moving_score_list.append(
-                    score.Score(self.mario.rect.centerx - self.viewport.x, self.mario.rect.y - 20, 1000)
-                )
+                if self.mario.rect is not None and self.viewport is not None:
+                    self.moving_score_list.append(
+                        score.Score(int(self.mario.rect.centerx - self.viewport.x), int(self.mario.rect.y - 20), 1000)
+                    )
 
                 self.mario.y_vel = -1
                 self.mario.state = c.SMALL_TO_BIG
                 self.mario.in_transition_state = True
                 self.convert_mushrooms_to_fireflowers()
             elif powerup.name == c.LIFE_MUSHROOM:
-                self.moving_score_list.append(
-                    score.Score(powerup.rect.right - self.viewport.x, powerup.rect.y, c.ONEUP)
-                )
+                if powerup.rect is not None and self.viewport is not None:
+                    self.moving_score_list.append(
+                        score.Score(int(powerup.rect.right - self.viewport.x), int(powerup.rect.y), c.ONEUP)
+                    )
 
                 self.game_info[c.LIVES] += 1
                 setup.SFX["one_up"].play()
             elif powerup.name == c.FIREFLOWER:
                 setup.SFX["powerup"].play()
                 self.game_info[c.SCORE] += 1000
-                self.moving_score_list.append(
-                    score.Score(self.mario.rect.centerx - self.viewport.x, self.mario.rect.y, 1000)
-                )
+                if self.mario.rect is not None and self.viewport is not None:
+                    self.moving_score_list.append(
+                        score.Score(int(self.mario.rect.centerx - self.viewport.x), int(self.mario.rect.y), 1000)
+                    )
 
                 if self.mario.big and not self.mario.fire:
                     self.mario.state = c.BIG_TO_FIRE
