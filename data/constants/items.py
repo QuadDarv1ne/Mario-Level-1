@@ -30,6 +30,7 @@ CURRENT_TIME: str = "current time"
 LEVEL_STATE: str = "level state"
 CAMERA_START_X: str = "camera start x"
 MARIO_DEAD: str = "mario dead"
+CURRENT_LEVEL: str = "current_level"
 
 # =============================================================================
 # SCORE VALUES
