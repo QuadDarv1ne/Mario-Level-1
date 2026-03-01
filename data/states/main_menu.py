@@ -221,8 +221,8 @@ class Menu(tools._State):
                 self.next = c.LEVEL_SELECT
                 self.done = True
             elif self.selected_option == 2:  # SETTINGS
-                # TODO: Implement settings menu
-                pass
+                self.next = c.SETTINGS
+                self.done = True
             elif self.selected_option == 3:  # EXIT
                 pg.quit()
                 import sys

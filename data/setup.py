@@ -124,6 +124,16 @@ def create_level_select() -> Optional[Any]:
     except Exception as e:
         logger.error(f"Failed to create level select: {e}")
         return None
+def create_settings() -> Optional[Any]:
+    """Create settings state."""
+    try:
+        from .states import settings
+
+        return settings.Settings()
+    except Exception as e:
+        logger.error(f"Failed to create settings: {e}")
+        return None
+
 
 
 def create_load_screen() -> Optional[Any]:

@@ -149,6 +149,7 @@ from .states import (
     RETRACTING,
     THROWN,
     LEVEL_SELECT,
+    SETTINGS,
 )
 
 __all__ = [
