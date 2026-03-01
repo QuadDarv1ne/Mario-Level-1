@@ -67,6 +67,7 @@ BOUNCE: str = "bounce"
 FLYING: str = "flying"
 BOUNCING: str = "bouncing"
 EXPLODING: str = "exploding"
+THROWN: str = "thrown"
 
 # =============================================================================
 # LEVEL STATES

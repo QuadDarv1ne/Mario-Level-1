@@ -342,3 +342,42 @@ class FireBall(pg.sprite.Sprite):
         """Removes from sprite group if off screen"""
         if (self.rect.x > viewport.right) or (self.rect.y > viewport.bottom) or (self.rect.right < viewport.x):
             self.kill()
+
+
+class Hammer(Powerup):
+    """Hammer projectile thrown by Hammer Bro."""
+
+    def __init__(self, x: int, y: int, direction: str = c.RIGHT) -> None:
+        super().__init__(x, y)
+        self.name = "hammer"
+        self.direction = direction
+        self.state = c.THROWN
+        self.x_vel = 3 if direction == c.RIGHT else -3
+        self.y_vel = -8
+        self.gravity = 0.5
+        self.rect.y = y
+
+    def update(self, game_info: Dict[str, Any]) -> None:
+        """Update hammer physics"""
+        self.current_time = game_info[c.CURRENT_TIME]
+        self.x_vel = 3 if self.direction == c.RIGHT else -3
+
+        if self.state == c.THROWN:
+            self.rect.x += self.x_vel
+            self.rect.y += self.y_vel
+            self.y_vel += self.gravity
+
+            if self.rect.y >= self.box_height:
+                self.rect.y = self.box_height
+                self.y_vel = 0
+                self.state = c.SLIDE
+
+        elif self.state == c.SLIDE:
+            self.rect.x += self.x_vel
+
+        self.check_if_off_screen(pg.Rect(0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+
+    def check_if_off_screen(self, viewport: pg.Rect) -> None:
+        """Removes from sprite group if off screen"""
+        if (self.rect.x > viewport.right) or (self.rect.y > viewport.bottom) or (self.rect.right < viewport.x):
+            self.kill()

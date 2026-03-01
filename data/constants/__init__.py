@@ -146,6 +146,7 @@ from .states import (
     EMERGING,
     EMERGED,
     RETRACTING,
+    THROWN,
 )
 
 __all__ = [
@@ -210,6 +211,7 @@ __all__ = [
     "FLYING",
     "BOUNCING",
     "EXPLODING",
+    "THROWN",
     "FROZEN",
     "NOT_FROZEN",
     "IN_CASTLE",
