@@ -64,7 +64,10 @@ class Menu(tools._State):
 
     def setup_background(self) -> None:
         """Setup the background image to blit"""
-        self.background = setup.GFX["level_1"]
+        level_1_img = setup.GFX.get("level_1")
+        if level_1_img is None:
+            level_1_img = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+        self.background = level_1_img
         self.background_rect = self.background.get_rect()
         scaled_background = pg.transform.scale(
             self.background,
