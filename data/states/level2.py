@@ -10,6 +10,8 @@ import pygame as pg
 
 from .. import setup, tools
 from .. import constants as c
+from ..constants_extended import MUSIC_FADE_IN_MS, TIME_WARNING_THRESHOLD
+from ..error_handler import LevelDataValidator, GameStateValidator
 from ..level_music_manager import get_level_music_manager
 from ..level_sound_effects import get_level_sound_effects
 from ..components import mario
@@ -74,14 +76,15 @@ class Level2(tools._State):
         self.brick_pieces_group: pg.sprite.Group | None = None
         self.mario_and_enemy_group: pg.sprite.Group | None = None
 
-        # Load level data from JSON
-        try:
-            self.level_data = level_loader.load_level_from_json("data/levels/level_2_1.json")
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            logger.error(f"Failed to load level: {e}")
+        # Load level data from JSON with validation
+        data, error = LevelDataValidator.load_and_validate_level("data/levels/level_2_1.json")
+        if error:
+            logger.error(f"Failed to load level: {error}")
             self.next = c.GAME_OVER
             self.done = True
             return
+        
+        self.level_data = data
         self._init_groups()
         self.setup_all()
 
@@ -115,7 +118,7 @@ class Level2(tools._State):
         self._update_mario_enemy_group()
 
         # Start level music (underground level)
-        self.music_manager.play_level_music('level2', fade_ms=1000)
+        self.music_manager.play_level_music('level2', fade_ms=MUSIC_FADE_IN_MS)
 
     def setup_background(self) -> None:
         """Sets the background"""
@@ -228,14 +231,17 @@ class Level2(tools._State):
         """Update level state"""
         self.current_time = current_time
 
-        # Update music based on time remaining
-        time_remaining = self.game_info.get(c.LEVEL_TIME, 400)
-        self.music_manager.update(time_remaining)
-        
-        # Play time warning sound
-        if time_remaining == 100 and not self.time_warning_played:
-            self.sound_effects.play_time_warning()
-            self.time_warning_played = True
+        # Update music based on time remaining with validation
+        if GameStateValidator.validate_game_info(self.game_info):
+            time_remaining = GameStateValidator.safe_get_game_value(
+                self.game_info, c.LEVEL_TIME, 400
+            )
+            self.music_manager.update(time_remaining)
+            
+            # Play time warning sound
+            if time_remaining == TIME_WARNING_THRESHOLD and not self.time_warning_played:
+                self.sound_effects.play_time_warning()
+                self.time_warning_played = True
 
         if self.state == c.FROZEN:
             self.draw(surface)
