@@ -23,7 +23,7 @@
     {"x": 6600, "y": 538, "width": 800, "height": 60},
     {"x": 7600, "y": 538, "width": 1400, "height": 60}
   ],
-  "bricks": [
+  "brick_sections": [
     {"x": 300, "y": 365, "contents": null},
     {"x": 386, "y": 365, "contents": "mushroom"},
     {"x": 472, "y": 365, "contents": null},
@@ -65,7 +65,7 @@
     {"x": 8544, "y": 365, "contents": null},
     {"x": 8200, "y": 280, "width": 40, "height": 258}
   ],
-  "coin_boxes": [
+  "coin_box_sections": [
     {"x": 1400, "y": 365, "contents": "coin"},
     {"x": 1486, "y": 365, "contents": "coin"},
     {"x": 1572, "y": 365, "contents": "coin"},
@@ -84,7 +84,7 @@
     {"x": 7286, "y": 365, "contents": "coin"},
     {"x": 7372, "y": 365, "contents": "coin"}
   ],
-  "pipes": [
+  "pipe_sections": [
     {"x": 1800, "y": 452, "width": 83, "height": 82},
     {"x": 2900, "y": 452, "width": 83, "height": 82},
     {"x": 4800, "y": 452, "width": 83, "height": 82, "warp": {"x": 4900, "y": 100, "bonus_room": true}},
@@ -93,7 +93,7 @@
     {"x": 6200, "y": 452, "width": 83, "height": 82},
     {"x": 7800, "y": 452, "width": 83, "height": 82}
   ],
-  "steps": [
+  "step_sections": [
     {"x": 700, "y": 495, "width": 40, "height": 44},
     {"x": 743, "y": 452, "width": 40, "height": 88},
     {"x": 786, "y": 409, "width": 40, "height": 132},
