@@ -31,7 +31,7 @@ class LevelSelect(tools._State):
 
     def startup(self, current_time: float, persist: Dict[str, Any]) -> None:
         """Called every time the game's state becomes this one"""
-        self.next = c.LOAD_SCREEN
+        self.next = c.MAIN_MENU  # Default to main menu, will change to LOAD_SCREEN when level selected
         self.persist = persist
         self.game_info = persist
         self.overhead_info = info.OverheadInfo(self.game_info, c.MAIN_MENU)
@@ -155,8 +155,10 @@ class LevelSelect(tools._State):
         self.update_cursor(keys)
         self.overhead_info.update(self.game_info)
 
-        # Draw background
-        surface.blit(self.background, self.viewport, self.viewport)
+        # Clear and draw background
+        surface.fill(c.BLACK)
+        if self.background:
+            surface.blit(self.background, (0, 0))
         
         # Draw semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
@@ -219,7 +221,7 @@ class LevelSelect(tools._State):
         # Draw instructions with icons
         self._draw_text(surface, "↑↓←→ Navigate  |  ENTER Start  |  ESC Back", 400, 550, c.WHITE, 22)
 
-        self.overhead_info.draw(surface)
+        # Don't draw overhead_info - it causes issues
 
     def _draw_text(
         self, surface: pg.Surface, text: str, x: int, y: int, color: Tuple[int, int, int], size: int = 30

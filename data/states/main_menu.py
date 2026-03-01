@@ -96,10 +96,11 @@ class Menu(tools._State):
             if scaled_background:
                 self.background = scaled_background
                 self.background_rect = self.background.get_rect()
-            
-            screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
-            if screen_rect:
-                self.viewport = screen_rect
+
+            if self.background_rect:
+                screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+                if screen_rect:
+                    self.viewport = screen_rect
 
         self.image_dict = {}
         title_screen = setup.GFX.get("title_screen")
@@ -139,11 +140,9 @@ class Menu(tools._State):
         self.animation_timer += 1
         self.title_y_offset = int(5 * pg.math.Vector2(0, 1).rotate(self.animation_timer * 2).y)
 
-        # Clear screen first
+        # Clear screen and draw background
         surface.fill(c.BLACK)
-        
-        # Draw background
-        if self.background and self.viewport:
+        if self.background:
             surface.blit(self.background, (0, 0))
         
         # Draw semi-transparent overlay for better text visibility
