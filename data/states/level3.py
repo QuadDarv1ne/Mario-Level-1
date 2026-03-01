@@ -241,7 +241,7 @@ class Level3(tools._State):
         # Update music based on time remaining with validation
         if GameStateValidator.validate_game_info(self.game_info):
             time_remaining = GameStateValidator.safe_get_game_value(
-                self.game_info, c.LEVEL_TIME, 400
+                self.game_info, str(c.LEVEL_TIME), 400
             )
             self.music_manager.update(time_remaining)
             

@@ -669,3 +669,228 @@ class DebugManager:
     ) -> None:
         """Draw collision boxes."""
         self.collision_visualizer.draw(surface, rects, camera_offset)
+
+
+# =============================================================================
+# Debug Mode Manager - New Feature v2.7.1
+# =============================================================================
+
+
+class DebugModeManager:
+    """
+    Manages debug game modes for testing and development.
+
+    Features:
+    - God mode (invincibility)
+    - Teleport on click
+    - No clip mode
+    - Speed hack
+    - Jump hack
+
+    Usage:
+        debug_modes = DebugModeManager()
+        debug_modes.toggle_god_mode()
+        debug_modes.handle_click(mouse_pos, mario)
+    """
+
+    def __init__(self) -> None:
+        """Initialize debug mode manager."""
+        self.god_mode = False  # Invincibility
+        self.teleport_on_click = False  # Teleport to mouse position
+        self.no_clip = False  # Pass through walls
+        self.speed_hack = False  # 2x speed
+        self.super_jump = False  # 2x jump height
+
+        # Visual feedback
+        self.active_modes: List[str] = []
+
+    def toggle_god_mode(self) -> None:
+        """Toggle god mode (invincibility)."""
+        self.god_mode = not self.god_mode
+        self._update_active_modes()
+        print(f"God Mode: {'ON' if self.god_mode else 'OFF'}")
+
+    def toggle_teleport(self) -> None:
+        """Toggle teleport on click."""
+        self.teleport_on_click = not self.teleport_on_click
+        self._update_active_modes()
+        print(f"Teleport on Click: {'ON' if self.teleport_on_click else 'OFF'}")
+
+    def toggle_no_clip(self) -> None:
+        """Toggle no clip mode."""
+        self.no_clip = not self.no_clip
+        self._update_active_modes()
+        print(f"No Clip: {'ON' if self.no_clip else 'OFF'}")
+
+    def toggle_speed_hack(self) -> None:
+        """Toggle speed hack (2x speed)."""
+        self.speed_hack = not self.speed_hack
+        self._update_active_modes()
+        print(f"Speed Hack: {'ON' if self.speed_hack else 'OFF'}")
+
+    def toggle_super_jump(self) -> None:
+        """Toggle super jump (2x jump height)."""
+        self.super_jump = not self.super_jump
+        self._update_active_modes()
+        print(f"Super Jump: {'ON' if self.super_jump else 'OFF'}")
+
+    def _update_active_modes(self) -> None:
+        """Update list of active modes for display."""
+        self.active_modes = []
+        if self.god_mode:
+            self.active_modes.append("GOD")
+        if self.teleport_on_click:
+            self.active_modes.append("TELEPORT")
+        if self.no_clip:
+            self.active_modes.append("NOCLIP")
+        if self.speed_hack:
+            self.active_modes.append("SPEED")
+        if self.super_jump:
+            self.active_modes.append("SUPERJUMP")
+
+    def handle_mouse_click(
+        self,
+        pos: Tuple[int, int],
+        mario: Optional[Any],
+        camera_offset: Tuple[int, int] = (0, 0),
+    ) -> bool:
+        """
+        Handle mouse click for teleport feature.
+
+        Args:
+            pos: Mouse position
+            mario: Mario object
+            camera_offset: Camera offset (x, y)
+
+        Returns:
+            True if teleport was performed
+        """
+        if not self.teleport_on_click or not mario or not hasattr(mario, "rect"):
+            return False
+
+        # Calculate world position
+        world_x = pos[0] + camera_offset[0]
+        world_y = pos[1] + camera_offset[1]
+
+        # Teleport Mario
+        mario.rect.x = world_x
+        mario.rect.y = world_y
+        mario.x_vel = 0
+        mario.y_vel = 0
+
+        print(f"Teleported to ({world_x}, {world_y})")
+        return True
+
+    def apply_debug_mode(self, mario: Optional[Any]) -> None:
+        """
+        Apply debug mode effects to Mario.
+
+        Args:
+            mario: Mario object
+        """
+        if not mario:
+            return
+
+        # God mode - make invincible
+        if self.god_mode:
+            mario.invincible = True
+            mario.in_transition_state = False
+
+        # Speed hack
+        if self.speed_hack:
+            if hasattr(mario, "max_speed"):
+                mario.max_speed = mario.max_speed * 2  # type: ignore[attr-defined]
+
+        # Super jump
+        if self.super_jump:
+            if hasattr(mario, "jump_vel"):
+                mario.jump_vel = mario.jump_vel * 2  # type: ignore[attr-defined]
+
+    def reset_debug_mode(self, mario: Optional[Any]) -> None:
+        """
+        Reset debug mode effects.
+
+        Args:
+            mario: Mario object
+        """
+        if not mario:
+            return
+
+        # Reset invincibility if god mode is off
+        if not self.god_mode:
+            mario.invincible = False
+
+        # Reset speed
+        if hasattr(mario, "max_speed"):
+            mario.max_speed = c.MAX_RUN_SPEED  # type: ignore[attr-defined]
+
+        # Reset jump
+        if hasattr(mario, "jump_vel"):
+            mario.jump_vel = c.JUMP_VEL  # type: ignore[attr-defined]
+
+    def get_active_modes_display(self) -> str:
+        """
+        Get string representation of active modes.
+
+        Returns:
+            Comma-separated list of active modes
+        """
+        if not self.active_modes:
+            return "NONE"
+        return ", ".join(self.active_modes)
+
+    def handle_debug_keys(self, event: pg.Event) -> None:
+        """
+        Handle debug mode key bindings.
+
+        Args:
+            event: Pygame event
+        """
+        if event.type != pg.KEYDOWN:
+            return
+
+        # F1 - Toggle god mode
+        if event.key == pg.K_F1:
+            self.toggle_god_mode()
+
+        # F2 - Toggle teleport
+        elif event.key == pg.K_F2:
+            self.toggle_teleport()
+
+        # F6 - Toggle no clip
+        elif event.key == pg.K_F6:
+            self.toggle_no_clip()
+
+        # F7 - Toggle speed hack
+        elif event.key == pg.K_F7:
+            self.toggle_speed_hack()
+
+        # F8 - Toggle super jump
+        elif event.key == pg.K_F8:
+            self.toggle_super_jump()
+
+
+# =============================================================================
+# Global debug mode manager
+# =============================================================================
+
+_debug_mode_manager: Optional[DebugModeManager] = None
+
+
+def get_debug_mode_manager() -> DebugModeManager:
+    """
+    Get global debugModeManager instance.
+
+    Returns:
+        DebugModeManager instance
+    """
+    global _debug_mode_manager
+    if _debug_mode_manager is None:
+        _debug_mode_manager = DebugModeManager()
+    return _debug_mode_manager
+
+
+def reset_debug_mode_manager() -> None:
+    """Reset global DebugModeManager."""
+    global _debug_mode_manager
+    _debug_mode_manager = None

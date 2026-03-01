@@ -122,61 +122,66 @@ class Level2(tools._State):
 
     def setup_background(self) -> None:
         """Sets the background"""
-        self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
-        self.background.fill(self.level_data.background_color)
+        if self.level_data is None:
+            return
+        self.background = setup.GFX.get("level_1", pg.Surface((self.level_data["width"], self.level_data["height"])))
+        self.background.fill(self.level_data.get("background_color", c.BLACK))
         self.back_rect = self.background.get_rect()
         width = self.back_rect.width if self.back_rect else 0
         height = self.back_rect.height if self.back_rect else 0
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
-        if self.level_rect:
+        if self.level_rect and setup.SCREEN is not None:
             self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
-            self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
+            self.viewport.x = self.game_info.get(str(c.CAMERA_START_X), 0)
 
     def setup_ground(self) -> None:
         """Creates ground collision rectangles"""
-        if self.ground_group:
-            for section in getattr(self.level_data, "ground_sections", []):
+        if self.ground_group and self.level_data:
+            for section in self.level_data.get("ground_sections", []):
                 self.ground_group.add(collider.Collider(section["x"], section["y"], section["width"], section["height"]))
 
     def setup_pipes(self) -> None:
         """Create pipe obstacles"""
-        if self.pipe_group:
-            for p in getattr(self.level_data, "pipes", []):
+        if self.pipe_group and self.level_data:
+            for p in self.level_data.get("pipes", []):
                 self.pipe_group.add(collider.Collider(p["x"], p["y"], p["width"], p["height"]))
 
     def setup_steps(self) -> None:
         """Create step obstacles"""
-        if self.step_group:
-            for s in getattr(self.level_data, "steps", []):
+        if self.step_group and self.level_data:
+            for s in self.level_data.get("steps", []):
                 self.step_group.add(collider.Collider(s["x"], s["y"], s["width"], s["height"]))
 
     def setup_bricks(self) -> None:
         """Creates breakable bricks"""
         self.brick_pieces_group = pg.sprite.Group()
-        if self.brick_group:
-            for brick_info in getattr(self.level_data, "bricks", []):
+        if self.brick_group and self.level_data:
+            for brick_info in self.level_data.get("bricks", []):
                 self.brick_group.add(bricks.Brick(brick_info["x"], brick_info["y"], contents=brick_info.get("contents")))
 
     def setup_coin_boxes(self) -> None:
         """Creates coin boxes"""
-        if self.coin_box_group:
-            for box_info in getattr(self.level_data, "coin_boxes", []):
+        if self.coin_box_group and self.level_data:
+            for box_info in self.level_data.get("coin_boxes", []):
                 self.coin_box_group.add(coin_box.CoinBox(box_info["x"], box_info["y"], contents=box_info.get("contents")))
 
     def setup_flag_pole(self) -> None:
         """Creates flag pole"""
-        flag_pole_data = getattr(self.level_data, "flag_pole", {})
-        if flag_pole_data and self.flag_pole_group:
-            self.flag = flagpole.Flag(flag_pole_data["x"], flag_pole_data["y"])
-            self.pole = flagpole.Pole(flag_pole_data["x"], flag_pole_data["y"])
-            self.finial = flagpole.Finial(flag_pole_data["x"], flag_pole_data["y"])
-            self.flag_pole_group.add(self.flag, self.pole, self.finial)
+        if self.level_data:
+            flag_pole_data = self.level_data.get("flag_pole", {})
+            if flag_pole_data and self.flag_pole_group:
+                self.flag = flagpole.Flag(flag_pole_data["x"], flag_pole_data["y"])
+                self.pole = flagpole.Pole(flag_pole_data["x"], flag_pole_data["y"])
+                self.finial = flagpole.Finial(flag_pole_data["x"], flag_pole_data["y"])
+                self.flag_pole_group.add(self.flag, self.pole, self.finial)
 
     def setup_enemies(self) -> None:
         """Setup all enemies"""
-        enemy_data = getattr(self.level_data, "enemies", [])
+        if not self.level_data:
+            return
+        enemy_data = self.level_data.get("enemies", [])
         enemy_map = {
             "goomba": enemies.Goomba,
             "koopa": enemies.Koopa,
@@ -199,7 +204,10 @@ class Level2(tools._State):
 
     def setup_mario(self) -> None:
         """Setup Mario"""
-        mario_start = getattr(self.level_data, "mario_start", {"x": 110, "y": c.GROUND_HEIGHT})
+        if self.level_data:
+            mario_start = self.level_data.get("mario_start", {"x": 110, "y": c.GROUND_HEIGHT})
+        else:
+            mario_start = {"x": 110, "y": c.GROUND_HEIGHT}
         self.mario = mario.Mario()
         if self.mario:
             self.mario.rect.x = mario_start.get("x", 110)
@@ -234,7 +242,7 @@ class Level2(tools._State):
         # Update music based on time remaining with validation
         if GameStateValidator.validate_game_info(self.game_info):
             time_remaining = GameStateValidator.safe_get_game_value(
-                self.game_info, c.LEVEL_TIME, 400
+                self.game_info, str(c.LEVEL_TIME), 400
             )
             self.music_manager.update(time_remaining)
             

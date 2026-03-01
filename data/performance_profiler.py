@@ -84,42 +84,43 @@ class PerformanceMonitor:
     
     def get_average(self, name: str) -> float:
         """Get average timing for a measurement.
-        
+
         Args:
             name: Name of the measurement
-            
+
         Returns:
             Average time in milliseconds
         """
         if name not in self.timings or not self.timings[name]:
             return 0.0
-        return sum(self.timings[name]) / len(self.timings[name])
-    
+        timings_list = list(self.timings[name])
+        return float(sum(timings_list)) / float(len(timings_list))
+
     def get_max(self, name: str) -> float:
         """Get maximum timing for a measurement.
-        
+
         Args:
             name: Name of the measurement
-            
+
         Returns:
             Maximum time in milliseconds
         """
         if name not in self.timings or not self.timings[name]:
             return 0.0
-        return max(self.timings[name])
-    
+        return float(max(self.timings[name]))
+
     def get_min(self, name: str) -> float:
         """Get minimum timing for a measurement.
-        
+
         Args:
             name: Name of the measurement
-            
+
         Returns:
             Minimum time in milliseconds
         """
         if name not in self.timings or not self.timings[name]:
             return 0.0
-        return min(self.timings[name])
+        return float(min(self.timings[name]))
     
     def get_counter(self, name: str) -> int:
         """Get counter value.

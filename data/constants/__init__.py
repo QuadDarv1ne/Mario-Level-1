@@ -67,6 +67,7 @@ from .items import (
     HURT_INVINCIBLE_DURATION,
     INVINCIBLE_DURATION,
     LIVES,
+    LEVEL_TIME,
     TOP_SCORE,
 )
 from .physics import (
@@ -288,6 +289,7 @@ __all__ = [
     "INVINCIBLE_DURATION",
     "HURT_INVINCIBLE_DURATION",
     "FLAG_SLIDE_DURATION",
+    "LEVEL_TIME",
     # Screen
     "SCREEN_HEIGHT",
     "SCREEN_WIDTH",
