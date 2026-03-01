@@ -32,12 +32,14 @@ class LoadScreen(tools._State):
         current_level = self.persist.get("current_level", c.LEVEL1)
 
         if current_level == c.LEVEL1:
-            return c.LEVEL2
+            return c.LEVEL1
         elif current_level == c.LEVEL2:
-            return c.LEVEL3
+            return c.LEVEL2
         elif current_level == c.LEVEL3:
-            return c.LEVEL4
+            return c.LEVEL3
         elif current_level == c.LEVEL4:
+            return c.LEVEL4
+        elif current_level == c.LEVEL5:
             return c.LEVEL5
         else:
             return c.LEVEL1

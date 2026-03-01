@@ -53,6 +53,7 @@ def main() -> int:
         # Define game states
         state_dict: Dict[str, Any] = {
             c.MAIN_MENU: setup.create_main_menu(),
+            c.LEVEL_SELECT: setup.create_level_select(),
             c.LOAD_SCREEN: setup.create_load_screen(),
             c.TIME_OUT: setup.create_timeout_screen(),
             c.GAME_OVER: setup.create_game_over(),

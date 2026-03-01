@@ -89,6 +89,7 @@ FLAG_BOTTOM_OF_POLE: str = "bottom of pole"
 # =============================================================================
 PLAYER1: str = "1 player"
 PLAYER2: str = "2 player"
+LEVEL_SELECT: str = "level select"
 
 # =============================================================================
 # OVERHEAD INFO STATES
