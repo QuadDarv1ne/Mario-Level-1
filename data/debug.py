@@ -122,7 +122,7 @@ class DebugOverlay:
 
         # Memory
         try:
-            import resource  # type: ignore[import-not-found]
+            import resource
 
             self.stats.memory_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
