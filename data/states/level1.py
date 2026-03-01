@@ -400,11 +400,11 @@ class Level1(tools._State):
 
     def setup_spritegroups(self) -> None:
         """Sprite groups created for convenience"""
-        self.sprites_about_to_die_group = pg.sprite.Group()
-        self.shell_group = pg.sprite.Group()
-        self.enemy_group = pg.sprite.Group()
+        self.sprites_about_to_die_group: pg.sprite.Group = pg.sprite.Group()
+        self.shell_group: pg.sprite.Group = pg.sprite.Group()
+        self.enemy_group: pg.sprite.Group = pg.sprite.Group()
 
-        self.ground_step_pipe_group = pg.sprite.Group()
+        self.ground_step_pipe_group: pg.sprite.Group = pg.sprite.Group()
         if self.ground_group is not None:
             for sprite in self.ground_group:
                 self.ground_step_pipe_group.add(sprite)
@@ -415,7 +415,7 @@ class Level1(tools._State):
             for sprite in self.step_group:
                 self.ground_step_pipe_group.add(sprite)
 
-        self.mario_and_enemy_group = pg.sprite.Group()
+        self.mario_and_enemy_group: pg.sprite.Group = pg.sprite.Group()
         if self.enemy_group is not None:
             for sprite in self.enemy_group:
                 self.mario_and_enemy_group.add(sprite)
@@ -1008,7 +1008,7 @@ class Level1(tools._State):
         if self.mario is None or self.mario.rect is None:
             return
         self.mario.rect.y += 1
-        test_collide_group = pg.sprite.Group()
+        test_collide_group: pg.sprite.Group = pg.sprite.Group()
         if self.ground_step_pipe_group is not None:
             for sprite in self.ground_step_pipe_group:
                 test_collide_group.add(sprite)
