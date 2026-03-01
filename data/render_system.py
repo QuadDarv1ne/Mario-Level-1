@@ -314,7 +314,9 @@ class SpriteRenderer:
             layer: Rendering layer
         """
         if hasattr(sprite, "image") and hasattr(sprite, "rect"):
-            self.add_sprite(sprite.rect, sprite.image, layer)
+            rect = sprite.rect
+            if rect is not None:
+                self.add_sprite(rect, sprite.image, layer)
 
     def add_sprite_group(
         self,

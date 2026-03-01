@@ -634,7 +634,7 @@ class SeasonalTheme:
         theme = self.THEMES[self.season]
 
         # Set random weather from theme
-        weather: WeatherType = random.choice(theme["weather"])
+        weather: WeatherType = random.choice(theme["weather"])  # type: ignore[arg-type]
         self.weather_manager.set_weather(weather)
 
     def change_season(self, season: str) -> None:

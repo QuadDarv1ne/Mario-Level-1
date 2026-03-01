@@ -406,6 +406,8 @@ class Mario(pg.sprite.Sprite):
 
     def get_out_of_crouch(self) -> None:
         """Get out of crouch"""
+        if self.rect is None:
+            return
         bottom = self.rect.bottom
         left = self.rect.x
         if self.facing_right:
@@ -429,13 +431,15 @@ class Mario(pg.sprite.Sprite):
 
     def shoot_fireball(self, powerup_group: pg.sprite.Group) -> None:
         """Shoots fireball, allowing no more than two to exist at once"""
+        if self.rect is None:
+            return
         setup.SFX["fireball"].play()
         self.fireball_count = self.count_number_of_fireballs(powerup_group)
 
         if (self.current_time - self.last_fireball_time) > 200:
             if self.fireball_count < 2:
                 self.allow_fireball = False
-                powerup_group.add(powerups.FireBall(self.rect.right, self.rect.y, self.facing_right))
+                powerup_group.add(powerups.FireBall(int(self.rect.right), int(self.rect.y), self.facing_right))
                 self.last_fireball_time = self.current_time
 
                 self.frame_index = 6
@@ -541,15 +545,15 @@ class Mario(pg.sprite.Sprite):
                     self.x_vel = 0
                     self.state = c.STAND
 
-    def calculate_animation_speed(self) -> float:
+    def calculate_animation_speed(self) -> int:
         """Used to make walking animation speed be in relation to
         Mario's x-vel"""
         if self.x_vel == 0:
             animation_speed = 130
         elif self.x_vel > 0:
-            animation_speed = 130 - (self.x_vel * (13))
+            animation_speed = int(130 - (self.x_vel * 13))
         else:
-            animation_speed = 130 - (self.x_vel * (13) * -1)
+            animation_speed = int(130 - (self.x_vel * 13 * -1))
 
         return animation_speed
 
