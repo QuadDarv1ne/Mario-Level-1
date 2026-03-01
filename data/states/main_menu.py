@@ -72,7 +72,7 @@ class Menu(tools._State):
         """Setup the background image to blit"""
         try:
             # Try to load custom background image
-            bg_image = pg.image.load("img/sky_background.png")
+            bg_image = pg.image.load("img/sky_background.jpg")
             # Scale to screen size
             self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
             self.background_rect = self.background.get_rect()
