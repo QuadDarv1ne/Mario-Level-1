@@ -149,7 +149,7 @@ class PiranhaPlant(Enemy):
         self.state = c.EMERGING
         self.action_timer = self.current_time
 
-    def jumped_on(self) -> None:
+    def jumped_on(self) -> bool:
         """Can only be killed when fully emerged."""
         if self.state == c.EMERGED:
             self.start_death_jump(c.RIGHT)
@@ -484,13 +484,13 @@ def create_enemy(enemy_type: str, x: int, y: int, direction: str = c.LEFT, **kwa
         raise ValueError(f"Unknown enemy type: {enemy_type}")
 
 
-def setup_enemy_instance(cls_name: str, y: int, x: int, direction: str):
+def setup_enemy_instance(cls_name: str, y: int, x: int, direction: str) -> Enemy:
     """Helper to create classic enemies."""
     from .enemies import Goomba, Koopa
 
     if cls_name == "Goomba":
-        return Goomba(y, x, direction)
+        return Goomba(y, x, direction)  # type: ignore[return-value]
     elif cls_name == "Koopa":
-        return Koopa(y, x, direction)
+        return Koopa(y, x, direction)  # type: ignore[return-value]
     else:
         raise ValueError(f"Unknown enemy class: {cls_name}")

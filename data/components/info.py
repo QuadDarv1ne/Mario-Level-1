@@ -208,21 +208,21 @@ class OverheadInfo:
         self.create_label(game_label, "GAME", 280, 300)
         self.create_label(over_label, "OVER", 400, 300)
 
-        self.game_over_label = [game_label, over_label]
+        self.game_over_label: List[List[Character]] = [game_label, over_label]
 
     def create_time_out_label(self):
         """Create the label for the time out screen"""
         time_out_label: List[Character] = []
 
         self.create_label(time_out_label, "TIME OUT", 290, 310)
-        self.time_out_label = [time_out_label]
+        self.time_out_label: List[List[Character]] = [time_out_label]
 
     def create_main_menu_labels(self):
         """Create labels for the MAIN MENU screen"""
-        player_one_game = []
-        player_two_game = []
-        top = []
-        top_score = []
+        player_one_game: List[Character] = []
+        player_two_game: List[Character] = []
+        top: List[Character] = []
+        top_score: List[Character] = []
 
         self.create_label(player_one_game, "1 PLAYER GAME", 272, 360)
         self.create_label(player_two_game, "2 PLAYER GAME", 272, 405)
@@ -243,7 +243,8 @@ class OverheadInfo:
             self.update_score_images(self.score_images, self.score)
             self.update_score_images(self.main_menu_labels[3], self.top_score)
             self.update_coin_total(level_info)
-            self.flashing_coin.update(level_info[c.CURRENT_TIME])
+            if self.flashing_coin:
+                self.flashing_coin.update(level_info[c.CURRENT_TIME])
 
         elif self.state == c.LOAD_SCREEN:
             self.score = level_info[c.SCORE]
@@ -261,7 +262,8 @@ class OverheadInfo:
             ):
                 self.update_count_down_clock(level_info)
             self.update_coin_total(level_info)
-            self.flashing_coin.update(level_info[c.CURRENT_TIME])
+            if self.flashing_coin:
+                self.flashing_coin.update(level_info[c.CURRENT_TIME])
 
         elif self.state == c.TIME_OUT:
             self.score = level_info[c.SCORE]
@@ -368,7 +370,8 @@ class OverheadInfo:
             for letter in label:
                 surface.blit(letter.image, letter.rect)
 
-        surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+        if self.flashing_coin:
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
 
     def draw_loading_screen_info(self, surface):
         """Draws info for loading screen"""
@@ -392,7 +395,8 @@ class OverheadInfo:
             for letter in label:
                 surface.blit(letter.image, letter.rect)
 
-        surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+        if self.flashing_coin:
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
 
     def draw_level_screen_info(self, surface):
         """Draws info during regular game play"""
@@ -409,7 +413,8 @@ class OverheadInfo:
             for letter in label:
                 surface.blit(letter.image, letter.rect)
 
-        surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+        if self.flashing_coin:
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
 
     def draw_game_over_screen_info(self, surface):
         """Draws info when game over"""
@@ -427,7 +432,8 @@ class OverheadInfo:
             for letter in label:
                 surface.blit(letter.image, letter.rect)
 
-        surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+        if self.flashing_coin:
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
 
     def draw_time_out_screen_info(self, surface):
         """Draws info when on the time out screen"""
@@ -445,4 +451,5 @@ class OverheadInfo:
             for letter in label:
                 surface.blit(letter.image, letter.rect)
 
-        surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+        if self.flashing_coin:
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)

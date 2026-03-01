@@ -50,8 +50,11 @@ class Menu(tools._State):
         """Creates the mushroom cursor to select 1 or 2 player game"""
         self.cursor = pg.sprite.Sprite()
         dest = (220, 358)
-        self.cursor.image, self.cursor.rect = self.get_image(24, 160, 8, 8, dest, setup.GFX["item_objects"])
-        self.cursor.state = c.PLAYER1
+        image, rect = self.get_image(24, 160, 8, 8, dest, setup.GFX["item_objects"])
+        if image is not None and rect is not None:
+            self.cursor.image = image
+            self.cursor.rect = rect
+        self.cursor.state = c.PLAYER1  # type: ignore[attr-defined]
 
     def setup_mario(self) -> None:
         """Places Mario at the beginning of the level"""
@@ -106,8 +109,10 @@ class Menu(tools._State):
 
         surface.blit(self.background, self.viewport, self.viewport)
         surface.blit(self.image_dict["GAME_NAME_BOX"][0], self.image_dict["GAME_NAME_BOX"][1])
-        surface.blit(self.mario.image, self.mario.rect)
-        surface.blit(self.cursor.image, self.cursor.rect)
+        if self.mario.image:
+            surface.blit(self.mario.image, self.mario.rect)
+        if self.cursor.image:
+            surface.blit(self.cursor.image, self.cursor.rect)
         self.overhead_info.draw(surface)
 
     def update_cursor(self, keys: Tuple[bool, ...]) -> None:
