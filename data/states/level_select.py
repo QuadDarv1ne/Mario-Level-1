@@ -98,7 +98,7 @@ class LevelSelect(tools._State):
         """Setup the background image"""
         try:
             # Try to load custom background image
-            bg_image = pg.image.load("img/sky_background.png")
+            bg_image = pg.image.load("img/sky_background.jpg")
             self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
             self.background_rect = self.background.get_rect()
             self.viewport = pg.Rect(0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT)
@@ -163,9 +163,9 @@ class LevelSelect(tools._State):
         if self.background:
             surface.blit(self.background, (0, 0))
         
-        # Draw lighter semi-transparent overlay
+        # Draw very light semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        overlay.set_alpha(90)  # Reduced from 120
+        overlay.set_alpha(60)  # Very light
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
 
@@ -261,32 +261,50 @@ class LevelSelect(tools._State):
             # Move down in current column
             if self.selected_level % levels_per_column < levels_per_column - 1:
                 self.selected_level += 1
+                # Play navigation sound
+                if setup.SFX.get('coin'):
+                    setup.SFX['coin'].play()
             self.input_timer = current_time
             
         elif can_input and keys[pg.K_UP]:
             # Move up in current column
             if self.selected_level % levels_per_column > 0:
                 self.selected_level -= 1
+                # Play navigation sound
+                if setup.SFX.get('coin'):
+                    setup.SFX['coin'].play()
             self.input_timer = current_time
             
         elif can_input and keys[pg.K_RIGHT]:
             # Move to next column
             if self.selected_level < levels_per_column:
                 self.selected_level += levels_per_column
+                # Play navigation sound
+                if setup.SFX.get('coin'):
+                    setup.SFX['coin'].play()
             self.input_timer = current_time
             
         elif can_input and keys[pg.K_LEFT]:
             # Move to previous column
             if self.selected_level >= levels_per_column:
                 self.selected_level -= levels_per_column
+                # Play navigation sound
+                if setup.SFX.get('coin'):
+                    setup.SFX['coin'].play()
             self.input_timer = current_time
             
         elif keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
+            # Play selection sound
+            if setup.SFX.get('bump'):
+                setup.SFX['bump'].play()
             self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
             self.next = c.LOAD_SCREEN
             self.done = True
             
         elif keys[pg.K_ESCAPE]:
+            # Play back sound
+            if setup.SFX.get('pipe'):
+                setup.SFX['pipe'].play()
             self.next = c.MAIN_MENU
             self.done = True
 

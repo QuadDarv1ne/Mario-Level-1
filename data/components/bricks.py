@@ -92,7 +92,7 @@ class Brick(pg.sprite.Sprite):
         """State when not moving"""
         if self.contents == "6coins":
             if self.coin_total == 0:
-                self.state == c.OPENED
+                self.state = c.OPENED
 
     def bumped(self) -> None:
         """Action during a BUMPED state"""

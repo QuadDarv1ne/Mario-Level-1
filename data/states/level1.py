@@ -10,6 +10,8 @@ from .. import setup, tools
 from .. import constants as c
 from .. import game_sound
 from ..event_system import get_event_manager, EventType
+from ..level_music_manager import get_level_music_manager
+from ..level_sound_effects import get_level_sound_effects
 from ..components import mario
 from ..components import collider
 from ..components import bricks
@@ -44,6 +46,11 @@ class Level1(tools._State):
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
         self.sound_manager = game_sound.Sound(self.overhead_info_display)
 
+        # Initialize music and sound effects
+        self.music_manager = get_level_music_manager()
+        self.sound_effects = get_level_sound_effects()
+        self.time_warning_played = False
+
         self.background: Optional[pg.Surface] = None
         self.back_rect: Optional[pg.Rect] = None
         self.level: Optional[pg.Surface] = None
@@ -76,6 +83,9 @@ class Level1(tools._State):
         self.setup_mario()
         self.setup_checkpoints()
         self.setup_spritegroups()
+
+        # Start level music
+        self.music_manager.play_level_music('level1', fade_ms=1000)
 
     def setup_background(self) -> None:
         """Sets the background image, rect and scales it to the correct
@@ -392,6 +402,16 @@ class Level1(tools._State):
     def update(self, surface: pg.Surface, keys: Tuple[bool, ...], current_time: float) -> None:
         """Updates Entire level using states.  Called by the control object"""
         self.game_info[c.CURRENT_TIME] = self.current_time = current_time
+        
+        # Update music based on time remaining
+        time_remaining = self.game_info.get(c.LEVEL_TIME, 400)
+        self.music_manager.update(time_remaining)
+        
+        # Play time warning sound
+        if time_remaining == 100 and not self.time_warning_played:
+            self.sound_effects.play_time_warning()
+            self.time_warning_played = True
+        
         self.handle_states(keys)
         self.check_if_time_out()
         self.blit_everything(surface)
@@ -546,23 +566,29 @@ class Level1(tools._State):
 
     def check_mario_x_collisions(self):
         """Check for collisions after Mario is moved on the x axis"""
+        # Check static colliders first (ground, steps, pipes)
         collider = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
+        if collider:
+            self.adjust_mario_for_x_collisions(collider)
+            return
+        
+        # Check interactive objects
         coin_box = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
+        if coin_box:
+            self.adjust_mario_for_x_collisions(coin_box)
+            return
+        
         brick = pg.sprite.spritecollideany(self.mario, self.brick_group)
+        if brick:
+            self.adjust_mario_for_x_collisions(brick)
+            return
+        
+        # Check enemies and powerups
         enemy = pg.sprite.spritecollideany(self.mario, self.enemy_group)
         shell = pg.sprite.spritecollideany(self.mario, self.shell_group)
         powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
 
-        if coin_box:
-            self.adjust_mario_for_x_collisions(coin_box)
-
-        elif brick:
-            self.adjust_mario_for_x_collisions(brick)
-
-        elif collider:
-            self.adjust_mario_for_x_collisions(collider)
-
-        elif enemy:
+        if enemy:
             if self.mario.invincible:
                 setup.SFX["kick"].play()
                 self.game_info[c.SCORE] += 100

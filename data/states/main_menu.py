@@ -72,7 +72,7 @@ class Menu(tools._State):
         """Setup the background image to blit"""
         try:
             # Try to load custom background image
-            bg_image = pg.image.load("img/sky_background.png")
+            bg_image = pg.image.load("img/sky_background.jpg")
             # Scale to screen size
             self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
             self.background_rect = self.background.get_rect()
@@ -145,18 +145,18 @@ class Menu(tools._State):
         if self.background:
             surface.blit(self.background, (0, 0))
         
-        # Draw lighter semi-transparent overlay
+        # Draw very light semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        overlay.set_alpha(80)  # Reduced from 110 for better visibility
+        overlay.set_alpha(50)  # Very light overlay
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
         
-        # Draw decorative top bar (lighter)
+        # Draw decorative top bar (very light)
         top_bar = pg.Surface((c.SCREEN_WIDTH, 220))
-        top_bar.set_alpha(140)  # Reduced from 180
-        top_bar.fill((40, 40, 60))  # Slightly blue tint
+        top_bar.set_alpha(100)  # Very transparent
+        top_bar.fill((30, 30, 50))  # Dark blue tint
         surface.blit(top_bar, (0, 0))
-        pg.draw.line(surface, c.GOLD, (0, 220), (c.SCREEN_WIDTH, 220), 3)
+        pg.draw.line(surface, c.GOLD, (0, 220), (c.SCREEN_WIDTH, 220), 4)
         
         # Draw title with animation
         if "GAME_NAME_BOX" in self.image_dict:
@@ -168,13 +168,13 @@ class Menu(tools._State):
         # Draw version info and subtitle
         self._draw_text(surface, "v2.7.0 - Enhanced Edition", 400, 185, c.YELLOW, 22)
         
-        # Draw lighter decorative menu panel
+        # Draw much lighter decorative menu panel
         menu_panel = pg.Surface((420, 280))
-        menu_panel.set_alpha(160)  # Reduced from 200
-        menu_panel.fill((50, 50, 70))  # Lighter color
+        menu_panel.set_alpha(120)  # More transparent
+        menu_panel.fill((70, 70, 90))  # Lighter color
         surface.blit(menu_panel, (190, 250))
         menu_panel_rect = pg.Rect(190, 250, 420, 280)
-        pg.draw.rect(surface, c.GOLD, menu_panel_rect, 4, border_radius=15)
+        pg.draw.rect(surface, c.GOLD, menu_panel_rect, 5, border_radius=15)
 
         # Draw menu options with enhanced styling
         menu_start_y = 290
@@ -212,10 +212,10 @@ class Menu(tools._State):
 
         # Draw instructions bar at bottom
         bottom_bar = pg.Surface((c.SCREEN_WIDTH, 60))
-        bottom_bar.set_alpha(180)
-        bottom_bar.fill((30, 30, 40))
+        bottom_bar.set_alpha(140)
+        bottom_bar.fill((40, 40, 60))
         surface.blit(bottom_bar, (0, 540))
-        pg.draw.line(surface, c.GOLD, (0, 540), (c.SCREEN_WIDTH, 540), 2)
+        pg.draw.line(surface, c.GOLD, (0, 540), (c.SCREEN_WIDTH, 540), 3)
         self._draw_text(surface, "↑↓ Navigate  |  ENTER Select  |  ESC Exit", 400, 565, c.WHITE, 22)
 
         # Draw Mario (animated) - in bottom left corner
@@ -256,15 +256,25 @@ class Menu(tools._State):
             if self.cursor and self.cursor.rect:
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
             self.input_timer = current_time
+            # Play navigation sound
+            if setup.SFX.get('coin'):
+                setup.SFX['coin'].play()
                 
         elif can_input and keys[pg.K_UP]:
             self.selected_option = (self.selected_option - 1) % len(self.menu_options)
             if self.cursor and self.cursor.rect:
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
             self.input_timer = current_time
+            # Play navigation sound
+            if setup.SFX.get('coin'):
+                setup.SFX['coin'].play()
 
         # Handle selection
         if keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
+            # Play selection sound
+            if setup.SFX.get('bump'):
+                setup.SFX['bump'].play()
+                
             if self.selected_option == 0:  # PLAY
                 self.reset_game_info()
                 self.next = c.LOAD_SCREEN
