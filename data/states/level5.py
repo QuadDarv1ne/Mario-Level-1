@@ -112,8 +112,8 @@ class Level5(tools._State):
         self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
-        width = self.back_rect.width
-        height = self.back_rect.height
+        width = self.back_rect.width  # type: ignore[union-attr]
+        height = self.back_rect.height  # type: ignore[union-attr]
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
@@ -301,8 +301,8 @@ class Level5(tools._State):
         if not self.mario or not self.viewport:
             return
 
-        level_rect = self.level_rect
-        if self.mario.rect.right > self.viewport.centerx:
+        level_rect = self.level_rect  # type: ignore[assignment]
+        if self.mario.rect.right > self.viewport.centerx:  # type: ignore[union-attr]
             self.viewport.centerx = self.mario.rect.centerx
             self.viewport.right = min(self.viewport.right, level_rect.right)
 
@@ -317,7 +317,7 @@ class Level5(tools._State):
         if self.level is None or self.background is None:
             return
 
-        self.level.blit(self.background, self.back_rect, self.viewport)
+        self.level.blit(self.background, self.back_rect, self.viewport)  # type: ignore[arg-type]
 
         for group in [
             self.ground_group,
@@ -335,13 +335,13 @@ class Level5(tools._State):
                 group.draw(self.level)
 
         if self.mario:
-            self.mario.draw(self.level)
+            self.mario.draw(self.level)  # type: ignore[attr-defined]
         if self.overhead_info_display:
             self.overhead_info_display.draw(self.level)
 
-        surface.blit(self.level, (0, 0), self.viewport)
+        surface.blit(self.level, (0, 0), self.viewport)  # type: ignore[arg-type]
 
     def get_event(self, event: pg.event.Event) -> None:
         """Handle events"""
         if self.mario:
-            self.mario.get_event(event)
+            self.mario.get_event(event)  # type: ignore[attr-defined]
