@@ -10,6 +10,8 @@ import pygame as pg
 
 from .. import setup, tools
 from .. import constants as c
+from ..constants_extended import MUSIC_FADE_IN_MS, TIME_WARNING_THRESHOLD
+from ..error_handler import GameStateValidator
 from ..level_music_manager import get_level_music_manager
 from ..level_sound_effects import get_level_sound_effects
 from ..components import mario
@@ -236,14 +238,17 @@ class Level3(tools._State):
         """Update level state"""
         self.current_time = current_time
 
-        # Update music based on time remaining
-        time_remaining = self.game_info.get(c.LEVEL_TIME, 400)
-        self.music_manager.update(time_remaining)
-        
-        # Play time warning sound
-        if time_remaining == 100 and not self.time_warning_played:
-            self.sound_effects.play_time_warning()
-            self.time_warning_played = True
+        # Update music based on time remaining with validation
+        if GameStateValidator.validate_game_info(self.game_info):
+            time_remaining = GameStateValidator.safe_get_game_value(
+                self.game_info, str(c.LEVEL_TIME), 400
+            )
+            self.music_manager.update(time_remaining)
+            
+            # Play time warning sound
+            if time_remaining == TIME_WARNING_THRESHOLD and not self.time_warning_played:
+                self.sound_effects.play_time_warning()
+                self.time_warning_played = True
 
         if self.state == c.FROZEN:
             self.draw(surface)

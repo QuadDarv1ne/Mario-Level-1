@@ -83,14 +83,14 @@ class EnhancedAudioManager:
         
         self.current_music: Optional[str] = None
         self.music_paused = False
-    
-    def load_music(self, music_name: str, subdirs: list[str] = None) -> bool:
+
+    def load_music(self, music_name: str, subdirs: Optional[list[str]] = None) -> bool:
         """Load music file with caching.
-        
+
         Args:
             music_name: Name of music file (with or without extension)
             subdirs: Optional subdirectories to search
-            
+
         Returns:
             True if loaded successfully, False otherwise
         """
@@ -135,16 +135,16 @@ class EnhancedAudioManager:
         music_name: str,
         loops: int = -1,
         fade_ms: int = 1000,
-        subdirs: list[str] = None,
+        subdirs: Optional[list[str]] = None,
     ) -> bool:
         """Load and play music in one call.
-        
+
         Args:
             music_name: Name of music file
             loops: Number of loops (-1 for infinite)
             fade_ms: Fade in duration
             subdirs: Optional subdirectories to search
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -184,13 +184,13 @@ class EnhancedAudioManager:
         self.music_volume = max(0.0, min(1.0, volume))
         pg.mixer.music.set_volume(self.music_volume)
     
-    def load_sound(self, sound_name: str, subdirs: list[str] = None) -> Optional[pg.mixer.Sound]:
+    def load_sound(self, sound_name: str, subdirs: Optional[list[str]] = None) -> Optional[pg.mixer.Sound]:
         """Load sound effect with caching.
-        
+
         Args:
             sound_name: Name of sound file
             subdirs: Optional subdirectories to search
-            
+
         Returns:
             Sound object or None
         """
@@ -213,13 +213,13 @@ class EnhancedAudioManager:
         
         return sound
     
-    def play_sound(self, sound_name: str, subdirs: list[str] = None) -> bool:
+    def play_sound(self, sound_name: str, subdirs: Optional[list[str]] = None) -> bool:
         """Load and play sound effect.
-        
+
         Args:
             sound_name: Name of sound file
             subdirs: Optional subdirectories to search
-            
+
         Returns:
             True if played successfully, False otherwise
         """
@@ -248,15 +248,15 @@ class EnhancedAudioManager:
         self,
         base_dir: Path,
         filename: str,
-        subdirs: list[str] = None,
+        subdirs: Optional[list[str]] = None,
     ) -> Optional[Path]:
         """Find audio file in directory and subdirectories.
-        
+
         Args:
             base_dir: Base directory to search
             filename: Filename to find
             subdirs: Optional subdirectories to search
-            
+
         Returns:
             Path to file or None
         """

@@ -56,3 +56,4 @@ FIREBALL_INTERVAL: int = 200  # Minimum time between fireball shots
 INVINCIBLE_DURATION: int = 2000  # Duration of star power invincibility
 HURT_INVINCIBLE_DURATION: int = 1000  # Duration of invincibility after getting hurt
 FLAG_SLIDE_DURATION: int = 1000  # Duration of flag slide animation
+LEVEL_TIME: int = 400  # Level time limit (in seconds)

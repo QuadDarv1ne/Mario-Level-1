@@ -97,8 +97,8 @@ class Menu(tools._State):
                 self.background = scaled_background
                 self.background_rect = self.background.get_rect()
 
-            if self.background_rect:
-                screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+            if self.background_rect and setup.SCREEN is not None:
+                screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom if setup.SCREEN_RECT else 0)
                 if screen_rect:
                     self.viewport = screen_rect
 

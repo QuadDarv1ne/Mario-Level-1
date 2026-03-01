@@ -70,10 +70,13 @@ class Level1(tools._State):
         self.finial: Optional[flagpole.Finial] = None
         self.coin_group: Optional[pg.sprite.Group] = None
         self.powerup_group: Optional[pg.sprite.Group] = None
+        self.brick_pieces_group: Optional[pg.sprite.Group] = None
         self.fire_group: Optional[pg.sprite.Group] = None
+        self.sprites_about_to_die_group: Optional[pg.sprite.Group] = None
+        self.shell_group: Optional[pg.sprite.Group] = None
+        self.enemy_group_list: Optional[List[pg.sprite.Group]] = None
 
         self.setup_background()
-        self.setup_ground()
         self.setup_pipes()
         self.setup_steps()
         self.setup_bricks()
@@ -103,7 +106,11 @@ class Level1(tools._State):
         # use an alpha-capable surface so tests don't need a display
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
-        self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
+        if setup.SCREEN is not None:
+            self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
+        else:
+            self.viewport = pg.Rect(0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT)
+            self.viewport.bottom = self.level_rect.bottom
         self.viewport.x = self.game_info[c.CAMERA_START_X]
 
     def setup_ground(self) -> None:
@@ -365,8 +372,9 @@ class Level1(tools._State):
     def setup_mario(self) -> None:
         """Places Mario at the beginning of the level"""
         self.mario = mario.Mario()
-        self.mario.rect.x = self.viewport.x + 110
-        self.mario.rect.bottom = c.GROUND_HEIGHT
+        if self.viewport is not None and self.mario.rect is not None:
+            self.mario.rect.x = self.viewport.x + 110
+            self.mario.rect.bottom = c.GROUND_HEIGHT
 
     def setup_checkpoints(self) -> None:
         """Creates invisible checkpoints that when collided will trigger
@@ -402,9 +410,9 @@ class Level1(tools._State):
     def update(self, surface: pg.Surface, keys: Tuple[bool, ...], current_time: float) -> None:
         """Updates Entire level using states.  Called by the control object"""
         self.game_info[c.CURRENT_TIME] = self.current_time = current_time
-        
+
         # Update music based on time remaining
-        time_remaining = self.game_info.get(c.LEVEL_TIME, 400)
+        time_remaining = self.game_info.get(str(c.LEVEL_TIME), 400)
         self.music_manager.update(time_remaining)
         
         # Play time warning sound
@@ -432,14 +440,17 @@ class Level1(tools._State):
         """Updates mario in a transition state (like becoming big, small,
         or dies). Checks if he leaves the transition state or dies to
         change the level state back"""
-        self.mario.update(keys, self.game_info, self.powerup_group)
+        if self.mario is not None and self.powerup_group is not None:
+            self.mario.update(keys, self.game_info, self.powerup_group)
         for moving_score in self.moving_score_list:
             moving_score.update(self.moving_score_list, self.game_info)
         if self.flag_score:
             self.flag_score.update(None, self.game_info)
             self.check_to_add_flag_score()
-        self.coin_box_group.update(self.game_info)
-        self.flag_pole_group.update(self.game_info)
+        if self.coin_box_group is not None:
+            self.coin_box_group.update(self.game_info)
+        if self.flag_pole_group is not None:
+            self.flag_pole_group.update(self.game_info)
         self.check_if_mario_in_transition_state()
         self.check_flag()
         self.check_for_mario_death()
@@ -448,6 +459,8 @@ class Level1(tools._State):
     def check_if_mario_in_transition_state(self):
         """If mario is in a transition state, the level will be in a FREEZE
         state"""
+        if self.mario is None:
+            return
         if self.mario.in_transition_state:
             self.game_info[c.LEVEL_STATE] = self.state = c.FROZEN
         elif not self.mario.in_transition_state:
@@ -456,22 +469,32 @@ class Level1(tools._State):
 
     def update_all_sprites(self, keys):
         """Updates the location of all sprites on the screen."""
-        self.mario.update(keys, self.game_info, self.powerup_group)
+        if self.mario is not None and self.powerup_group is not None:
+            self.mario.update(keys, self.game_info, self.powerup_group)
         for moving_score in self.moving_score_list:
             moving_score.update(self.moving_score_list, self.game_info)
         if self.flag_score:
             self.flag_score.update(None, self.game_info)
             self.check_to_add_flag_score()
-        self.flag_pole_group.update()
+        if self.flag_pole_group is not None:
+            self.flag_pole_group.update()
         self.check_points_check()
-        self.enemy_group.update(self.game_info)
-        self.sprites_about_to_die_group.update(self.game_info, self.viewport)
-        self.shell_group.update(self.game_info)
-        self.brick_group.update()
-        self.coin_box_group.update(self.game_info)
-        self.powerup_group.update(self.game_info, self.viewport)
-        self.coin_group.update(self.game_info, self.viewport)
-        self.brick_pieces_group.update()
+        if self.enemy_group is not None:
+            self.enemy_group.update(self.game_info)
+        if self.sprites_about_to_die_group is not None:
+            self.sprites_about_to_die_group.update(self.game_info, self.viewport)
+        if self.shell_group is not None:
+            self.shell_group.update(self.game_info)
+        if self.brick_group is not None:
+            self.brick_group.update()
+        if self.coin_box_group is not None:
+            self.coin_box_group.update(self.game_info)
+        if self.powerup_group is not None:
+            self.powerup_group.update(self.game_info, self.viewport)
+        if self.coin_group is not None:
+            self.coin_group.update(self.game_info, self.viewport)
+        if self.brick_pieces_group is not None:
+            self.brick_pieces_group.update()
         self.adjust_sprite_positions()
         self.check_if_mario_in_transition_state()
         self.check_for_mario_death()
@@ -481,50 +504,68 @@ class Level1(tools._State):
     def check_points_check(self):
         """Detect if checkpoint collision occurs, delete checkpoint,
         add enemies to self.enemy_group"""
+        if self.mario is None or self.check_point_group is None:
+            return
+            
         checkpoint = pg.sprite.spritecollideany(self.mario, self.check_point_group)
         if checkpoint:
             checkpoint.kill()
 
-            for i in range(1, 11):
-                if checkpoint.name == str(i):
-                    for index, enemy in enumerate(self.enemy_group_list[i - 1]):
-                        enemy.rect.x = self.viewport.right + (index * 60)
-                    self.enemy_group.add(self.enemy_group_list[i - 1])
+            if self.enemy_group_list is not None:
+                for i in range(1, 11):
+                    if checkpoint.name == str(i):
+                        for index, enemy in enumerate(self.enemy_group_list[i - 1]):
+                            if self.viewport is not None:
+                                enemy.rect.x = self.viewport.right + (index * 60)
+                        if self.enemy_group is not None:
+                            self.enemy_group.add(self.enemy_group_list[i - 1])
 
             if checkpoint.name == "11":
-                self.mario.state = c.FLAGPOLE
-                self.mario.invincible = False
-                self.mario.flag_pole_right = checkpoint.rect.right
-                if self.mario.rect.bottom < self.flag.rect.y:
-                    self.mario.rect.bottom = self.flag.rect.y
-                self.flag.state = c.SLIDE_DOWN
+                if self.mario is not None:
+                    self.mario.state = c.FLAGPOLE
+                    self.mario.invincible = False
+                    if checkpoint.rect is not None:
+                        self.mario.flag_pole_right = int(checkpoint.rect.right)
+                    if self.mario.rect is not None and self.flag is not None and self.flag.rect is not None:
+                        if self.mario.rect.bottom < self.flag.rect.y:
+                            self.mario.rect.bottom = self.flag.rect.y
+                if self.flag is not None:
+                    self.flag.state = c.SLIDE_DOWN
                 self.create_flag_points()
 
             elif checkpoint.name == "12":
                 self.state = c.IN_CASTLE
-                self.mario.kill()
-                self.mario.state = c.STAND
-                self.mario.in_castle = True
+                if self.mario is not None:
+                    self.mario.kill()
+                    self.mario.state = c.STAND
+                    self.mario.in_castle = True
                 self.overhead_info_display.state = c.FAST_COUNT_DOWN
 
             elif checkpoint.name == "secret_mushroom" and self.mario.y_vel < 0:
-                mushroom_box = coin_box.CoinBox(
-                    checkpoint.rect.x, checkpoint.rect.bottom - 40, "1up_mushroom", self.powerup_group
-                )
-                mushroom_box.start_bump(self.moving_score_list)
-                self.coin_box_group.add(mushroom_box)
+                if checkpoint.rect is not None:
+                    mushroom_box = coin_box.CoinBox(
+                        checkpoint.rect.x, checkpoint.rect.bottom - 40, "1up_mushroom", self.powerup_group
+                    )
+                    mushroom_box.start_bump(self.moving_score_list)
+                    if self.coin_box_group is not None:
+                        self.coin_box_group.add(mushroom_box)
 
-                self.mario.y_vel = 7
-                self.mario.rect.y = mushroom_box.rect.bottom
-                self.mario.state = c.FALL
+                    self.mario.y_vel = 7
+                    self.mario.rect.y = mushroom_box.rect.bottom
+                    self.mario.state = c.FALL
 
-            self.mario_and_enemy_group.add(self.enemy_group)
+            if self.mario_and_enemy_group is not None and self.enemy_group is not None:
+                self.mario_and_enemy_group.add(self.enemy_group)
 
     def create_flag_points(self):
         """Creates the points that appear when Mario touches the
         flag pole"""
         x = 8518
         y = c.GROUND_HEIGHT - 60
+        
+        if self.mario is None or self.mario.rect is None:
+            return
+            
         mario_bottom = self.mario.rect.bottom
 
         if mario_bottom > (c.GROUND_HEIGHT - 40 - 40):
