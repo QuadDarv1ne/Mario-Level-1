@@ -546,7 +546,7 @@ class Level1(tools._State):
                     mushroom_box = coin_box.CoinBox(
                         int(checkpoint.rect.x), int(checkpoint.rect.bottom - 40), "1up_mushroom", self.powerup_group
                     )
-                    temp_score_group = pg.sprite.Group()
+                    temp_score_group: pg.sprite.Group = pg.sprite.Group()
                     mushroom_box.start_bump(temp_score_group)
                     for s in temp_score_group:
                         self.moving_score_list.append(s)
@@ -696,7 +696,7 @@ class Level1(tools._State):
             elif powerup.name == c.LIFE_MUSHROOM:
                 if powerup.rect is not None and self.viewport is not None:
                     self.moving_score_list.append(
-                        score.Score(int(powerup.rect.right - self.viewport.x), int(powerup.rect.y), c.ONEUP)
+                        score.Score(int(powerup.rect.right - self.viewport.x), int(powerup.rect.y), int(c.ONEUP))
                     )
 
                 self.game_info[c.LIVES] += 1
@@ -723,25 +723,31 @@ class Level1(tools._State):
     def convert_mushrooms_to_fireflowers(self):
         """When Mario becomees big, converts all fireflower powerups to
         mushroom powerups"""
-        for brick in self.brick_group:
-            if brick.contents == c.MUSHROOM:
-                brick.contents = c.FIREFLOWER
-        for box in self.coin_box_group:
-            if box.contents == c.MUSHROOM:
-                box.contents = c.FIREFLOWER
+        if self.brick_group is not None:
+            for brick in self.brick_group:
+                if brick.contents == c.MUSHROOM:
+                    brick.contents = c.FIREFLOWER
+        if self.coin_box_group is not None:
+            for box in self.coin_box_group:
+                if box.contents == c.MUSHROOM:
+                    box.contents = c.FIREFLOWER
 
     def convert_fireflowers_to_mushrooms(self):
         """When Mario becomes small, converts all mushroom powerups to
         fireflower powerups"""
-        for brick in self.brick_group:
-            if brick.contents == c.FIREFLOWER:
-                brick.contents = c.MUSHROOM
-        for box in self.coin_box_group:
-            if box.contents == c.FIREFLOWER:
-                box.contents = c.MUSHROOM
+        if self.brick_group is not None:
+            for brick in self.brick_group:
+                if brick.contents == c.FIREFLOWER:
+                    brick.contents = c.MUSHROOM
+        if self.coin_box_group is not None:
+            for box in self.coin_box_group:
+                if box.contents == c.FIREFLOWER:
+                    box.contents = c.MUSHROOM
 
     def adjust_mario_for_x_collisions(self, collider):
         """Puts Mario flush next to the collider after moving on the x axis"""
+        if self.mario is None or self.mario.rect is None:
+            return
         if self.mario.rect.x < collider.rect.x:
             self.mario.rect.right = collider.rect.left
         else:
@@ -751,10 +757,12 @@ class Level1(tools._State):
 
     def adjust_mario_for_x_shell_collisions(self, shell):
         """Deals with Mario if he hits a shell moving on the x axis"""
+        if self.mario is None or self.mario.rect is None or self.viewport is None:
+            return
         if shell.state == c.JUMPED_ON:
             if self.mario.rect.x < shell.rect.x:
                 self.game_info[c.SCORE] += 400
-                self.moving_score_list.append(score.Score(shell.rect.centerx - self.viewport.x, shell.rect.y, 400))
+                self.moving_score_list.append(score.Score(int(shell.rect.centerx - self.viewport.x), int(shell.rect.y), 400))
                 self.mario.rect.right = shell.rect.left
                 shell.direction = c.RIGHT
                 shell.x_vel = 5
@@ -773,9 +781,10 @@ class Level1(tools._State):
                 self.mario.state = c.BIG_TO_SMALL
             elif self.mario.invincible:
                 self.game_info[c.SCORE] += 200
-                self.moving_score_list.append(score.Score(shell.rect.right - self.viewport.x, shell.rect.y, 200))
+                self.moving_score_list.append(score.Score(int(shell.rect.right - self.viewport.x), int(shell.rect.y), 200))
                 shell.kill()
-                self.sprites_about_to_die_group.add(shell)
+                if self.sprites_about_to_die_group is not None:
+                    self.sprites_about_to_die_group.add(shell)
                 shell.start_death_jump(c.RIGHT)
             else:
                 if not self.mario.hurt_invincible and not self.mario.invincible:
