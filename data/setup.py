@@ -115,6 +115,17 @@ def create_main_menu() -> Optional[Any]:
         return None
 
 
+def create_level_select() -> Optional[Any]:
+    """Create level select state."""
+    try:
+        from .states import level_select
+
+        return level_select.LevelSelect()
+    except Exception as e:
+        logger.error(f"Failed to create level select: {e}")
+        return None
+
+
 def create_load_screen() -> Optional[Any]:
     """Create load screen state."""
     try:

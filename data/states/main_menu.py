@@ -118,11 +118,26 @@ class Menu(tools._State):
         surface.blit(self.background, self.viewport, self.viewport)
         game_box = self.image_dict["GAME_NAME_BOX"]
         surface.blit(game_box[0], game_box[1])
+
+        # Draw menu options
+        self._draw_text(surface, "1 PLAYER GAME", 400, 365, c.WHITE, 30)
+        self._draw_text(surface, "2 PLAYER GAME", 400, 410, c.WHITE, 30)
+        self._draw_text(surface, "LEVEL SELECT", 400, 455, c.WHITE, 30)
+
         if self.mario and self.mario.image and self.mario.rect:
             surface.blit(self.mario.image, self.mario.rect)
         if self.cursor and self.cursor.image and hasattr(self.cursor, "rect") and self.cursor.rect:
             surface.blit(self.cursor.image, self.cursor.rect)
         self.overhead_info.draw(surface)
+
+    def _draw_text(
+        self, surface: pg.Surface, text: str, x: int, y: int, color: Tuple[int, int, int], size: int = 30
+    ) -> None:
+        """Draw text on surface"""
+        font = pg.font.Font(None, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect(center=(x, y))
+        surface.blit(text_surface, text_rect)
 
     def update_cursor(self, keys: Tuple[bool, ...]) -> None:
         """Update the position of the cursor"""
@@ -140,6 +155,20 @@ class Menu(tools._State):
             self.cursor.rect.y = 403  # type: ignore[union-attr]
             if keys[pg.K_UP]:
                 self.cursor.state = c.PLAYER1  # type: ignore[union-attr]
+            elif keys[pg.K_DOWN]:
+                self.cursor.state = c.LEVEL_SELECT  # type: ignore[attr-defined]
+            for input in input_list:
+                if keys[input]:
+                    self.reset_game_info()
+                    self.done = True
+        elif self.cursor.state == c.LEVEL_SELECT:  # type: ignore[attr-defined]
+            self.cursor.rect.y = 448  # type: ignore[attr-defined]
+            if keys[pg.K_UP]:
+                self.cursor.state = c.PLAYER2  # type: ignore[union-attr]
+            for input in input_list:
+                if keys[input]:
+                    self.next = c.LEVEL_SELECT
+                    self.done = True
 
     def reset_game_info(self) -> None:
         """Resets the game info in case of a Game Over and restart"""
