@@ -44,6 +44,8 @@ class LevelSelect(tools._State):
         self.mario: Optional[mario.Mario] = None
         self.cursor: Optional[pg.sprite.Sprite] = None
         self.selected_level: int = 0
+        self.input_timer = 0
+        self.input_delay = 200  # milliseconds between inputs
         self.level_names: List[str] = [
             "LEVEL 1-1",
             "LEVEL 1-2", 
@@ -175,12 +177,18 @@ class LevelSelect(tools._State):
 
     def update_cursor(self, keys: Tuple[bool, ...]) -> None:
         """Update the position of the cursor"""
-        if keys[pg.K_DOWN]:
+        # Check if enough time has passed since last input
+        current_time = pg.time.get_ticks()
+        can_input = current_time - self.input_timer > self.input_delay
+        
+        if can_input and keys[pg.K_DOWN]:
             self.selected_level = (self.selected_level + 1) % len(self.level_names)
             self._update_cursor_position()
-        elif keys[pg.K_UP]:
+            self.input_timer = current_time
+        elif can_input and keys[pg.K_UP]:
             self.selected_level = (self.selected_level - 1) % len(self.level_names)
             self._update_cursor_position()
+            self.input_timer = current_time
         elif keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
             self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
             self.next = c.LOAD_SCREEN

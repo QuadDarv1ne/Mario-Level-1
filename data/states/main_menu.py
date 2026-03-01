@@ -46,6 +46,8 @@ class Menu(tools._State):
         self.selected_option = 0
         self.animation_timer = 0
         self.title_y_offset = 0
+        self.input_timer = 0
+        self.input_delay = 200  # milliseconds between inputs
         self.setup_background()
         self.setup_mario()
         self.setup_cursor()
@@ -192,16 +194,22 @@ class Menu(tools._State):
 
     def update_cursor(self, keys: Tuple[bool, ...]) -> None:
         """Update the position of the cursor"""
+        # Check if enough time has passed since last input
+        current_time = pg.time.get_ticks()
+        can_input = current_time - self.input_timer > self.input_delay
+        
         # Handle navigation
-        if keys[pg.K_DOWN]:
+        if can_input and keys[pg.K_DOWN]:
             self.selected_option = (self.selected_option + 1) % len(self.menu_options)
             if self.cursor and self.cursor.rect:
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
+            self.input_timer = current_time
                 
-        elif keys[pg.K_UP]:
+        elif can_input and keys[pg.K_UP]:
             self.selected_option = (self.selected_option - 1) % len(self.menu_options)
             if self.cursor and self.cursor.rect:
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
+            self.input_timer = current_time
 
         # Handle selection
         if keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
