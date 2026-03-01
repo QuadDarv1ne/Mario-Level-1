@@ -799,12 +799,12 @@ class DebugModeManager:
         # Speed hack
         if self.speed_hack:
             if hasattr(mario, "max_speed"):
-                mario.max_speed = mario.max_speed * 2  # type: ignore[attr-defined]
+                mario.max_speed = mario.max_speed * 2
 
         # Super jump
         if self.super_jump:
             if hasattr(mario, "jump_vel"):
-                mario.jump_vel = mario.jump_vel * 2  # type: ignore[attr-defined]
+                mario.jump_vel = mario.jump_vel * 2
 
     def reset_debug_mode(self, mario: Optional[Any]) -> None:
         """
@@ -822,11 +822,11 @@ class DebugModeManager:
 
         # Reset speed
         if hasattr(mario, "max_speed"):
-            mario.max_speed = c.MAX_RUN_SPEED  # type: ignore[attr-defined]
+            mario.max_speed = c.MAX_RUN_SPEED
 
         # Reset jump
         if hasattr(mario, "jump_vel"):
-            mario.jump_vel = c.JUMP_VEL  # type: ignore[attr-defined]
+            mario.jump_vel = c.JUMP_VEL
 
     def get_active_modes_display(self) -> str:
         """

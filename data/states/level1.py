@@ -542,9 +542,9 @@ class Level1(tools._State):
                 self.overhead_info_display.state = c.FAST_COUNT_DOWN
 
             elif checkpoint.name == "secret_mushroom" and self.mario.y_vel < 0:
-                if checkpoint.rect is not None:
+                if checkpoint.rect is not None and self.powerup_group is not None:
                     mushroom_box = coin_box.CoinBox(
-                        checkpoint.rect.x, checkpoint.rect.bottom - 40, "1up_mushroom", self.powerup_group
+                        int(checkpoint.rect.x), int(checkpoint.rect.bottom - 40), "1up_mushroom", self.powerup_group
                     )
                     mushroom_box.start_bump(self.moving_score_list)
                     if self.coin_box_group is not None:
@@ -594,6 +594,8 @@ class Level1(tools._State):
     def adjust_mario_position(self):
         """Adjusts Mario's position based on his x, y velocities and
         potential collisions"""
+        if self.mario is None or self.mario.rect is None or self.viewport is None:
+            return
         self.last_x_position = self.mario.rect.right
         self.mario.rect.x += round(self.mario.x_vel)
         self.check_mario_x_collisions()
@@ -607,27 +609,36 @@ class Level1(tools._State):
 
     def check_mario_x_collisions(self):
         """Check for collisions after Mario is moved on the x axis"""
+        if self.mario is None:
+            return
         # Check static colliders first (ground, steps, pipes)
-        collider = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
-        if collider:
-            self.adjust_mario_for_x_collisions(collider)
-            return
-        
+        if self.ground_step_pipe_group is not None:
+            collider = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
+            if collider:
+                self.adjust_mario_for_x_collisions(collider)
+                return
+
         # Check interactive objects
-        coin_box = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
-        if coin_box:
-            self.adjust_mario_for_x_collisions(coin_box)
-            return
-        
-        brick = pg.sprite.spritecollideany(self.mario, self.brick_group)
-        if brick:
-            self.adjust_mario_for_x_collisions(brick)
-            return
-        
+        if self.coin_box_group is not None:
+            coin_box = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
+            if coin_box:
+                self.adjust_mario_for_x_collisions(coin_box)
+                return
+
+        if self.brick_group is not None:
+            brick = pg.sprite.spritecollideany(self.mario, self.brick_group)
+            if brick:
+                self.adjust_mario_for_x_collisions(brick)
+                return
+
         # Check enemies and powerups
-        enemy = pg.sprite.spritecollideany(self.mario, self.enemy_group)
-        shell = pg.sprite.spritecollideany(self.mario, self.shell_group)
-        powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
+        enemy = shell = powerup = None
+        if self.enemy_group is not None:
+            enemy = pg.sprite.spritecollideany(self.mario, self.enemy_group)
+        if self.shell_group is not None:
+            shell = pg.sprite.spritecollideany(self.mario, self.shell_group)
+        if self.powerup_group is not None:
+            powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
 
         if enemy:
             if self.mario.invincible:
