@@ -38,10 +38,10 @@ class Brick(pg.sprite.Sprite):
         self.rect.y = y
         self.mask = pg.mask.from_surface(self.image)
         self.bumped_up = False
-        self.rest_height = y
+        self.rest_height: float = y
         self.state = c.RESTING
-        self.y_vel = 0
-        self.gravity = 1.2
+        self.y_vel: float = 0
+        self.gravity: float = 1.2
         self.name = name
         self.contents = contents
         self.setup_contents()
@@ -140,12 +140,15 @@ class Brick(pg.sprite.Sprite):
 
         if self.contents == "star" and self.powerup_in_box:
             if self.rect is not None and self.group is not None:
-                self.group.add(powerups.Star(self.rect.centerx, self.rest_height))
+                self.group.add(powerups.Star(int(self.rect.centerx), int(self.rest_height)))
             self.powerup_in_box = False
 
 
 class BrickPiece(pg.sprite.Sprite):
     """Pieces that appear when bricks are broken"""
+
+    image: pg.Surface
+    rect: pg.Rect
 
     def __init__(self, x: int, y: int, xvel: float, yvel: float) -> None:
         super(BrickPiece, self).__init__()
