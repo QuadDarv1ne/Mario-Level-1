@@ -163,9 +163,9 @@ class LevelSelect(tools._State):
         if self.background:
             surface.blit(self.background, (0, 0))
         
-        # Draw lighter semi-transparent overlay
+        # Draw very light semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        overlay.set_alpha(90)  # Reduced from 120
+        overlay.set_alpha(60)  # Very light
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
 
