@@ -414,7 +414,10 @@ class Level1(tools._State):
             for sprite in self.step_group:
                 self.ground_step_pipe_group.add(sprite)
 
-        self.mario_and_enemy_group = pg.sprite.Group(self.enemy_group)
+        self.mario_and_enemy_group = pg.sprite.Group()
+        if self.enemy_group is not None:
+            for sprite in self.enemy_group:
+                self.mario_and_enemy_group.add(sprite)
         if self.mario is not None:
             self.mario_and_enemy_group.add(self.mario)
 
@@ -570,7 +573,8 @@ class Level1(tools._State):
                     self.mario.state = c.FALL
 
             if self.mario_and_enemy_group is not None and self.enemy_group is not None:
-                self.mario_and_enemy_group.add(self.enemy_group)
+                for sprite in self.enemy_group:
+                    self.mario_and_enemy_group.add(sprite)
 
     def create_flag_points(self):
         """Creates the points that appear when Mario touches the
@@ -1002,11 +1006,14 @@ class Level1(tools._State):
         self.mario.rect.y += 1
         test_collide_group = pg.sprite.Group()
         if self.ground_step_pipe_group is not None:
-            test_collide_group.add(self.ground_step_pipe_group)
+            for sprite in self.ground_step_pipe_group:
+                test_collide_group.add(sprite)
         if self.brick_group is not None:
-            test_collide_group.add(self.brick_group)
+            for sprite in self.brick_group:
+                test_collide_group.add(sprite)
         if self.coin_box_group is not None:
-            test_collide_group.add(self.coin_box_group)
+            for sprite in self.coin_box_group:
+                test_collide_group.add(sprite)
 
         if pg.sprite.spritecollideany(self.mario, test_collide_group) is None:
             if (
@@ -1109,7 +1116,7 @@ class Level1(tools._State):
                 enemy_collider.x_vel = -2
 
         self.enemy_group.add(enemy)
-        self.mario_and_enemy_group.add(self.enemy_group)
+        self.mario_and_enemy_group.add(enemy)
 
     def check_enemy_y_collisions(self, enemy):
         """Enemy collisions on the y axis"""
