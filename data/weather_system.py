@@ -95,9 +95,9 @@ class Drop:
 
     x: float
     y: float
-    speed: int
+    speed: float
     length: float
-    width: int
+    width: float
 
 
 @dataclass

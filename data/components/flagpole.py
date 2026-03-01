@@ -13,6 +13,8 @@ from .. import setup
 class Flag(pg.sprite.Sprite):
     """Flag on top of the flag pole at the end of the level"""
 
+    rect: pg.Rect
+
     def __init__(self, x: int, y: int) -> None:
         super(Flag, self).__init__()
         self.sprite_sheet = setup.GFX["item_objects"]
@@ -66,6 +68,8 @@ class Flag(pg.sprite.Sprite):
 
 class Pole(pg.sprite.Sprite):
     """Pole that the flag is on top of"""
+
+    rect: pg.Rect
 
     def __init__(self, x: int, y: int) -> None:
         super(Pole, self).__init__()

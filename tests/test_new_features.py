@@ -18,6 +18,7 @@ from data.enhanced_particles_v2 import EnhancedParticleSystem, EnhancedParticle,
 from data.hint_system import HintManager, Hint, HintCategory, HintPriority
 from data.components.bosses import Boss, BossState, BossStats, Bowser, MegaGoomba, create_boss
 from data.components.advanced_enemies import PiranhaPlant, BulletBill, HammerBro, BuzzyBeetle, create_enemy
+from data import constants as c
 
 
 class TestComboManager:
@@ -403,7 +404,7 @@ class TestAdvancedEnemies:
         # Set time beyond lifetime
         bullet.current_time = bullet.LIFETIME + 1
 
-        bullet.update({})
+        bullet.update({c.CURRENT_TIME: bullet.current_time})
 
         # Should be killed
         assert not bullet.alive() if hasattr(bullet, "alive") else True

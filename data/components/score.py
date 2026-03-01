@@ -13,6 +13,9 @@ from .. import setup
 class Digit(pg.sprite.Sprite):
     """Individual digit for score"""
 
+    image: pg.Surface
+    rect: pg.Rect
+
     def __init__(self, image: pg.Surface) -> None:
         super(Digit, self).__init__()
         self.image = image

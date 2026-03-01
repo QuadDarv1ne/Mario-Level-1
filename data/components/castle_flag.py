@@ -13,6 +13,8 @@ from .. import setup
 class Flag(pg.sprite.Sprite):
     """Flag on the castle"""
 
+    rect: pg.Rect
+
     def __init__(self, x: int, y: int) -> None:
         """Initialize object"""
         super(Flag, self).__init__()

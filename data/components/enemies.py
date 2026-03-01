@@ -19,6 +19,8 @@ class Enemy(pg.sprite.Sprite):
         'current_time', 'mario', 'image', 'rect'
     ]
 
+    rect: pg.Rect
+
     def __init__(self) -> None:
         pg.sprite.Sprite.__init__(self)
         self.sprite_sheet: pg.Surface = setup.GFX["smb_enemies_sheet"]
@@ -86,8 +88,6 @@ class Enemy(pg.sprite.Sprite):
             self.walking()
         elif self.state == c.FALL:
             self.falling()
-        elif self.state == c.JUMPED_ON:
-            self.jumped_on()
         elif self.state == c.SHELL_SLIDE:
             self.shell_sliding()
         elif self.state == c.DEATH_JUMP:
@@ -109,10 +109,12 @@ class Enemy(pg.sprite.Sprite):
             self.y_vel += self.gravity
 
     def jumped_on(self) -> None:
-        """When the enemy is stomped on - kills it"""
-        self.state = c.JUMPED_ON
+        """When the enemy is stomped on - kills it after delay"""
         self.frame_index = 0
-        self.death_timer = self.current_time
+        if (self.current_time - self.death_timer) > 500:
+            self.kill()
+        else:
+            self.death_timer = self.current_time
 
     def death_jumping(self) -> None:
         """Death animation"""
@@ -141,7 +143,7 @@ class Enemy(pg.sprite.Sprite):
 
     def update(self, game_info: dict, *args: Any) -> None:
         """Updates enemy behavior"""
-        self.current_time = game_info.get(c.CURRENT_TIME, getattr(self, "current_time", 0))
+        self.current_time = game_info[c.CURRENT_TIME]
         self.handle_state()
         self.animation()
 
@@ -160,9 +162,12 @@ class Goomba(Enemy):
         self.frames.append(pg.transform.flip(self.frames[1], False, True))
 
     def jumped_on(self) -> None:
-        """When Mario squishes him"""
+        """When Mario squishes him - dies after 500ms"""
         self.frame_index = 2
-
+        
+        if self.death_timer == 0:
+            self.death_timer = self.current_time
+        
         if (self.current_time - self.death_timer) > 500:
             self.kill()
 
