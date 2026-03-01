@@ -111,8 +111,8 @@ class Level4(tools._State):
         self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
-        width = self.back_rect.width  # type: ignore[union-attr]
-        height = self.back_rect.height  # type: ignore[union-attr]
+        width = self.back_rect.width
+        height = self.back_rect.height
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
@@ -137,7 +137,7 @@ class Level4(tools._State):
 
     def setup_bricks(self) -> None:
         """Creates breakable bricks"""
-        self.brick_pieces_group: Optional[pg.sprite.Group] = None  # type: ignore[assignment]
+        self.brick_pieces_group: Optional[pg.sprite.Group] = None
         for brick_info in getattr(self.level_data, "bricks", []):
             brick = bricks.Brick(brick_info["x"], brick_info["y"], contents=brick_info.get("contents"))
             self.brick_group.add(brick)  # type: ignore[union-attr]

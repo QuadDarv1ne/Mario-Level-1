@@ -112,8 +112,8 @@ class Level5(tools._State):
         self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
-        width = self.back_rect.width  # type: ignore[union-attr]
-        height = self.back_rect.height  # type: ignore[union-attr]
+        width = self.back_rect.width
+        height = self.back_rect.height
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
@@ -289,7 +289,7 @@ class Level5(tools._State):
             self.game_info[c.MARIO_DEAD] = True
 
         if self.mario and self.flag_pole_group:
-            flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)  # type: ignore[arg-type]
+            flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)
             if flag_pole and hasattr(flag_pole, "state") and flag_pole.state == c.TOP_OF_POLE:
                 self.state = c.FLAG_AND_FIREWORKS
                 if self.mario.rect:
@@ -301,8 +301,8 @@ class Level5(tools._State):
         if not self.mario or not self.viewport:
             return
 
-        level_rect = self.level_rect  # type: ignore[assignment]
-        if self.mario.rect.right > self.viewport.centerx:  # type: ignore[union-attr]
+        level_rect = self.level_rect
+        if self.mario.rect.right > self.viewport.centerx:
             self.viewport.centerx = self.mario.rect.centerx
             self.viewport.right = min(self.viewport.right, level_rect.right)
 
@@ -335,13 +335,13 @@ class Level5(tools._State):
                 group.draw(self.level)
 
         if self.mario:
-            self.mario.draw(self.level)  # type: ignore[attr-defined]
+            self.mario.draw(self.level)
         if self.overhead_info_display:
             self.overhead_info_display.draw(self.level)
 
-        surface.blit(self.level, (0, 0), self.viewport)  # type: ignore[arg-type]
+        surface.blit(self.level, (0, 0), self.viewport)
 
     def get_event(self, event: pg.event.Event) -> None:
         """Handle events"""
         if self.mario:
-            self.mario.get_event(event)  # type: ignore[attr-defined]
+            self.mario.get_event(event)
