@@ -723,6 +723,8 @@ class Mario(pg.sprite.Sprite):
         self.big = True
         self.right_frames = self.right_big_normal_frames
         self.left_frames = self.left_big_normal_frames
+        if self.rect is None:
+            return
         bottom = self.rect.bottom
         left = self.rect.x
         image = self.right_frames[0]
@@ -860,7 +862,7 @@ class Mario(pg.sprite.Sprite):
     def adjust_rect(self) -> None:
         """Makes sure new Rect has the same bottom and left
         location as previous Rect"""
-        if self.rect is None:
+        if self.rect is None or self.image is None:
             return
         x = self.rect.x
         bottom = self.rect.bottom
@@ -918,7 +920,7 @@ class Mario(pg.sprite.Sprite):
             self.image = self.left_frames[10]
         else:
             self.in_transition_state = False
-            if self.rect.bottom < 485:
+            if self.rect is not None and self.rect.bottom < 485:
                 self.state = c.END_OF_LEVEL_FALL
             else:
                 self.state = c.WALKING_TO_CASTLE
@@ -926,6 +928,8 @@ class Mario(pg.sprite.Sprite):
     def set_state_to_bottom_of_pole(self) -> None:
         """Sets Mario to the BOTTOM_OF_POLE state"""
         self.image = self.left_frames[9]
+        if self.rect is None:
+            return
         right = self.rect.right
         self.rect.x = right
         if self.big:
@@ -1016,21 +1020,26 @@ class Mario(pg.sprite.Sprite):
                 self.hurt_invisible_timer2 = 0
                 for frames in self.all_images:
                     for image in frames:
-                        image.set_alpha(255)
+                        if image is not None:
+                            image.set_alpha(255)
 
     def hurt_invincible_check(self) -> None:
         """Makes Mario invincible on a fixed interval"""
         if self.hurt_invisible_timer == 0:
             self.hurt_invisible_timer = self.current_time
         elif (self.current_time - self.hurt_invisible_timer) < 35:
-            self.image.set_alpha(0)
+            if self.image is not None:
+                self.image.set_alpha(0)
         elif (self.current_time - self.hurt_invisible_timer) < 70:
-            self.image.set_alpha(255)
+            if self.image is not None:
+                self.image.set_alpha(255)
             self.hurt_invisible_timer = self.current_time
 
     def check_if_crouching(self) -> None:
         """Checks if mario is crouching"""
         if self.crouching and self.big:
+            if self.rect is None:
+                return
             bottom = self.rect.bottom
             left = self.rect.x
             if self.facing_right:

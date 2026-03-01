@@ -151,8 +151,8 @@ class OverheadInfo:
 
     def create_load_screen_labels(self):
         """Creates labels for the center info of a load screen"""
-        world_label = []
-        number_label = []
+        world_label: List[Character] = []
+        number_label: List[Character] = []
 
         self.create_label(world_label, "WORLD", 280, 200)
         self.create_label(number_label, "1-1", 430, 200)
@@ -202,8 +202,8 @@ class OverheadInfo:
 
     def create_game_over_label(self):
         """Create the label for the GAME OVER screen"""
-        game_label = []
-        over_label = []
+        game_label: List[Character] = []
+        over_label: List[Character] = []
 
         self.create_label(game_label, "GAME", 280, 300)
         self.create_label(over_label, "OVER", 400, 300)
@@ -212,7 +212,7 @@ class OverheadInfo:
 
     def create_time_out_label(self):
         """Create the label for the time out screen"""
-        time_out_label = []
+        time_out_label: List[Character] = []
 
         self.create_label(time_out_label, "TIME OUT", 290, 310)
         self.time_out_label = [time_out_label]

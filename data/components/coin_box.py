@@ -126,7 +126,7 @@ class CoinBox(pg.sprite.Sprite):
         self.state = c.BUMPED
 
         if self.group is not None and self.contents == "coin":
-            self.group.add(coin.Coin(self.rect.centerx, self.rect.y, score_group))
+            self.group.add(coin.Coin(self.rect.centerx, self.rect.y, list(score_group)))
             setup.SFX["coin"].play()
         else:
             setup.SFX["powerup_appears"].play()
