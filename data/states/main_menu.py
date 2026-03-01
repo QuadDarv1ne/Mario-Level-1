@@ -84,7 +84,9 @@ class Menu(tools._State):
             self.viewport = screen_rect
 
         self.image_dict = {}
-        self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), setup.GFX["title_screen"])
+        title_screen = setup.GFX.get("title_screen")
+        if title_screen:
+            self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), title_screen)
 
     def get_image(
         self, x: int, y: int, width: int, height: int, dest: Tuple[int, int], sprite_sheet: pg.Surface
@@ -151,20 +153,22 @@ class Menu(tools._State):
                 if keys[input]:
                     self.reset_game_info()
                     self.done = True
-        elif self.cursor.state == c.PLAYER2:  # type: ignore[union-attr]
-            self.cursor.rect.y = 403  # type: ignore[union-attr]
+        elif self.cursor and self.cursor.state == c.PLAYER2:
+            if self.cursor.rect:
+                self.cursor.rect.y = 403
             if keys[pg.K_UP]:
-                self.cursor.state = c.PLAYER1  # type: ignore[union-attr]
+                self.cursor.state = c.PLAYER1
             elif keys[pg.K_DOWN]:
-                self.cursor.state = c.LEVEL_SELECT  # type: ignore[attr-defined]
+                self.cursor.state = c.LEVEL_SELECT
             for input in input_list:
                 if keys[input]:
                     self.reset_game_info()
                     self.done = True
-        elif self.cursor.state == c.LEVEL_SELECT:  # type: ignore[attr-defined]
-            self.cursor.rect.y = 448  # type: ignore[attr-defined]
+        elif self.cursor and self.cursor.state == c.LEVEL_SELECT:
+            if self.cursor.rect:
+                self.cursor.rect.y = 448
             if keys[pg.K_UP]:
-                self.cursor.state = c.PLAYER2  # type: ignore[union-attr]
+                self.cursor.state = c.PLAYER2
             for input in input_list:
                 if keys[input]:
                     self.next = c.LEVEL_SELECT

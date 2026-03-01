@@ -46,10 +46,10 @@ class LevelSelect(tools._State):
         self.selected_level: int = 0
         self.level_names: List[str] = [
             "LEVEL 1-1",
-            "LEVEL 2-1", 
-            "LEVEL 3-1",
-            "LEVEL 4-1",
-            "LEVEL 5-1",
+            "LEVEL 1-2", 
+            "LEVEL 1-3",
+            "LEVEL 1-4",
+            "LEVEL 2-1",
         ]
         self.level_constants: List[str] = [
             c.LEVEL1,
@@ -75,14 +75,14 @@ class LevelSelect(tools._State):
 
     def _update_cursor_position(self) -> None:
         """Updates cursor position based on selected level"""
-        if self.cursor:
+        if self.cursor and self.cursor.rect:
             self.cursor.rect.x = 220
             self.cursor.rect.y = 280 + (self.selected_level * 40)
 
     def setup_mario(self) -> None:
         """Places Mario at the side"""
         self.mario = mario.Mario()
-        if self.mario:
+        if self.mario and self.mario.rect:
             self.mario.rect.x = 500
             self.mario.rect.bottom = c.GROUND_HEIGHT - 50
 

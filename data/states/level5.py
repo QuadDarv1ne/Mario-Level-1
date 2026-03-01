@@ -30,7 +30,7 @@ class Level5(tools._State):
 
     def __init__(self) -> None:
         tools._State.__init__(self)
-        self.level_file = "data/levels/level_5_1.json"
+        self.level_file = "data/levels/level_2_1.json"
 
     def startup(self, current_time: float, persist: Dict[str, Any]) -> None:
         """Called when the State object is created"""
