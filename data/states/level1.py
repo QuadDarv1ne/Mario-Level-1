@@ -521,7 +521,7 @@ class Level1(tools._State):
         add enemies to self.enemy_group"""
         if self.mario is None or self.check_point_group is None:
             return
-            
+
         checkpoint = pg.sprite.spritecollideany(self.mario, self.check_point_group)
         if checkpoint:
             checkpoint.kill()
@@ -532,8 +532,11 @@ class Level1(tools._State):
                         for index, enemy in enumerate(self.enemy_group_list[i - 1]):
                             if self.viewport is not None:
                                 enemy.rect.x = self.viewport.right + (index * 60)
-                        if self.enemy_group is not None:
-                            self.enemy_group.add(self.enemy_group_list[i - 1])
+                            if self.enemy_group is not None:
+                                self.enemy_group.add(enemy)
+                        if self.mario_and_enemy_group is not None:
+                            for enemy in self.enemy_group_list[i - 1]:
+                                self.mario_and_enemy_group.add(enemy)
 
             if checkpoint.name == "11":
                 if self.mario is not None:
@@ -1254,9 +1257,16 @@ class Level1(tools._State):
 
     def check_mushroom_x_collisions(self, mushroom):
         """Mushroom collisions along the x axis"""
-        collider = pg.sprite.spritecollideany(mushroom, self.ground_step_pipe_group)
-        brick = pg.sprite.spritecollideany(mushroom, self.brick_group)
-        coin_box = pg.sprite.spritecollideany(mushroom, self.coin_box_group)
+        collider = None
+        brick = None
+        coin_box = None
+        
+        if self.ground_step_pipe_group is not None:
+            collider = pg.sprite.spritecollideany(mushroom, self.ground_step_pipe_group)
+        if self.brick_group is not None:
+            brick = pg.sprite.spritecollideany(mushroom, self.brick_group)
+        if self.coin_box_group is not None:
+            coin_box = pg.sprite.spritecollideany(mushroom, self.coin_box_group)
 
         if collider:
             self.adjust_mushroom_for_collision_x(mushroom, collider)
@@ -1269,9 +1279,16 @@ class Level1(tools._State):
 
     def check_mushroom_y_collisions(self, mushroom):
         """Mushroom collisions along the y axis"""
-        collider = pg.sprite.spritecollideany(mushroom, self.ground_step_pipe_group)
-        brick = pg.sprite.spritecollideany(mushroom, self.brick_group)
-        coin_box = pg.sprite.spritecollideany(mushroom, self.coin_box_group)
+        collider = None
+        brick = None
+        coin_box = None
+        
+        if self.ground_step_pipe_group is not None:
+            collider = pg.sprite.spritecollideany(mushroom, self.ground_step_pipe_group)
+        if self.brick_group is not None:
+            brick = pg.sprite.spritecollideany(mushroom, self.brick_group)
+        if self.coin_box_group is not None:
+            coin_box = pg.sprite.spritecollideany(mushroom, self.coin_box_group)
 
         if collider:
             self.adjust_mushroom_for_collision_y(mushroom, collider)
@@ -1280,9 +1297,12 @@ class Level1(tools._State):
         elif coin_box:
             self.adjust_mushroom_for_collision_y(mushroom, coin_box)
         else:
-            self.check_if_falling(mushroom, self.ground_step_pipe_group)
-            self.check_if_falling(mushroom, self.brick_group)
-            self.check_if_falling(mushroom, self.coin_box_group)
+            if self.ground_step_pipe_group is not None:
+                self.check_if_falling(mushroom, self.ground_step_pipe_group)
+            if self.brick_group is not None:
+                self.check_if_falling(mushroom, self.brick_group)
+            if self.coin_box_group is not None:
+                self.check_if_falling(mushroom, self.coin_box_group)
 
     def adjust_mushroom_for_collision_x(self, item, collider):
         """Changes mushroom direction if collision along x axis"""
@@ -1517,7 +1537,7 @@ class Level1(tools._State):
             self.flag_timer = self.current_time
         elif (self.current_time - self.flag_timer) > 2000:
             self.set_game_info_values()
-            self.next = c.GAME_OVER
+            self.next = c.LEVEL2
             self.sound_manager.stop_music()
             self.done = True
 
