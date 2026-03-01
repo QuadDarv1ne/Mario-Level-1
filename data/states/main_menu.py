@@ -51,16 +51,16 @@ class Menu(tools._State):
         self.cursor = pg.sprite.Sprite()
         dest = (220, 358)
         image, rect = self.get_image(24, 160, 8, 8, dest, setup.GFX["item_objects"])
-        if image is not None and rect is not None:
-            self.cursor.image = image
-            self.cursor.rect = rect
+        self.cursor.image = image
+        self.cursor.rect = rect
         self.cursor.state = c.PLAYER1  # type: ignore[attr-defined]
 
     def setup_mario(self) -> None:
         """Places Mario at the beginning of the level"""
         self.mario = mario.Mario()
-        self.mario.rect.x = 110
-        self.mario.rect.bottom = c.GROUND_HEIGHT
+        if self.mario.rect:
+            self.mario.rect.x = 110
+            self.mario.rect.bottom = c.GROUND_HEIGHT
 
     def setup_background(self) -> None:
         """Setup the background image to blit"""
@@ -108,10 +108,12 @@ class Menu(tools._State):
         self.overhead_info.update(self.game_info)
 
         surface.blit(self.background, self.viewport, self.viewport)
-        surface.blit(self.image_dict["GAME_NAME_BOX"][0], self.image_dict["GAME_NAME_BOX"][1])
-        if self.mario.image:
+        game_box = self.image_dict["GAME_NAME_BOX"]
+        if game_box:
+            surface.blit(game_box[0], game_box[1])
+        if self.mario.image and self.mario.rect:
             surface.blit(self.mario.image, self.mario.rect)
-        if self.cursor.image:
+        if self.cursor.image and self.cursor.rect:
             surface.blit(self.cursor.image, self.cursor.rect)
         self.overhead_info.draw(surface)
 
