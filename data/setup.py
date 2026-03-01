@@ -224,6 +224,39 @@ def create_level5() -> Optional[Any]:
         return None
 
 
+def create_level6() -> Optional[Any]:
+    """Create level 6 state."""
+    try:
+        from .states import level6
+
+        return level6.Level6()
+    except Exception as e:
+        logger.error(f"Failed to create level 6: {e}")
+        return None
+
+
+def create_level7() -> Optional[Any]:
+    """Create level 7 state."""
+    try:
+        from .states import level7
+
+        return level7.Level7()
+    except Exception as e:
+        logger.error(f"Failed to create level 7: {e}")
+        return None
+
+
+def create_level8() -> Optional[Any]:
+    """Create level 8 state."""
+    try:
+        from .states import level8
+
+        return level8.Level8()
+    except Exception as e:
+        logger.error(f"Failed to create level 8: {e}")
+        return None
+
+
 # Initialize on module import for backward compatibility
 try:
     initialize()

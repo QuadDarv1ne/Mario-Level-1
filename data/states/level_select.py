@@ -52,6 +52,9 @@ class LevelSelect(tools._State):
             "LEVEL 1-3",
             "LEVEL 1-4",
             "LEVEL 2-1",
+            "LEVEL 2-2",
+            "LEVEL 2-3",
+            "LEVEL 2-4",
         ]
         self.level_constants: List[str] = [
             c.LEVEL1,
@@ -59,6 +62,9 @@ class LevelSelect(tools._State):
             c.LEVEL3,
             c.LEVEL4,
             c.LEVEL5,
+            c.LEVEL6,
+            c.LEVEL7,
+            c.LEVEL8,
         ]
         self.setup_background()
         self.setup_mario()

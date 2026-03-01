@@ -115,6 +115,9 @@ LEVEL2: str = "level2"
 LEVEL3: str = "level3"
 LEVEL4: str = "level4"
 LEVEL5: str = "level5"
+LEVEL6: str = "level6"
+LEVEL7: str = "level7"
+LEVEL8: str = "level8"
 
 # =============================================================================
 # SOUND STATES
