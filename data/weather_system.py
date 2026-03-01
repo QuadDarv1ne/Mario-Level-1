@@ -95,9 +95,9 @@ class Drop:
 
     x: float
     y: float
-    speed: int
+    speed: float
     length: float
-    width: int
+    width: float
 
 
 @dataclass
@@ -234,12 +234,12 @@ class WeatherEffect:
             # Reset when off screen
             if drop.y > self.screen_height:
                 drop.y = -drop.length
-                drop.x = random.randint(0, self.screen_width)
+                drop.x = float(random.randint(0, self.screen_width))
 
             if drop.x > self.screen_width:
-                drop.x = 0
+                drop.x = 0.0
             elif drop.x < 0:
-                drop.x = self.screen_width
+                drop.x = float(self.screen_width)
 
     def _update_snow(self, dt: float) -> None:
         """Update snowflakes."""
@@ -313,7 +313,7 @@ class WeatherEffect:
         count = int(self.config.rain_drop_count * self.intensity)
 
         for drop in self.rain_drops[:count]:
-            pg.draw.line(surface, self.config.rain_color, (drop.x, drop.y), (drop.x, drop.y + drop.length), drop.width)
+            pg.draw.line(surface, self.config.rain_color, (int(drop.x), int(drop.y)), (int(drop.x), int(drop.y) + int(drop.length)), int(drop.width))
 
     def _draw_snow(self, surface: pg.Surface) -> None:
         """Draw snowflakes."""
