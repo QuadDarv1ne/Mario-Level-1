@@ -553,8 +553,8 @@ class Level1(tools._State):
                     if self.coin_box_group is not None:
                         self.coin_box_group.add(mushroom_box)
 
-                    self.mario.y_vel = 7
-                    if mushroom_box.rect is not None:
+                    if self.mario.rect is not None:
+                        self.mario.y_vel = 7
                         self.mario.rect.y = mushroom_box.rect.bottom
                     self.mario.state = c.FALL
 
@@ -793,12 +793,27 @@ class Level1(tools._State):
 
     def check_mario_y_collisions(self):
         """Checks for collisions when Mario moves along the y-axis"""
-        ground_step_or_pipe = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
-        enemy = pg.sprite.spritecollideany(self.mario, self.enemy_group)
-        shell = pg.sprite.spritecollideany(self.mario, self.shell_group)
-        brick = pg.sprite.spritecollideany(self.mario, self.brick_group)
-        coin_box = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
-        powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
+        if self.mario is None:
+            return
+        ground_step_or_pipe = None
+        enemy = None
+        shell = None
+        brick = None
+        coin_box = None
+        powerup = None
+        
+        if self.ground_step_pipe_group is not None:
+            ground_step_or_pipe = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
+        if self.enemy_group is not None:
+            enemy = pg.sprite.spritecollideany(self.mario, self.enemy_group)
+        if self.shell_group is not None:
+            shell = pg.sprite.spritecollideany(self.mario, self.shell_group)
+        if self.brick_group is not None:
+            brick = pg.sprite.spritecollideany(self.mario, self.brick_group)
+        if self.coin_box_group is not None:
+            coin_box = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
+        if self.powerup_group is not None:
+            powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
 
         brick, coin_box = self.prevent_collision_conflict(brick, coin_box)
 
@@ -815,7 +830,8 @@ class Level1(tools._State):
             if self.mario.invincible:
                 setup.SFX["kick"].play()
                 enemy.kill()
-                self.sprites_about_to_die_group.add(enemy)
+                if self.sprites_about_to_die_group is not None:
+                    self.sprites_about_to_die_group.add(enemy)
                 enemy.start_death_jump(c.RIGHT)
             else:
                 self.adjust_mario_for_y_enemy_collisions(enemy)
@@ -834,6 +850,8 @@ class Level1(tools._State):
 
     def prevent_collision_conflict(self, obstacle1, obstacle2):
         """Allows collisions only for the item closest to marios centerx"""
+        if self.mario is None or self.mario.rect is None:
+            return obstacle1, obstacle2
         if obstacle1 and obstacle2:
             obstacle1_distance = self.mario.rect.centerx - obstacle1.rect.centerx
             if obstacle1_distance < 0:
