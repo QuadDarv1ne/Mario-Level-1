@@ -405,11 +405,14 @@ class Level1(tools._State):
 
         self.ground_step_pipe_group = pg.sprite.Group()
         if self.ground_group is not None:
-            self.ground_step_pipe_group.add(self.ground_group)
+            for sprite in self.ground_group:
+                self.ground_step_pipe_group.add(sprite)
         if self.pipe_group is not None:
-            self.ground_step_pipe_group.add(self.pipe_group)
+            for sprite in self.pipe_group:
+                self.ground_step_pipe_group.add(sprite)
         if self.step_group is not None:
-            self.ground_step_pipe_group.add(self.step_group)
+            for sprite in self.step_group:
+                self.ground_step_pipe_group.add(sprite)
 
         self.mario_and_enemy_group = pg.sprite.Group(self.enemy_group)
         if self.mario is not None:
