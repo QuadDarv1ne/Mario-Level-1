@@ -403,9 +403,17 @@ class Level1(tools._State):
         self.shell_group = pg.sprite.Group()
         self.enemy_group = pg.sprite.Group()
 
-        self.ground_step_pipe_group = pg.sprite.Group(self.ground_group, self.pipe_group, self.step_group)
+        self.ground_step_pipe_group = pg.sprite.Group()
+        if self.ground_group is not None:
+            self.ground_step_pipe_group.add(self.ground_group)
+        if self.pipe_group is not None:
+            self.ground_step_pipe_group.add(self.pipe_group)
+        if self.step_group is not None:
+            self.ground_step_pipe_group.add(self.step_group)
 
-        self.mario_and_enemy_group = pg.sprite.Group(self.mario, self.enemy_group)
+        self.mario_and_enemy_group = pg.sprite.Group(self.enemy_group)
+        if self.mario is not None:
+            self.mario_and_enemy_group.add(self.mario)
 
     def update(self, surface: pg.Surface, keys: Tuple[bool, ...], current_time: float) -> None:
         """Updates Entire level using states.  Called by the control object"""
