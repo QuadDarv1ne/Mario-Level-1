@@ -122,9 +122,9 @@ class DebugOverlay:
 
         # Memory
         try:
-            import resource
+            import resource  # type: ignore[import-not-found]
 
-            self.stats.memory_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+            self.stats.memory_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024  # type: ignore[attr-defined]
         except (ImportError, AttributeError):
             # Windows doesn't have resource module
             self.stats.memory_mb = 0
@@ -291,7 +291,7 @@ class EntityInspector:
         try:
             self.font = pg.font.Font(None, 20)
         except pg.error:
-            self.font = None
+            self.font = None  # type: ignore[assignment]
 
     def select(self, entity: Any) -> None:
         """Select entity for inspection."""

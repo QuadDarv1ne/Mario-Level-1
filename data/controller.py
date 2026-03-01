@@ -161,7 +161,7 @@ class GameController:
         Returns:
             Current controller state
         """
-        if not self.is_connected:
+        if not self.is_connected or self._controller is None:
             self._state = ControllerState()
             return self._state
 

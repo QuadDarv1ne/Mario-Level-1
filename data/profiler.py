@@ -265,9 +265,9 @@ class Profiler:
                 finally:
                     timer.stop()
 
-            return cast(T, wrapper)
+            return wrapper  # type: ignore[return-value]
 
-        return decorator
+        return decorator  # type: ignore[return-value]
 
     def end_frame(
         self,

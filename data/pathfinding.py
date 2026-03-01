@@ -53,7 +53,7 @@ class Node:
 class PathResult:
     """Pathfinding result."""
 
-    path: List[Tuple[int, int]]
+    path: List[Tuple[float, float]]
     success: bool
     length: int
     cost: float
@@ -303,7 +303,7 @@ class AStarPathfinder:
             "hits": self._cache_hits,
             "misses": self._cache_misses,
             "size": len(self._path_cache),
-            "hit_rate": round(hit_rate, 2),
+            "hit_rate": int(round(hit_rate, 2)),
         }
 
     def _heuristic(self, a: Node, b: Node) -> float:
