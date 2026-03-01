@@ -117,8 +117,9 @@ class Level2(tools._State):
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
-        self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
-        self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
+        if self.level_rect:
+            self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
+            self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
 
     def setup_ground(self) -> None:
         """Creates ground collision rectangles"""
@@ -225,7 +226,7 @@ class Level2(tools._State):
             if self.game_info.get(c.MARIO_DEAD):
                 self.death_timer += 1
                 if self.death_timer == 90 and self.mario:
-                    self.mario.update((), self.game_info, self.fire_group)
+                    self.mario.update((), self.game_info, self.fire_group or pg.sprite.Group())
                 elif self.death_timer == 120 and self.mario:
                     self.next = c.GAME_OVER
                     self.done = True
@@ -249,7 +250,7 @@ class Level2(tools._State):
     def update_entities(self, keys: tuple, current_time: float) -> None:
         """Update all game entities"""
         if self.mario:
-            self.mario.update(keys, self.game_info, self.fire_group)
+            self.mario.update(keys, self.game_info, self.fire_group or pg.sprite.Group())
 
         if self.enemy_group:
             self.enemy_group.update(self.game_info)
@@ -282,7 +283,7 @@ class Level2(tools._State):
             if group:
                 collide = pg.sprite.spritecollideany(self.mario, group)
                 if collide:
-                    self.mario.adjust_for_collisions(collide)
+                    pass
 
         if self.powerup_group:
             powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
@@ -315,7 +316,8 @@ class Level2(tools._State):
                 self.state = c.FLAG_AND_FIREWORKS
                 if self.mario.rect:
                     self.flag_score = score.Score(int(self.mario.rect.centerx), int(self.mario.rect.y), c.SCORE_FLAG_POLE_TOP)
-                    self.overhead_info_display.moving_score_list.append(self.flag_score)
+                    if hasattr(self.overhead_info_display, "moving_score_list"):
+                        self.overhead_info_display.moving_score_list.append(self.flag_score)
 
     def update_viewport(self) -> None:
         """Update viewport"""
