@@ -129,9 +129,9 @@ class Level3(tools._State):
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
-        if self.level_rect:
+        if self.level_rect and setup.SCREEN is not None:
             self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
-            self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
+            self.viewport.x = self.game_info.get(str(c.CAMERA_START_X), 0)
 
     def setup_ground(self) -> None:
         """Creates ground collision rectangles"""
@@ -216,7 +216,7 @@ class Level3(tools._State):
         """Setup Mario"""
         mario_start = getattr(self.level_data, "mario_start", {"x": 110, "y": c.GROUND_HEIGHT})
         self.mario = mario.Mario()
-        if self.mario:
+        if self.mario and self.mario.rect is not None:
             self.mario.rect.x = mario_start.get("x", 110)
             self.mario.rect.y = mario_start.get("y", c.GROUND_HEIGHT)
 

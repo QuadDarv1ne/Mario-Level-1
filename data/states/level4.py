@@ -128,9 +128,9 @@ class Level4(tools._State):
 
         self.level = pg.Surface((width, height), pg.SRCALPHA)
         self.level_rect = self.level.get_rect()
-        if self.level_rect:
+        if self.level_rect and setup.SCREEN is not None:
             self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
-            self.viewport.x = self.game_info.get(c.CAMERA_START_X, 0)
+            self.viewport.x = self.game_info.get(str(c.CAMERA_START_X), 0)
 
     def setup_ground(self) -> None:
         """Creates ground collision rectangles"""
