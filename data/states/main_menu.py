@@ -145,16 +145,16 @@ class Menu(tools._State):
         if self.background:
             surface.blit(self.background, (0, 0))
         
-        # Draw semi-transparent overlay for better text visibility
+        # Draw lighter semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        overlay.set_alpha(110)
+        overlay.set_alpha(80)  # Reduced from 110 for better visibility
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
         
-        # Draw decorative top bar
+        # Draw decorative top bar (lighter)
         top_bar = pg.Surface((c.SCREEN_WIDTH, 220))
-        top_bar.set_alpha(180)
-        top_bar.fill((50, 50, 50))
+        top_bar.set_alpha(140)  # Reduced from 180
+        top_bar.fill((40, 40, 60))  # Slightly blue tint
         surface.blit(top_bar, (0, 0))
         pg.draw.line(surface, c.GOLD, (0, 220), (c.SCREEN_WIDTH, 220), 3)
         
@@ -168,16 +168,16 @@ class Menu(tools._State):
         # Draw version info and subtitle
         self._draw_text(surface, "v2.7.0 - Enhanced Edition", 400, 185, c.YELLOW, 22)
         
-        # Draw decorative menu panel
-        menu_panel = pg.Surface((400, 260))
-        menu_panel.set_alpha(200)
-        menu_panel.fill((30, 30, 30))
-        surface.blit(menu_panel, (200, 260))
-        menu_panel_rect = pg.Rect(200, 260, 400, 260)
-        pg.draw.rect(surface, c.GOLD, menu_panel_rect, 3, border_radius=15)
+        # Draw lighter decorative menu panel
+        menu_panel = pg.Surface((420, 280))
+        menu_panel.set_alpha(160)  # Reduced from 200
+        menu_panel.fill((50, 50, 70))  # Lighter color
+        surface.blit(menu_panel, (190, 250))
+        menu_panel_rect = pg.Rect(190, 250, 420, 280)
+        pg.draw.rect(surface, c.GOLD, menu_panel_rect, 4, border_radius=15)
 
         # Draw menu options with enhanced styling
-        menu_start_y = 300
+        menu_start_y = 290
         menu_descriptions = [
             "Start from Level 1-1",
             "Choose any level",
@@ -186,37 +186,37 @@ class Menu(tools._State):
         ]
         
         for i, option in enumerate(self.menu_options):
-            y_pos = menu_start_y + (i * 55)
+            y_pos = menu_start_y + (i * 60)
             
             # Highlight selected option
             if i == self.selected_option:
                 color = c.YELLOW
-                size = 38
+                size = 40
                 # Draw selection highlight
-                highlight = pg.Surface((360, 48))
-                highlight.set_alpha(40)
+                highlight = pg.Surface((380, 52))
+                highlight.set_alpha(60)
                 highlight.fill((255, 215, 0))
-                surface.blit(highlight, (220, y_pos - 22))
+                surface.blit(highlight, (210, y_pos - 24))
                 
-                highlight_rect = pg.Rect(220, y_pos - 22, 360, 48)
-                pg.draw.rect(surface, c.GOLD, highlight_rect, 3, border_radius=8)
+                highlight_rect = pg.Rect(210, y_pos - 24, 380, 52)
+                pg.draw.rect(surface, c.GOLD, highlight_rect, 4, border_radius=10)
                 
                 # Draw description
-                desc_color = (200, 200, 200)
-                self._draw_text(surface, menu_descriptions[i], 400, y_pos + 20, desc_color, 16)
+                desc_color = (220, 220, 220)
+                self._draw_text(surface, menu_descriptions[i], 400, y_pos + 22, desc_color, 17)
             else:
                 color = c.WHITE
-                size = 32
+                size = 34
             
             self._draw_text(surface, option, 400, y_pos, color, size)
 
         # Draw instructions bar at bottom
         bottom_bar = pg.Surface((c.SCREEN_WIDTH, 60))
-        bottom_bar.set_alpha(200)
-        bottom_bar.fill((20, 20, 20))
+        bottom_bar.set_alpha(180)
+        bottom_bar.fill((30, 30, 40))
         surface.blit(bottom_bar, (0, 540))
         pg.draw.line(surface, c.GOLD, (0, 540), (c.SCREEN_WIDTH, 540), 2)
-        self._draw_text(surface, "↑↓ Navigate  |  ENTER Select  |  ESC Exit", 400, 565, c.WHITE, 20)
+        self._draw_text(surface, "↑↓ Navigate  |  ENTER Select  |  ESC Exit", 400, 565, c.WHITE, 22)
 
         # Draw Mario (animated) - in bottom left corner
         if self.mario and self.mario.image and self.mario.rect:

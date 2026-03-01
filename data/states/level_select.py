@@ -119,13 +119,16 @@ class LevelSelect(tools._State):
             if scaled_background:
                 self.background = scaled_background
                 self.background_rect = self.background.get_rect()
-            
-            screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
-            if screen_rect:
-                self.viewport = screen_rect
+
+            if self.background_rect:
+                screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
+                if screen_rect:
+                    self.viewport = screen_rect
 
         self.image_dict = {}
-        self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), setup.GFX.get("title_screen"))
+        title_screen = setup.GFX.get("title_screen")
+        if title_screen:
+            self.image_dict["GAME_NAME_BOX"] = self.get_image(1, 60, 176, 88, (170, 100), title_screen)
 
     def get_image(
         self, x: int, y: int, width: int, height: int, dest: Tuple[int, int], sprite_sheet: Optional[pg.Surface]
@@ -160,9 +163,9 @@ class LevelSelect(tools._State):
         if self.background:
             surface.blit(self.background, (0, 0))
         
-        # Draw semi-transparent overlay
+        # Draw lighter semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        overlay.set_alpha(120)
+        overlay.set_alpha(90)  # Reduced from 120
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
 
@@ -197,26 +200,33 @@ class LevelSelect(tools._State):
             # Highlight selected level
             if i == self.selected_level:
                 color = c.YELLOW
-                size = 32
+                size = 33
                 # Draw selection box with glow effect
                 box_rect = pg.Rect(x_pos - 10, y_pos - 15, 320, 80)
+                # Background for better visibility
+                box_bg = pg.Surface((320, 80))
+                box_bg.set_alpha(120)
+                box_bg.fill((60, 60, 80))
+                surface.blit(box_bg, (x_pos - 10, y_pos - 15))
+                
                 pg.draw.rect(surface, c.GOLD, box_rect, 4, border_radius=8)
-                # Inner glow
-                inner_rect = pg.Rect(x_pos - 5, y_pos - 10, 310, 70)
-                pg.draw.rect(surface, (255, 215, 0, 50), inner_rect, 2, border_radius=6)
             else:
                 color = c.WHITE
                 size = 28
-                # Draw subtle border
+                # Draw subtle border with background
                 box_rect = pg.Rect(x_pos - 10, y_pos - 15, 320, 80)
-                pg.draw.rect(surface, (100, 100, 100), box_rect, 2, border_radius=8)
+                box_bg = pg.Surface((320, 80))
+                box_bg.set_alpha(80)
+                box_bg.fill((40, 40, 50))
+                surface.blit(box_bg, (x_pos - 10, y_pos - 15))
+                pg.draw.rect(surface, (120, 120, 120), box_rect, 2, border_radius=8)
             
             # Draw level name
             self._draw_text(surface, level_name, x_pos + 150, y_pos, color, size)
             
             # Draw description
-            desc_color = c.YELLOW if i == self.selected_level else (200, 200, 200)
-            self._draw_text(surface, level_descriptions[i], x_pos + 150, y_pos + 30, desc_color, 16)
+            desc_color = c.YELLOW if i == self.selected_level else (210, 210, 210)
+            self._draw_text(surface, level_descriptions[i], x_pos + 150, y_pos + 30, desc_color, 17)
 
         # Draw instructions with icons
         self._draw_text(surface, "↑↓←→ Navigate  |  ENTER Start  |  ESC Back", 400, 550, c.WHITE, 22)
