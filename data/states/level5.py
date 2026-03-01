@@ -68,6 +68,7 @@ class Level5(tools._State):
         self.coin_group: Optional[pg.sprite.Group] = None
         self.powerup_group: Optional[pg.sprite.Group] = None
         self.fire_group: Optional[pg.sprite.Group] = None
+        self.brick_pieces_group: Optional[pg.sprite.Group] = None
 
         try:
             self.level_data = level_loader.load_level_from_json(self.level_file)
@@ -123,29 +124,28 @@ class Level5(tools._State):
         """Creates ground collision rectangles"""
         for section in getattr(self.level_data, "ground_sections", []):
             ground_rect = collider.Collider(section["x"], section["y"], section["width"], section["height"])
-            self.ground_group.add(ground_rect)
+            self.ground_group.add(ground_rect)  # type: ignore[union-attr]
 
     def setup_pipes(self) -> None:
         """Create pipe obstacles"""
         for p in getattr(self.level_data, "pipes", []):
-            self.pipe_group.add(collider.Collider(p["x"], p["y"], p["width"], p["height"]))
+            self.pipe_group.add(collider.Collider(p["x"], p["y"], p["width"], p["height"]))  # type: ignore[union-attr]
 
     def setup_steps(self) -> None:
         """Create step obstacles"""
         for s in getattr(self.level_data, "steps", []):
-            self.step_group.add(collider.Collider(s["x"], s["y"], s["width"], s["height"]))
+            self.step_group.add(collider.Collider(s["x"], s["y"], s["width"], s["height"]))  # type: ignore[union-attr]
 
     def setup_bricks(self) -> None:
         """Creates breakable bricks"""
-        self.brick_pieces_group = pg.sprite.Group()
         for brick_info in getattr(self.level_data, "bricks", []):
             brick = bricks.Brick(brick_info["x"], brick_info["y"], contents=brick_info.get("contents"))
-            self.brick_group.add(brick)
+            self.brick_group.add(brick)  # type: ignore[union-attr]
 
     def setup_coin_boxes(self) -> None:
         """Creates coin boxes"""
         for box_info in getattr(self.level_data, "coin_boxes", []):
-            self.coin_box_group.add(coin_box.CoinBox(box_info["x"], box_info["y"], contents=box_info.get("contents")))
+            self.coin_box_group.add(coin_box.CoinBox(box_info["x"], box_info["y"], contents=box_info.get("contents")))  # type: ignore[union-attr]
 
     def setup_flag_pole(self) -> None:
         """Creates flag pole"""
@@ -154,7 +154,7 @@ class Level5(tools._State):
             self.flag = flagpole.Flag(flag_pole_data["x"], flag_pole_data["y"])
             self.pole = flagpole.Pole(flag_pole_data["x"], flag_pole_data["y"])
             self.finial = flagpole.Finial(flag_pole_data["x"], flag_pole_data["y"])
-            self.flag_pole_group.add(self.flag, self.pole, self.finial)
+            self.flag_pole_group.add(self.flag, self.pole, self.finial)  # type: ignore[union-attr]
 
     def setup_enemies(self) -> None:
         """Setup enemies"""
@@ -174,7 +174,7 @@ class Level5(tools._State):
             x = enemy_info.get("x", 0)
             y = enemy_info.get("y", c.GROUND_HEIGHT)
             direction = enemy_info.get("direction", "left")
-            self.enemy_group.add(enemy_class(x, y, direction))
+            self.enemy_group.add(enemy_class(x, y, direction))  # type: ignore[union-attr]
 
     def setup_mario(self) -> None:
         """Setup Mario"""
@@ -187,7 +187,7 @@ class Level5(tools._State):
     def setup_checkpoints(self) -> None:
         """Setup checkpoints"""
         for cp_info in getattr(self.level_data, "checkpoints", []):
-            self.checkpoint_group.add(
+            self.checkpoint_group.add(  # type: ignore[union-attr]
                 checkpoint.Checkpoint(
                     cp_info["x"],
                     cp_info["name"],
@@ -206,12 +206,12 @@ class Level5(tools._State):
             return
 
         if self.state == c.NOT_FROZEN:
-            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []
+            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []  # type: ignore[attr-defined]
 
             if self.game_info.get(c.MARIO_DEAD):
                 self.death_timer += 1
                 if self.death_timer == 90 and self.mario:
-                    self.mario.update((), self.game_info, self.fire_group)
+                    self.mario.update((), self.game_info, self.fire_group)  # type: ignore[arg-type]
                 elif self.death_timer == 120:
                     self.next = c.GAME_OVER
                     self.done = True
@@ -234,7 +234,7 @@ class Level5(tools._State):
     def update_entities(self, keys: tuple, current_time: float) -> None:
         """Update all entities"""
         if self.mario:
-            self.mario.update(keys, self.game_info, self.fire_group)
+            self.mario.update(keys, self.game_info, self.fire_group)  # type: ignore[arg-type]
         if self.enemy_group:
             self.enemy_group.update(current_time)
         if self.powerup_group:
@@ -259,9 +259,9 @@ class Level5(tools._State):
             self.coin_box_group,
             self.enemy_group,
         ]:
-            collide = pg.sprite.spritecollideany(self.mario, group)
+            collide = pg.sprite.spritecollideany(self.mario, group)  # type: ignore[arg-type]
             if collide:
-                self.mario.adjust_for_collisions(collide)
+                self.mario.adjust_for_collisions(collide)  # type: ignore[attr-defined]
 
         if self.powerup_group:
             powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
@@ -289,11 +289,12 @@ class Level5(tools._State):
             self.game_info[c.MARIO_DEAD] = True
 
         if self.mario and self.flag_pole_group:
-            flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)
+            flag_pole = pg.sprite.spritecollideany(self.mario, self.flag_pole_group)  # type: ignore[arg-type]
             if flag_pole and hasattr(flag_pole, "state") and flag_pole.state == c.TOP_OF_POLE:
                 self.state = c.FLAG_AND_FIREWORKS
-                self.flag_score = score.Score(self.mario.rect.centerx, self.mario.rect.y, c.SCORE_FLAG_POLE_TOP)
-                self.moving_score_list.append(self.flag_score)
+                if self.mario.rect:
+                    self.flag_score = score.Score(int(self.mario.rect.centerx), int(self.mario.rect.y), c.SCORE_FLAG_POLE_TOP)
+                    self.moving_score_list.append(self.flag_score)
 
     def update_viewport(self) -> None:
         """Update viewport"""

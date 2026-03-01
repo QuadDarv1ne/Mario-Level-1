@@ -388,8 +388,8 @@ class OverheadInfo:
             for letter in word:
                 surface.blit(letter.image, letter.rect)
 
-        for word in self.life_total_label:
-            surface.blit(word.image, word.rect)
+        for character in self.life_total_label:
+            surface.blit(character.image, character.rect)
 
         if self.mario_image and self.mario_rect:
             surface.blit(self.mario_image, self.mario_rect)

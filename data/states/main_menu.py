@@ -36,9 +36,9 @@ class Menu(tools._State):
         self.overhead_info = info.OverheadInfo(self.game_info, c.MAIN_MENU)
 
         self.sprite_sheet = setup.GFX["title_screen"]
-        self.background: Optional[pg.Surface] = None
-        self.background_rect: Optional[pg.Rect] = None
-        self.viewport: Optional[pg.Rect] = None
+        self.background: pg.Surface = None  # type: ignore[assignment]
+        self.background_rect: pg.Rect = None  # type: ignore[assignment]
+        self.viewport: pg.Rect = None  # type: ignore[assignment]
         self.image_dict: Dict[str, Tuple[pg.Surface, pg.Rect]] = {}
         self.mario: Optional[mario.Mario] = None
         self.cursor: Optional[pg.sprite.Sprite] = None
@@ -90,10 +90,10 @@ class Menu(tools._State):
             image.set_colorkey((255, 0, 220))
             image = pg.transform.scale(
                 image, (int(rect.width * c.SIZE_MULTIPLIER), int(rect.height * c.SIZE_MULTIPLIER))
-            )  # type: ignore[assignment]
+            )
         else:
             image.set_colorkey(c.BLACK)
-            image = pg.transform.scale(image, (int(rect.width * 3), int(rect.height * 3)))  # type: ignore[assignment]
+            image = pg.transform.scale(image, (int(rect.width * 3), int(rect.height * 3)))
 
         rect = image.get_rect()
         rect.x = dest[0]
@@ -109,8 +109,7 @@ class Menu(tools._State):
 
         surface.blit(self.background, self.viewport, self.viewport)
         game_box = self.image_dict["GAME_NAME_BOX"]
-        if game_box:
-            surface.blit(game_box[0], game_box[1])
+        surface.blit(game_box[0], game_box[1])
         if self.mario.image and self.mario.rect:
             surface.blit(self.mario.image, self.mario.rect)
         if self.cursor.image and self.cursor.rect:
