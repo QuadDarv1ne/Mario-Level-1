@@ -10,6 +10,8 @@ import pygame as pg
 
 from .. import setup, tools
 from .. import constants as c
+from ..level_music_manager import get_level_music_manager
+from ..level_sound_effects import get_level_sound_effects
 from ..components import mario
 from ..components import collider
 from ..components import bricks
@@ -47,6 +49,11 @@ class Level5(tools._State):
 
         self.moving_score_list: List[score.Score] = []
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
+
+        # Initialize music and sound effects
+        self.music_manager = get_level_music_manager()
+        self.sound_effects = get_level_sound_effects()
+        self.time_warning_played = False
 
         self.background: Optional[pg.Surface] = None
         self.back_rect: Optional[pg.Rect] = None
@@ -106,6 +113,19 @@ class Level5(tools._State):
         self.setup_enemies()
         self.setup_mario()
         self.setup_checkpoints()
+
+        # Start level music - determine which level this is
+        level_name = getattr(self, 'level_file', 'data/levels/level_2_1.json')
+        if 'level_2_1' in level_name:
+            self.music_manager.play_level_music('level5', fade_ms=1000)
+        elif 'level_2_2' in level_name:
+            self.music_manager.play_level_music('level6', fade_ms=1000)
+        elif 'level_2_3' in level_name:
+            self.music_manager.play_level_music('level7', fade_ms=1000)
+        elif 'level_2_4' in level_name:
+            self.music_manager.play_level_music('level8', fade_ms=1000)
+        else:
+            self.music_manager.play_level_music('level5', fade_ms=1000)
 
     def setup_background(self) -> None:
         """Sets the background"""
@@ -211,6 +231,15 @@ class Level5(tools._State):
     def update(self, surface: pg.Surface, keys: tuple, current_time: float) -> None:
         """Update level state"""
         self.current_time = current_time
+
+        # Update music based on time remaining
+        time_remaining = self.game_info.get(c.LEVEL_TIME, 400)
+        self.music_manager.update(time_remaining)
+        
+        # Play time warning sound
+        if time_remaining == 100 and not self.time_warning_played:
+            self.sound_effects.play_time_warning()
+            self.time_warning_played = True
 
         if self.state == c.FROZEN:
             self.draw(surface)

@@ -8,6 +8,7 @@ import pygame as pg
 
 from .. import setup
 from .. import constants as c
+from ..constants_extended import ANIMATION_FAST, ANIMATION_SLOW
 from . import coin
 from . import powerups
 
@@ -81,21 +82,21 @@ class CoinBox(pg.sprite.Sprite):
         """Action when in the RESTING state"""
         if self.first_half:
             if self.frame_index == 0:
-                if (self.current_time - self.animation_timer) > 375:
+                if (self.current_time - self.animation_timer) > ANIMATION_SLOW:
                     self.frame_index += 1
                     self.animation_timer = self.current_time
             elif self.frame_index < 2:
-                if (self.current_time - self.animation_timer) > 125:
+                if (self.current_time - self.animation_timer) > ANIMATION_FAST:
                     self.frame_index += 1
                     self.animation_timer = self.current_time
             elif self.frame_index == 2:
-                if (self.current_time - self.animation_timer) > 125:
+                if (self.current_time - self.animation_timer) > ANIMATION_FAST:
                     self.frame_index -= 1
                     self.first_half = False
                     self.animation_timer = self.current_time
         else:
             if self.frame_index == 1:
-                if (self.current_time - self.animation_timer) > 125:
+                if (self.current_time - self.animation_timer) > ANIMATION_FAST:
                     self.frame_index -= 1
                     self.first_half = True
                     self.animation_timer = self.current_time

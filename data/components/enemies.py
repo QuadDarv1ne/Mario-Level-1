@@ -8,6 +8,7 @@ import pygame as pg
 
 from .. import setup
 from .. import constants as c
+from ..constants_extended import ANIMATION_FAST
 
 
 class Enemy(pg.sprite.Sprite):
@@ -95,7 +96,7 @@ class Enemy(pg.sprite.Sprite):
 
     def walking(self) -> None:
         """Default state of moving sideways"""
-        if (self.current_time - self.animate_timer) > 125:
+        if (self.current_time - self.animate_timer) > ANIMATION_FAST:
             if self.frame_index == 0:
                 self.frame_index += 1
             elif self.frame_index == 1:
