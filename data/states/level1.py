@@ -875,9 +875,9 @@ class Level1(tools._State):
             if coin_box.state == c.RESTING:
                 if coin_box.contents == c.COIN:
                     self.game_info[c.SCORE] += 200
-                    temp_score_group: pg.sprite.Group = pg.sprite.Group()
-                    coin_box.start_bump(temp_score_group)
-                    for s in temp_score_group:
+                    temp_score_group1: pg.sprite.Group = pg.sprite.Group()
+                    coin_box.start_bump(temp_score_group1)
+                    for s in temp_score_group1:
                         self.moving_score_list.append(s)
                     if coin_box.contents == c.COIN:
                         self.game_info[c.COIN_TOTAL] += 1
@@ -891,9 +891,9 @@ class Level1(tools._State):
                             },
                         )
                 else:
-                    temp_score_group: pg.sprite.Group = pg.sprite.Group()
-                    coin_box.start_bump(temp_score_group)
-                    for s in temp_score_group:
+                    temp_score_group2: pg.sprite.Group = pg.sprite.Group()
+                    coin_box.start_bump(temp_score_group2)
+                    for s in temp_score_group2:
                         self.moving_score_list.append(s)
 
             elif coin_box.state == c.OPENED:
@@ -969,6 +969,8 @@ class Level1(tools._State):
 
     def adjust_mario_for_y_ground_pipe_collisions(self, collider):
         """Mario collisions with pipes on the y-axis"""
+        if self.mario is None or self.mario.rect is None:
+            return
         if collider.rect.bottom > self.mario.rect.bottom:
             self.mario.y_vel = 0
             self.mario.rect.bottom = collider.rect.top
@@ -984,8 +986,16 @@ class Level1(tools._State):
     def test_if_mario_is_falling(self):
         """Changes Mario to a FALL state if more than a pixel above a pipe,
         ground, step or box"""
+        if self.mario is None or self.mario.rect is None:
+            return
         self.mario.rect.y += 1
-        test_collide_group = pg.sprite.Group(self.ground_step_pipe_group, self.brick_group, self.coin_box_group)
+        test_collide_group = pg.sprite.Group()
+        if self.ground_step_pipe_group is not None:
+            test_collide_group.add(self.ground_step_pipe_group)
+        if self.brick_group is not None:
+            test_collide_group.add(self.brick_group)
+        if self.coin_box_group is not None:
+            test_collide_group.add(self.coin_box_group)
 
         if pg.sprite.spritecollideany(self.mario, test_collide_group) is None:
             if (
@@ -1006,17 +1016,21 @@ class Level1(tools._State):
 
     def adjust_mario_for_y_enemy_collisions(self, enemy):
         """Mario collisions with all enemies on the y-axis"""
+        if self.mario is None or self.mario.rect is None or self.viewport is None:
+            return
         if self.mario.y_vel > 0:
             setup.SFX["stomp"].play()
             self.game_info[c.SCORE] += 100
-            self.moving_score_list.append(score.Score(enemy.rect.centerx - self.viewport.x, enemy.rect.y, 100))
+            self.moving_score_list.append(score.Score(int(enemy.rect.centerx - self.viewport.x), int(enemy.rect.y), 100))
             enemy.state = c.JUMPED_ON
             enemy.kill()
             if enemy.name == c.GOOMBA:
                 enemy.death_timer = self.current_time
-                self.sprites_about_to_die_group.add(enemy)
+                if self.sprites_about_to_die_group is not None:
+                    self.sprites_about_to_die_group.add(enemy)
             elif enemy.name == c.KOOPA:
-                self.shell_group.add(enemy)
+                if self.shell_group is not None:
+                    self.shell_group.add(enemy)
 
             self.mario.rect.bottom = enemy.rect.top
             self.mario.state = c.JUMP
