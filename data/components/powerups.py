@@ -45,7 +45,7 @@ class Powerup(pg.sprite.Sprite):
         self.y_vel = -1
         self.x_vel = 0
         self.direction = c.RIGHT
-        self.box_height = y
+        self.box_height = y - self.rect.height  # Top of the box where powerup came from
         self.gravity = 1
         self.max_y_vel = 8
         self.animate_timer = 0

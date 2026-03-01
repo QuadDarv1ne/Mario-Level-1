@@ -554,9 +554,9 @@ class Level1(tools._State):
             elif checkpoint.name == "12":
                 self.state = c.IN_CASTLE
                 if self.mario is not None:
-                    self.mario.kill()
                     self.mario.state = c.STAND
                     self.mario.in_castle = True
+                    self.mario.x_vel = 0
                 self.overhead_info_display.state = c.FAST_COUNT_DOWN
 
             elif checkpoint.name == "secret_mushroom" and self.mario.y_vel < 0:
@@ -1514,9 +1514,15 @@ class Level1(tools._State):
 
     def update_while_in_castle(self):
         """Updates while Mario is in castle at the end of the level"""
+        if self.mario is not None and self.mario.state == c.STAND:
+            self.mario.state = c.WALKING_TO_CASTLE
+        if self.mario is not None:
+            self.mario.update({}, self.game_info, self.powerup_group if self.powerup_group is not None else pg.sprite.Group())
+            self.mario.rect.x += round(self.mario.x_vel)
+            self.check_points_check()
         for moving_score in self.moving_score_list:
             moving_score.update(self.moving_score_list, self.game_info)
-        self.overhead_info_display.update(self.game_info)
+        self.overhead_info_display.update(self.game_info, self.mario)
 
         if self.overhead_info_display.state == c.END_OF_LEVEL:
             self.state = c.FLAG_AND_FIREWORKS
