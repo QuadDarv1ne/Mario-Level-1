@@ -76,8 +76,9 @@ class Menu(tools._State):
                 int(self.background_rect.height * c.BACKGROUND_MULTIPLIER),
             ),
         )
-        self.background = scaled_background
-        self.background_rect = self.background.get_rect()
+        if scaled_background:
+            self.background = scaled_background
+            self.background_rect = self.background.get_rect()
         screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
         if screen_rect:
             self.viewport = screen_rect

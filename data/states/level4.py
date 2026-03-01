@@ -209,7 +209,7 @@ class Level4(tools._State):
             return
 
         if self.state == c.NOT_FROZEN:
-            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []
+            self.moving_score_list = getattr(self.overhead_info_display, "moving_score_list", []) if self.overhead_info_display else []
 
             if self.game_info.get(c.MARIO_DEAD):
                 self.death_timer += 1

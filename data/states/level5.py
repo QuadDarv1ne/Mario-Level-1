@@ -109,7 +109,10 @@ class Level5(tools._State):
 
     def setup_background(self) -> None:
         """Sets the background"""
-        self.background = setup.GFX.get("level_1", pg.Surface((self.level_data.width, self.level_data.height)))
+        bg_surface = setup.GFX.get("level_1")
+        if bg_surface is None:
+            bg_surface = pg.Surface((self.level_data.width, self.level_data.height))
+        self.background = bg_surface
         self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
         width = self.back_rect.width if self.back_rect else 0
@@ -214,7 +217,7 @@ class Level5(tools._State):
             return
 
         if self.state == c.NOT_FROZEN:
-            self.moving_score_list = self.overhead_info_display.moving_score_list if self.overhead_info_display else []
+            self.moving_score_list = getattr(self.overhead_info_display, "moving_score_list", []) if self.overhead_info_display else []
 
             if self.game_info.get(c.MARIO_DEAD):
                 self.death_timer += 1
