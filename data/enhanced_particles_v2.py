@@ -127,7 +127,7 @@ class EnhancedParticle:
 
         # Pre-compute
         self._lifetime = self.config.lifetime
-        self._color_delta: Optional[Tuple[float, float, float]] = None
+        self._color_delta: Optional[Tuple[float, ...]] = None
         if self.config.color_end:
             self._color_delta = tuple(
                 (self.config.color_end[i] - self.config.color[i]) / self._lifetime for i in range(3)
@@ -268,10 +268,11 @@ class EnhancedParticle:
             size = 100
 
         # Create cache key
+        color_tuple = (int(self.current_color[0]), int(self.current_color[1]), int(self.current_color[2]))
         cache_key = (
             self.config.shape,
             size,
-            tuple(int(c) for c in self.current_color),
+            color_tuple,
             self.current_alpha,
         )
 
@@ -333,7 +334,7 @@ class EnhancedParticle:
                 r = size if i % 2 == 0 else size / 2
                 px = size + math.cos(angle) * r
                 py = size + math.sin(angle) * r
-                points.append((px, py))
+                points.append((int(px), int(py)))
             pg.draw.polygon(particle_surface, color_with_alpha, points)
 
         elif shape == ParticleShape.RING:
