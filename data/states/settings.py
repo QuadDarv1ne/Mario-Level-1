@@ -9,6 +9,7 @@ import pygame as pg
 from .. import setup, tools
 from .. import constants as c
 from ..components import info
+from ..settings_manager import get_settings_manager
 
 
 class Settings(tools._State):
@@ -40,13 +41,20 @@ class Settings(tools._State):
         self.input_timer = 0
         self.input_delay = 200
         
-        # Settings options
+        # Load settings from manager
+        settings_mgr = get_settings_manager()
         self.settings = {
-            "music_volume": 70,
-            "sfx_volume": 80,
-            "fullscreen": False,
-            "show_fps": False,
+            "music_volume": settings_mgr.get("music_volume", 70),
+            "sfx_volume": settings_mgr.get("sfx_volume", 80),
+            "fullscreen": settings_mgr.get("fullscreen", False),
+            "show_fps": settings_mgr.get("show_fps", False),
         }
+        
+        # Apply loaded settings
+        pg.mixer.music.set_volume(self.settings['music_volume'] / 100)
+        for sound in setup.SFX.values():
+            if sound:
+                sound.set_volume(self.settings['sfx_volume'] / 100)
         
         self.menu_options = ["Music Volume", "SFX Volume", "Fullscreen", "Show FPS", "Back"]
         self.setup_background()
@@ -197,36 +205,56 @@ class Settings(tools._State):
         if can_input and keys[pg.K_DOWN]:
             self.selected_option = (self.selected_option + 1) % len(self.menu_options)
             self.input_timer = current_time
+            # Play navigation sound
+            if setup.SFX.get('coin'):
+                setup.SFX['coin'].play()
                 
         elif can_input and keys[pg.K_UP]:
             self.selected_option = (self.selected_option - 1) % len(self.menu_options)
             self.input_timer = current_time
+            # Play navigation sound
+            if setup.SFX.get('coin'):
+                setup.SFX['coin'].play()
 
         # Change values
         if can_input and keys[pg.K_RIGHT]:
             self._change_setting(1)
             self.input_timer = current_time
+            # Play change sound
+            if setup.SFX.get('powerup'):
+                setup.SFX['powerup'].play()
             
         elif can_input and keys[pg.K_LEFT]:
             self._change_setting(-1)
             self.input_timer = current_time
+            # Play change sound
+            if setup.SFX.get('powerup'):
+                setup.SFX['powerup'].play()
 
         # Handle selection
         if keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
             if self.selected_option == len(self.menu_options) - 1:  # Back
+                # Play back sound
+                if setup.SFX.get('pipe'):
+                    setup.SFX['pipe'].play()
                 self.done = True
                 
         # Handle ESC to go back
         if keys[pg.K_ESCAPE]:
+            # Play back sound
+            if setup.SFX.get('pipe'):
+                setup.SFX['pipe'].play()
             self.done = True
 
     def _change_setting(self, direction: int) -> None:
         """Change the selected setting"""
         option = self.menu_options[self.selected_option]
+        settings_mgr = get_settings_manager()
         
         if option == "Music Volume":
             self.settings['music_volume'] = max(0, min(100, self.settings['music_volume'] + direction * 10))
             pg.mixer.music.set_volume(self.settings['music_volume'] / 100)
+            settings_mgr.set("music_volume", self.settings['music_volume'])
             
         elif option == "SFX Volume":
             self.settings['sfx_volume'] = max(0, min(100, self.settings['sfx_volume'] + direction * 10))
@@ -234,6 +262,7 @@ class Settings(tools._State):
             for sound in setup.SFX.values():
                 if sound:
                     sound.set_volume(self.settings['sfx_volume'] / 100)
+            settings_mgr.set("sfx_volume", self.settings['sfx_volume'])
                     
         elif option == "Fullscreen":
             self.settings['fullscreen'] = not self.settings['fullscreen']
@@ -241,6 +270,8 @@ class Settings(tools._State):
                 setup.SCREEN = pg.display.set_mode((c.SCREEN_WIDTH, c.SCREEN_HEIGHT), pg.FULLSCREEN)
             else:
                 setup.SCREEN = pg.display.set_mode((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+            settings_mgr.set("fullscreen", self.settings['fullscreen'])
                 
         elif option == "Show FPS":
             self.settings['show_fps'] = not self.settings['show_fps']
+            settings_mgr.set("show_fps", self.settings['show_fps'])

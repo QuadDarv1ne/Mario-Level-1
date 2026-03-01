@@ -256,15 +256,25 @@ class Menu(tools._State):
             if self.cursor and self.cursor.rect:
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
             self.input_timer = current_time
+            # Play navigation sound
+            if setup.SFX.get('coin'):
+                setup.SFX['coin'].play()
                 
         elif can_input and keys[pg.K_UP]:
             self.selected_option = (self.selected_option - 1) % len(self.menu_options)
             if self.cursor and self.cursor.rect:
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
             self.input_timer = current_time
+            # Play navigation sound
+            if setup.SFX.get('coin'):
+                setup.SFX['coin'].play()
 
         # Handle selection
         if keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
+            # Play selection sound
+            if setup.SFX.get('bump'):
+                setup.SFX['bump'].play()
+                
             if self.selected_option == 0:  # PLAY
                 self.reset_game_info()
                 self.next = c.LOAD_SCREEN
