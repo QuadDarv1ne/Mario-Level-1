@@ -869,11 +869,16 @@ class Level1(tools._State):
 
     def adjust_mario_for_y_coin_box_collisions(self, coin_box):
         """Mario collisions with coin boxes on the y-axis"""
+        if self.mario is None or self.mario.rect is None:
+            return
         if self.mario.rect.y > coin_box.rect.y:
             if coin_box.state == c.RESTING:
                 if coin_box.contents == c.COIN:
                     self.game_info[c.SCORE] += 200
-                    coin_box.start_bump(self.moving_score_list)
+                    temp_score_group: pg.sprite.Group = pg.sprite.Group()
+                    coin_box.start_bump(temp_score_group)
+                    for s in temp_score_group:
+                        self.moving_score_list.append(s)
                     if coin_box.contents == c.COIN:
                         self.game_info[c.COIN_TOTAL] += 1
                         # Emit coin collect event
@@ -886,7 +891,10 @@ class Level1(tools._State):
                             },
                         )
                 else:
-                    coin_box.start_bump(self.moving_score_list)
+                    temp_score_group: pg.sprite.Group = pg.sprite.Group()
+                    coin_box.start_bump(temp_score_group)
+                    for s in temp_score_group:
+                        self.moving_score_list.append(s)
 
             elif coin_box.state == c.OPENED:
                 pass
@@ -901,25 +909,31 @@ class Level1(tools._State):
 
     def adjust_mario_for_y_brick_collisions(self, brick):
         """Mario collisions with bricks on the y-axis"""
+        if self.mario is None or self.mario.rect is None:
+            return
         if self.mario.rect.y > brick.rect.y:
             if brick.state == c.RESTING:
                 if self.mario.big and brick.contents is None:
                     setup.SFX["brick_smash"].play()
                     self.check_if_enemy_on_brick(brick)
                     brick.kill()
-                    self.brick_pieces_group.add(
-                        bricks.BrickPiece(brick.rect.x, brick.rect.y - (brick.rect.height / 2), -2, -12),
-                        bricks.BrickPiece(brick.rect.right, brick.rect.y - (brick.rect.height / 2), 2, -12),
-                        bricks.BrickPiece(brick.rect.x, brick.rect.y, -2, -6),
-                        bricks.BrickPiece(brick.rect.right, brick.rect.y, 2, -6),
-                    )
+                    if self.brick_pieces_group is not None:
+                        self.brick_pieces_group.add(
+                            bricks.BrickPiece(brick.rect.x, brick.rect.y - (brick.rect.height / 2), -2, -12),
+                            bricks.BrickPiece(brick.rect.right, brick.rect.y - (brick.rect.height / 2), 2, -12),
+                            bricks.BrickPiece(brick.rect.x, brick.rect.y, -2, -6),
+                            bricks.BrickPiece(brick.rect.right, brick.rect.y, 2, -6),
+                        )
                 else:
                     setup.SFX["bump"].play()
                     if brick.coin_total > 0:
                         self.game_info[c.COIN_TOTAL] += 1
                         self.game_info[c.SCORE] += 200
                     self.check_if_enemy_on_brick(brick)
-                    brick.start_bump(self.moving_score_list)
+                    temp_score_group: pg.sprite.Group = pg.sprite.Group()
+                    brick.start_bump(temp_score_group)
+                    for s in temp_score_group:
+                        self.moving_score_list.append(s)
             elif brick.state == c.OPENED:
                 setup.SFX["bump"].play()
             self.mario.y_vel = 7
@@ -933,17 +947,20 @@ class Level1(tools._State):
 
     def check_if_enemy_on_brick(self, brick):
         """Kills enemy if on a bumped or broken brick"""
+        if self.viewport is None:
+            return
         brick.rect.y -= 5
 
-        enemy = pg.sprite.spritecollideany(brick, self.enemy_group)
+        enemy = pg.sprite.spritecollideany(brick, self.enemy_group) if self.enemy_group is not None else None
 
         if enemy:
             setup.SFX["kick"].play()
             self.game_info[c.SCORE] += 100
-            self.moving_score_list.append(score.Score(enemy.rect.centerx - self.viewport.x, enemy.rect.y, 100))
+            self.moving_score_list.append(score.Score(int(enemy.rect.centerx - self.viewport.x), int(enemy.rect.y), 100))
             enemy.kill()
-            self.sprites_about_to_die_group.add(enemy)
-            if self.mario.rect.centerx > brick.rect.centerx:
+            if self.sprites_about_to_die_group is not None:
+                self.sprites_about_to_die_group.add(enemy)
+            if self.mario and self.mario.rect and self.mario.rect.centerx > brick.rect.centerx:
                 enemy.start_death_jump("right")
             else:
                 enemy.start_death_jump("left")
