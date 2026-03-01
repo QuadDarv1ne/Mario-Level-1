@@ -51,10 +51,12 @@ class OverheadInfo:
         self.life_total_label: List[Character] = []
         self.mario_image: Optional[pg.Surface] = None
         self.mario_rect: Optional[pg.Rect] = None
-        self.game_over_label: List[Character] = []
-        self.time_out_label: List[Character] = []
+        self.game_over_label: List[List[Character]] = []
+        self.time_out_label: List[List[Character]] = []
         self.player_one_label: List[Character] = []
         self.player_two_label: List[Character] = []
+        self.main_menu_labels: List[List[Character]] = []
+        self.center_labels: List[List[Character]] = []
 
         self.create_image_dict()
         self.create_score_group()
@@ -208,14 +210,14 @@ class OverheadInfo:
         self.create_label(game_label, "GAME", 280, 300)
         self.create_label(over_label, "OVER", 400, 300)
 
-        self.game_over_label: List[List[Character]] = [game_label, over_label]
+        self.game_over_label = [game_label, over_label]
 
     def create_time_out_label(self):
         """Create the label for the time out screen"""
         time_out_label: List[Character] = []
 
         self.create_label(time_out_label, "TIME OUT", 290, 310)
-        self.time_out_label: List[List[Character]] = [time_out_label]
+        self.time_out_label = [time_out_label]
 
     def create_main_menu_labels(self):
         """Create labels for the MAIN MENU screen"""
@@ -281,12 +283,14 @@ class OverheadInfo:
             self.update_count_down_clock(level_info)
             self.update_score_images(self.score_images, self.score)
             self.update_coin_total(level_info)
-            self.flashing_coin.update(level_info[c.CURRENT_TIME])
+            if self.flashing_coin:
+                self.flashing_coin.update(level_info[c.CURRENT_TIME])
             if self.time == 0:
                 self.state = c.END_OF_LEVEL
 
         elif self.state == c.END_OF_LEVEL:
-            self.flashing_coin.update(level_info[c.CURRENT_TIME])
+            if self.flashing_coin:
+                self.flashing_coin.update(level_info[c.CURRENT_TIME])
 
     def update_score_images(self, images, score):
         """Updates what numbers are to be blitted for the score"""
@@ -328,8 +332,12 @@ class OverheadInfo:
         else:
             coin_string = "*" + coin_string
 
-        x = self.coin_count_images[0].rect.x
-        y = self.coin_count_images[0].rect.y
+        first_coin = self.coin_count_images[0] if self.coin_count_images else None
+        if first_coin and first_coin.rect:
+            x = first_coin.rect.x
+            y = first_coin.rect.y
+        else:
+            x, y = 300, 55
 
         self.coin_count_images = []
 
@@ -385,8 +393,10 @@ class OverheadInfo:
         for word in self.life_total_label:
             surface.blit(word.image, word.rect)
 
-        surface.blit(self.mario_image, self.mario_rect)
-        surface.blit(self.life_times_image, self.life_times_rect)
+        if self.mario_image and self.mario_rect:
+            surface.blit(self.mario_image, self.mario_rect)
+        if self.life_times_image and self.life_times_rect:
+            surface.blit(self.life_times_image, self.life_times_rect)
 
         for character in self.coin_count_images:
             surface.blit(character.image, character.rect)

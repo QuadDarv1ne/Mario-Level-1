@@ -149,13 +149,10 @@ class PiranhaPlant(Enemy):
         self.state = c.EMERGING
         self.action_timer = self.current_time
 
-    def jumped_on(self) -> bool:
+    def jumped_on(self) -> None:
         """Can only be killed when fully emerged."""
         if self.state == c.EMERGED:
             self.start_death_jump(c.RIGHT)
-            # Bonus points for timing
-            return True
-        return False
 
 
 class BulletBill(Enemy):
@@ -489,8 +486,8 @@ def setup_enemy_instance(cls_name: str, y: int, x: int, direction: str) -> Enemy
     from .enemies import Goomba, Koopa
 
     if cls_name == "Goomba":
-        return Goomba(y, x, direction)  # type: ignore[return-value]
+        return Goomba(y, x, direction)
     elif cls_name == "Koopa":
-        return Koopa(y, x, direction)  # type: ignore[return-value]
+        return Koopa(y, x, direction)
     else:
         raise ValueError(f"Unknown enemy class: {cls_name}")
