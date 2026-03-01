@@ -53,8 +53,14 @@ class Settings(tools._State):
 
     def setup_background(self) -> None:
         """Setup the background"""
-        self.background = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        self.background.fill(c.BLACK)
+        try:
+            # Try to load custom background image
+            bg_image = pg.image.load("img/mario_background.jpg")
+            self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+        except (pg.error, FileNotFoundError):
+            # Fallback to black background
+            self.background = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+            self.background.fill(c.BLACK)
 
     def update(self, surface: pg.Surface, keys: Tuple[bool, ...], current_time: float) -> None:
         """Updates the state every refresh"""

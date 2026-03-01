@@ -70,21 +70,29 @@ class Menu(tools._State):
 
     def setup_background(self) -> None:
         """Setup the background image to blit"""
-        level_1_img = setup.GFX.get("level_1")
-        if level_1_img is None:
-            level_1_img = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
-        self.background = level_1_img
-        self.background_rect = self.background.get_rect()
-        scaled_background = pg.transform.scale(
-            self.background,
-            (
-                int(self.background_rect.width * c.BACKGROUND_MULTIPLIER),
-                int(self.background_rect.height * c.BACKGROUND_MULTIPLIER),
-            ),
-        )
-        if scaled_background:
-            self.background = scaled_background
+        try:
+            # Try to load custom background image
+            bg_image = pg.image.load("img/mario_background.jpg")
+            self.background = pg.transform.scale(bg_image, (c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
             self.background_rect = self.background.get_rect()
+        except (pg.error, FileNotFoundError):
+            # Fallback to level_1 image
+            level_1_img = setup.GFX.get("level_1")
+            if level_1_img is None:
+                level_1_img = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+            self.background = level_1_img
+            self.background_rect = self.background.get_rect()
+            scaled_background = pg.transform.scale(
+                self.background,
+                (
+                    int(self.background_rect.width * c.BACKGROUND_MULTIPLIER),
+                    int(self.background_rect.height * c.BACKGROUND_MULTIPLIER),
+                ),
+            )
+            if scaled_background:
+                self.background = scaled_background
+                self.background_rect = self.background.get_rect()
+        
         screen_rect = setup.SCREEN.get_rect(bottom=setup.SCREEN_RECT.bottom)
         if screen_rect:
             self.viewport = screen_rect
