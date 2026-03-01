@@ -109,12 +109,13 @@ class CoinBox(pg.sprite.Sprite):
         if self.rect.y > self.rest_height + 5:
             self.rect.y = self.rest_height
             self.state = c.OPENED
-            if self.contents == "mushroom":
-                self.group.add(powerups.Mushroom(self.rect.centerx, self.rect.y))
-            elif self.contents == "fireflower":
-                self.group.add(powerups.FireFlower(self.rect.centerx, self.rect.y))
-            elif self.contents == "1up_mushroom":
-                self.group.add(powerups.LifeMushroom(self.rect.centerx, self.rect.y))
+            if self.group is not None:
+                if self.contents == "mushroom":
+                    self.group.add(powerups.Mushroom(self.rect.centerx, self.rect.y))
+                elif self.contents == "fireflower":
+                    self.group.add(powerups.FireFlower(self.rect.centerx, self.rect.y))
+                elif self.contents == "1up_mushroom":
+                    self.group.add(powerups.LifeMushroom(self.rect.centerx, self.rect.y))
 
         self.frame_index = 3
         self.image = self.frames[self.frame_index]
@@ -124,7 +125,7 @@ class CoinBox(pg.sprite.Sprite):
         self.y_vel = -6
         self.state = c.BUMPED
 
-        if self.contents == "coin":
+        if self.group is not None and self.contents == "coin":
             self.group.add(coin.Coin(self.rect.centerx, self.rect.y, score_group))
             setup.SFX["coin"].play()
         else:

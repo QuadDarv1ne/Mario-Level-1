@@ -89,7 +89,7 @@ class Enemy(pg.sprite.Sprite):
         elif self.state == c.FALL:
             self.falling()
         elif self.state == c.SHELL_SLIDE:
-            self.shell_sliding()
+            self.shell_sliding()  # type: ignore[attr-defined]
         elif self.state == c.DEATH_JUMP:
             self.death_jumping()
 

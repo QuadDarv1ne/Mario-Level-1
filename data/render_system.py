@@ -316,7 +316,7 @@ class SpriteRenderer:
         if hasattr(sprite, "image") and hasattr(sprite, "rect"):
             rect = sprite.rect
             if rect is not None:
-                self.add_sprite(rect, sprite.image, layer)
+                self.add_sprite(pg.Rect(rect), sprite.image, layer)
 
     def add_sprite_group(
         self,
