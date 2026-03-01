@@ -48,7 +48,7 @@ class LevelSelect(tools._State):
         self.input_delay = 200  # milliseconds between inputs
         self.level_names: List[str] = [
             "LEVEL 1-1",
-            "LEVEL 1-2", 
+            "LEVEL 1-2",
             "LEVEL 1-3",
             "LEVEL 1-4",
             "LEVEL 2-1",
@@ -69,6 +69,11 @@ class LevelSelect(tools._State):
         self.setup_background()
         self.setup_mario()
         self.setup_cursor()
+
+    def cleanup(self) -> Dict[str, Any]:
+        """Clean up and return game info with selected level"""
+        self.done = False
+        return self.game_info
 
     def setup_cursor(self) -> None:
         """Creates the cursor to select level"""
