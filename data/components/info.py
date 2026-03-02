@@ -24,6 +24,38 @@ class OverheadInfo:
     """Class for level information like score, coin total,
     and time remaining"""
 
+    sprite_sheet: pg.Surface
+    coin_total: int
+    time: int
+    current_time: float
+    total_lives: int
+    top_score: int
+    state: str
+    special_state: Optional[str]
+    game_info: Dict[str, Any]
+
+    image_dict: Dict[str, pg.Surface]
+    score_images: List[Character]
+    mario_label: List[Character]
+    world_label: List[Character]
+    time_label: List[Character]
+    stage_label: List[Character]
+    label_list: List[List[Character]]
+    center_labels: List[List[Character]]
+    count_down_images: List[Character]
+    coin_count_images: List[Character]
+    flashing_coin: Optional[flashing_coin.Coin]
+    life_times_image: Optional[pg.Surface]
+    life_times_rect: Optional[pg.Rect]
+    life_total_label: List[Character]
+    mario_image: Optional[pg.Surface]
+    mario_rect: Optional[pg.Rect]
+    game_over_label: List[List[Character]]
+    time_out_label: List[List[Character]]
+    player_one_label: List[Character]
+    player_two_label: List[Character]
+    main_menu_labels: List[List[Character]]
+
     def __init__(self, game_info: Dict[str, Any], state: str) -> None:
         self.sprite_sheet = setup.GFX["text_images"]
         self.coin_total = game_info[c.COIN_TOTAL]
@@ -34,28 +66,6 @@ class OverheadInfo:
         self.state = state
         self.special_state: Optional[str] = None
         self.game_info = game_info
-
-        self.image_dict: Dict[str, pg.Surface] = {}
-        self.score_images: List[Character] = []
-        self.mario_label: List[Character] = []
-        self.world_label: List[Character] = []
-        self.time_label: List[Character] = []
-        self.stage_label: List[Character] = []
-        self.label_list: List[List[Character]] = []
-        self.center_labels: List[List[Character]] = []
-        self.count_down_images: List[Character] = []
-        self.coin_count_images: List[Character] = []
-        self.flashing_coin: Optional[flashing_coin.Coin] = None
-        self.life_times_image: Optional[pg.Surface] = None
-        self.life_times_rect: Optional[pg.Rect] = None
-        self.life_total_label: List[Character] = []
-        self.mario_image: Optional[pg.Surface] = None
-        self.mario_rect: Optional[pg.Rect] = None
-        self.game_over_label: List[List[Character]] = []
-        self.time_out_label: List[List[Character]] = []
-        self.player_one_label: List[Character] = []
-        self.player_two_label: List[Character] = []
-        self.main_menu_labels: List[List[Character]] = []
 
         self.create_image_dict()
         self.create_score_group()
@@ -172,24 +182,25 @@ class OverheadInfo:
         self.create_label(self.count_down_images, str(self.time), 645, 55)
 
     def create_label(
-        self, label_list: List[Character], string: str, x: int, y: int
+        self, label_list: List[Character], string: str, x: int | float, y: int | float
     ) -> None:
         """Creates a label (WORLD, TIME, MARIO)"""
         for letter in string:
             label_list.append(Character(self.image_dict[letter]))
 
-        self.set_label_rects(label_list, x, y)
+        self.set_label_rects(label_list, int(x), int(y))
 
     def set_label_rects(
         self, label_list: List[Character], x: int, y: int
     ) -> None:
         """Set the location of each individual character"""
         for i, letter in enumerate(label_list):
-            letter.rect.x = x + ((letter.rect.width + 3) * i)
-            letter.rect.y = y
-            if letter.image == self.image_dict["-"]:
-                letter.rect.y += 7
-                letter.rect.x += 2
+            if letter.rect is not None:
+                letter.rect.x = x + ((letter.rect.width + 3) * i)
+                letter.rect.y = y
+                if letter.image == self.image_dict["-"]:
+                    letter.rect.y += 7
+                    letter.rect.x += 2
 
     def create_coin_counter(self) -> None:
         """Creates the info that tracks the number of coins Mario collects"""
@@ -273,6 +284,7 @@ class OverheadInfo:
             self.update_score_images(self.score_images, self.score)
             if (
                 level_info[c.LEVEL_STATE] != c.FROZEN
+                and self.mario is not None
                 and self.mario.state != c.WALKING_TO_CASTLE
                 and self.mario.state != c.END_OF_LEVEL_FALL
                 and not self.mario.dead
@@ -382,33 +394,33 @@ class OverheadInfo:
     def draw_main_menu_info(self, surface: pg.Surface) -> None:
         """Draws info for main menu"""
         for info in self.score_images:
-            surface.blit(info.image, info.rect)
+            surface.blit(info.image, info.rect)  # type: ignore[arg-type]
 
         for label in self.main_menu_labels:
             for letter in label:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         for character in self.coin_count_images:
-            surface.blit(character.image, character.rect)
+            surface.blit(character.image, character.rect)  # type: ignore[arg-type]
 
         for label in self.label_list:
             for letter in label:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         if self.flashing_coin:
-            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)  # type: ignore[arg-type]
 
     def draw_loading_screen_info(self, surface: pg.Surface) -> None:
         """Draws info for loading screen"""
         for info in self.score_images:
-            surface.blit(info.image, info.rect)
+            surface.blit(info.image, info.rect)  # type: ignore[arg-type]
 
         for word in self.center_labels:
             for letter in word:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         for character in self.life_total_label:
-            surface.blit(character.image, character.rect)
+            surface.blit(character.image, character.rect)  # type: ignore[arg-type]
 
         if self.mario_image and self.mario_rect:
             surface.blit(self.mario_image, self.mario_rect)
@@ -416,67 +428,67 @@ class OverheadInfo:
             surface.blit(self.life_times_image, self.life_times_rect)
 
         for character in self.coin_count_images:
-            surface.blit(character.image, character.rect)
+            surface.blit(character.image, character.rect)  # type: ignore[arg-type]
 
         for label in self.label_list:
             for letter in label:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         if self.flashing_coin:
-            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)  # type: ignore[arg-type]
 
     def draw_level_screen_info(self, surface: pg.Surface) -> None:
         """Draws info during regular game play"""
         for info in self.score_images:
-            surface.blit(info.image, info.rect)
+            surface.blit(info.image, info.rect)  # type: ignore[arg-type]
 
         for digit in self.count_down_images:
-            surface.blit(digit.image, digit.rect)
+            surface.blit(digit.image, digit.rect)  # type: ignore[arg-type]
 
         for character in self.coin_count_images:
-            surface.blit(character.image, character.rect)
+            surface.blit(character.image, character.rect)  # type: ignore[arg-type]
 
         for label in self.label_list:
             for letter in label:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         if self.flashing_coin:
-            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)  # type: ignore[arg-type]
 
     def draw_game_over_screen_info(self, surface: pg.Surface) -> None:
         """Draws info when game over"""
         for info in self.score_images:
-            surface.blit(info.image, info.rect)
+            surface.blit(info.image, info.rect)  # type: ignore[arg-type]
 
         for word in self.game_over_label:
             for letter in word:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         for character in self.coin_count_images:
-            surface.blit(character.image, character.rect)
+            surface.blit(character.image, character.rect)  # type: ignore[arg-type]
 
         for label in self.label_list:
             for letter in label:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         if self.flashing_coin:
-            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)  # type: ignore[arg-type]
 
     def draw_time_out_screen_info(self, surface: pg.Surface) -> None:
         """Draws info when on the time out screen"""
         for info in self.score_images:
-            surface.blit(info.image, info.rect)
+            surface.blit(info.image, info.rect)  # type: ignore[arg-type]
 
         for word in self.time_out_label:
             for letter in word:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         for character in self.coin_count_images:
-            surface.blit(character.image, character.rect)
+            surface.blit(character.image, character.rect)  # type: ignore[arg-type]
 
         for label in self.label_list:
             for letter in label:
-                surface.blit(letter.image, letter.rect)
+                surface.blit(letter.image, letter.rect)  # type: ignore[arg-type]
 
         if self.flashing_coin:
-            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)
+            surface.blit(self.flashing_coin.image, self.flashing_coin.rect)  # type: ignore[arg-type]

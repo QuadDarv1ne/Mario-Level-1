@@ -78,7 +78,7 @@ class Boss(Enemy, ABC):
         self.start_x = x
         self.start_y = y
 
-        self.state = BossState.INTRO
+        self.state: BossState = BossState.INTRO
         self.stats = BossStats()
 
         # Timers
@@ -613,6 +613,6 @@ def create_boss(boss_type: str, x: int, y: int) -> Boss:
     }
 
     if boss_type.lower() in bosses:
-        return bosses[boss_type.lower()](x, y)
+        return bosses[boss_type.lower()](x, y)  # type: ignore[return-value, misc]
     else:
         raise ValueError(f"Unknown boss type: {boss_type}")

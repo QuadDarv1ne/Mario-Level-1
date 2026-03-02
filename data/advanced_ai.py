@@ -193,7 +193,7 @@ class EnemyAI:
                 position=mario_pos,
                 distance=distance,
                 visible=True,
-                last_known_position=(current_time, mario_pos),
+                last_known_position=(mario_pos[0], mario_pos[1]),
             )
 
             # Update alert state
@@ -388,12 +388,12 @@ class EnemyAI:
             return
 
         # Move to last known position
-        last_pos = self.target.last_known_position[1] if self.target.last_known_position else None
+        last_pos = self.target.last_known_position
         if last_pos is None:
             self.enemy.x_vel = 0
             return
-            
-        enemy_pos = (self.enemy.rect.centerx, self.enemy.rect.centery)
+
+        enemy_pos: Tuple[float, float] = (float(self.enemy.rect.centerx), float(self.enemy.rect.centery))
 
         distance = math.sqrt((last_pos[0] - enemy_pos[0]) ** 2 + (last_pos[1] - enemy_pos[1]) ** 2)
 

@@ -474,7 +474,7 @@ def load_game_file() -> Optional["GameSave"]:
         with open(SAVE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         result = GameSave.from_dict(data)
-        return result
+        return result  # type: ignore[return-value]
     except (IOError, OSError, ValueError):
         return None
 
@@ -597,7 +597,7 @@ def save_game(game_data: GameData, slot: int = 1) -> bool:
     """Save game (backward compatible)."""
     try:
         if SAVE_FILE:
-            return save_game_file(game_data)
+            return save_game_file(game_data)  # type: ignore[arg-type]
     except Exception:
         pass
     return get_save_manager().save_game(slot, game_data)

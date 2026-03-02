@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pygame as pg
 
@@ -26,6 +26,24 @@ from ..player_progression import get_progression_manager
 
 class AnimatedButton:
     """Animated menu button with hover effects."""
+
+    rect: pg.Rect
+    text: str
+    action: str
+    base_color: Tuple[int, int, int]
+    hover_color: Tuple[int, int, int]
+    current_color: Tuple[int, int, int]
+    is_hovered: bool
+    is_pressed: bool
+    tween: TweenManager
+    scale: float
+    alpha: int
+    y_offset: int
+    pulse_timer: float
+    pulse_speed: float
+    font: Any
+    text_surface: pg.Surface
+    text_rect: pg.Rect
 
     def __init__(
         self,
@@ -52,7 +70,6 @@ class AnimatedButton:
         self.scale: float = 1.0
         self.alpha: int = 255
         self.y_offset: int = 0
-        self.current_color: Tuple[int, int, int] = color
 
         # Pulse animation
         self.pulse_timer = 0
@@ -65,7 +82,8 @@ class AnimatedButton:
 
     def _lighten_color(self, color: Tuple[int, int, int], amount: int) -> Tuple[int, int, int]:
         """Lighten a color by a given amount."""
-        return tuple(int(min(255, max(0, c + amount))) for c in color)
+        result = tuple(int(min(255, max(0, c + amount))) for c in color)
+        return (result[0], result[1], result[2])
 
     def update(self, dt: int, mouse_pos: Tuple[int, int]) -> None:
         """Update button state."""
@@ -74,11 +92,11 @@ class AnimatedButton:
 
         # Color interpolation
         target_color = self.hover_color if self.is_hovered else self.base_color
+        new_color = []
         for i in range(3):
             diff = target_color[i] - self.current_color[i]
-            self.current_color = tuple(
-                self.current_color[j] + int(diff * 0.2) if j == i else self.current_color[j] for j in range(3)
-            )
+            new_color.append(int(self.current_color[i] + diff * 0.2))
+        self.current_color = (new_color[0], new_color[1], new_color[2])
 
         # Scale animation on hover
         target_scale = 1.1 if self.is_hovered else 1.0
@@ -203,6 +221,25 @@ class ParticleBackground:
 class EnhancedMenu(tools._State):
     """Enhanced main menu with animations."""
 
+    background: Optional[pg.Surface]
+    background_rect: pg.Rect
+    bg_offset: float
+    bg_direction: int
+    buttons: List[AnimatedButton]
+    logo_surface: Optional[pg.Surface]
+    logo_rect: pg.Rect
+    logo_y_offset: float
+    logo_timer: float
+    logo_bounce_speed: float
+    particles: List[Dict[str, Any]]
+    spawn_timer: float
+    spawn_interval: float
+    progression: Any
+    selected_index: int
+    menu_alpha: float
+    fade_in: bool
+    transition_alpha: float
+
     def __init__(self) -> None:
         super().__init__()
         self.persist: Dict[str, Any] = {}
@@ -239,9 +276,11 @@ class EnhancedMenu(tools._State):
         # Create gradient background if no image
         if self.background is None:
             self.background = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
+            dark_blue = getattr(c, "DARK_BLUE", (0, 0, 139))
+            sky_blue = getattr(c, "SKY_BLUE", (135, 206, 235))
             for y in range(c.SCREEN_HEIGHT):
                 ratio = y / c.SCREEN_HEIGHT
-                color = tuple(int(c * (1 - ratio) + c.DARK_BLUE * ratio) for c in c.SKY_BLUE)
+                color = tuple(int(c_val * (1 - ratio) + sky_blue[0] * ratio) for c_val in dark_blue)
                 pg.draw.line(self.background, color, (0, y), (c.SCREEN_WIDTH, y))
 
         self.background_rect = self.background.get_rect()
@@ -358,14 +397,16 @@ class EnhancedMenu(tools._State):
         self.logo_y_offset = math.sin(self.logo_timer * self.logo_bounce_speed) * 10
 
         # Update logo rect
-        self.logo_rect = self.logo_surface.get_rect(
-            centerx=c.SCREEN_WIDTH // 2,
-            top=60 + self.logo_y_offset,
-        )
-        self.subtitle_rect = self.subtitle_surface.get_rect(
-            centerx=c.SCREEN_WIDTH // 2,
-            top=140 + self.logo_y_offset * 0.5,
-        )
+        if self.logo_surface:
+            self.logo_rect = self.logo_surface.get_rect(
+                centerx=c.SCREEN_WIDTH // 2,
+                top=60 + self.logo_y_offset,
+            )
+        if self.subtitle_surface:
+            self.subtitle_rect = self.subtitle_surface.get_rect(
+                centerx=c.SCREEN_WIDTH // 2,
+                top=140 + self.logo_y_offset * 0.5,
+            )
 
     def _update_background(self, dt: int) -> None:
         """Update background parallax."""
@@ -376,14 +417,17 @@ class EnhancedMenu(tools._State):
     def _draw(self, surface: pg.Surface) -> None:
         """Draw all menu elements."""
         # Draw background
-        surface.blit(self.background, (self.bg_offset, 0))
+        if self.background:
+            surface.blit(self.background, (self.bg_offset, 0))
 
         # Draw particles
         self.particle_system.draw(surface)
 
         # Draw logo
-        surface.blit(self.logo_surface, self.logo_rect)
-        surface.blit(self.subtitle_surface, self.subtitle_rect)
+        if self.logo_surface and self.logo_rect:
+            surface.blit(self.logo_surface, self.logo_rect)
+        if self.subtitle_surface and self.subtitle_rect:
+            surface.blit(self.subtitle_surface, self.subtitle_rect)
 
         # Draw player stats (top right)
         self._draw_player_stats(surface)

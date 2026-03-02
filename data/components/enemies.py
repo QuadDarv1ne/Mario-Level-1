@@ -22,6 +22,7 @@ class Enemy(pg.sprite.Sprite):
     ]
 
     rect: pg.Rect
+    state: Any
 
     def __init__(self) -> None:
         pg.sprite.Sprite.__init__(self)
@@ -31,7 +32,7 @@ class Enemy(pg.sprite.Sprite):
         self.animate_timer: float = 0
         self.death_timer: float = 0
         self.gravity: float = 1.5
-        self.state: str = c.WALK
+        self.state: Any = c.WALK
         self.name: str = ""
         self.direction: str = ""
         self.x_vel: float = 0
