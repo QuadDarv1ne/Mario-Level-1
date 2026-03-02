@@ -1,13 +1,18 @@
-"""Level 6 state for Super Mario Bros - World 2-2 (Underwater)."""
+"""Level 6 state for Super Mario Bros - World 2-2."""
 
 from __future__ import annotations
 
-from .level5 import Level5
+from .. import constants as c
+from .base_level import BaseLevel
 
 
-class Level6(Level5):
-    """Level 6 - World 2-2 (Underwater level)"""
+class Level6(BaseLevel):
+    """Level 6 - World 2-2 themed level"""
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.level_file = "data/levels/level_2_2.json"
+    level_file = "data/levels/level_2_2.json"
+
+    def get_level_music_key(self) -> str:
+        return "level6"
+
+    def get_next_level(self) -> str:
+        return c.LEVEL7

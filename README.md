@@ -125,19 +125,19 @@ black data/ tests/
 ## 🚀 Running the Game
 
 ```bash
-python mario_level_1.py
+python Mario.py
 ```
 
 Or on Windows:
 ```bash
-python mario_level_1.py
+python Mario.py
 ```
 
 ## 📁 Project Structure
 
 ```
 Mario-Level-1/
-├── mario_level_1.py      # Main entry point
+├── Mario.py            # Main entry point
 ├── requirements.txt      # Python dependencies
 ├── pyproject.toml       # Project configuration
 ├── .pre-commit-config.yaml

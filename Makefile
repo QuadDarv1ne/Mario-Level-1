@@ -36,7 +36,7 @@ venv:
 
 # Run the game
 run:
-	$(PYTHON) mario_level_1.py
+	$(PYTHON) Mario.py
 
 # Run tests
 test:
@@ -93,7 +93,7 @@ clean:
 # Build executable
 build:
 	$(PYTHON) -m pip install pyinstaller
-	$(PYTHON) -m PyInstaller --onefile --name mario_level_1 mario_level_1.py
+	$(PYTHON) -m PyInstaller --onefile --name Mario Mario.py
 	@echo "Build complete! Executable in dist/"
 
 # Quick validation (for CI)

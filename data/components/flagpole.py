@@ -8,6 +8,7 @@ import pygame as pg
 
 from data import constants as c
 from .. import setup
+from ..tools import sprite_utils
 
 
 class Flag(pg.sprite.Sprite):
@@ -34,15 +35,9 @@ class Flag(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Extracts image from sprite sheet"""
-        image = pg.Surface([width, height])
-        rect = image.get_rect()
-
-        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
-        image.set_colorkey(c.BLACK)
-        image = pg.transform.scale(
-            image, (int(rect.width * c.BRICK_SIZE_MULTIPLIER), int(rect.height * c.BRICK_SIZE_MULTIPLIER))
+        return sprite_utils.extract_image(
+            self.sprite_sheet, x, y, width, height, c.BRICK_SIZE_MULTIPLIER, c.BLACK
         )
-        return image
 
     def update(self, *args: Any) -> None:
         """Updates behavior"""
@@ -88,15 +83,9 @@ class Pole(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Extracts image from sprite sheet"""
-        image = pg.Surface([width, height])
-        rect = image.get_rect()
-
-        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
-        image.set_colorkey(c.BLACK)
-        image = pg.transform.scale(
-            image, (int(rect.width * c.BRICK_SIZE_MULTIPLIER), int(rect.height * c.BRICK_SIZE_MULTIPLIER))
+        return sprite_utils.extract_image(
+            self.sprite_sheet, x, y, width, height, c.BRICK_SIZE_MULTIPLIER, c.BLACK
         )
-        return image
 
     def update(self, *args: Any) -> None:
         """Placeholder for update, since there is nothing to update"""
@@ -123,13 +112,9 @@ class Finial(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Extracts image from sprite sheet"""
-        image = pg.Surface([width, height])
-        rect = image.get_rect()
-
-        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
-        image.set_colorkey(c.BLACK)
-        image = pg.transform.scale(image, (int(rect.width * c.SIZE_MULTIPLIER), int(rect.height * c.SIZE_MULTIPLIER)))
-        return image
+        return sprite_utils.extract_image(
+            self.sprite_sheet, x, y, width, height, c.SIZE_MULTIPLIER, c.BLACK
+        )
 
     def update(self, *args: Any) -> None:
         pass
