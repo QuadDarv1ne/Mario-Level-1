@@ -75,9 +75,6 @@ class TestBrickCustomization:
     def test_brick_6coins_contents(self, brick_6coins: Brick) -> None:
         """Test Brick with 6coins contents."""
         assert brick_6coins.contents == "6coins"
-        # Note: coin_total is reset to 0 after setup_contents in __init__
-        # This is a known bug in the original code
-        brick_6coins.setup_contents()
         assert brick_6coins.coin_total == 6
 
     def test_brick_custom_name(self) -> None:
@@ -185,8 +182,6 @@ class TestBrickIntegration:
         assert normal_brick.contents is None
         assert brick_6coins.contents == "6coins"
         assert star_brick.contents == "star"
-        # Note: coin_total is reset to 0 after setup_contents in __init__
-        brick_6coins.setup_contents()
         assert brick_6coins.coin_total == 6
         assert normal_brick.coin_total == 0
 

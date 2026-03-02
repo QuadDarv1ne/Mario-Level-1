@@ -45,12 +45,12 @@ class Brick(pg.sprite.Sprite):
         self.gravity: float = 1.2
         self.name = name
         self.contents = contents
-        self.setup_contents()
+        self.coin_total: int = 0
         self.group = powerup_group
         self.powerup_in_box = True
-
-        self.coin_total: int = 0
         self.powerup: Optional[Any] = None
+
+        self.setup_contents()
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Extracts the image from the sprite sheet"""
