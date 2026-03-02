@@ -1022,6 +1022,7 @@ class SimpleResourceManager:
     """
 
     _instance: Optional["SimpleResourceManager"] = None
+    _initialized: bool = False
 
     def __new__(cls) -> "SimpleResourceManager":
         """Singleton pattern."""
@@ -1032,7 +1033,7 @@ class SimpleResourceManager:
 
     def __init__(self) -> None:
         """Initialize."""
-        if self._initialized:
+        if SimpleResourceManager._initialized:
             return
 
         self._gfx: Dict[str, pg.Surface] = {}
@@ -1041,7 +1042,7 @@ class SimpleResourceManager:
         self._fonts: Dict[str, str] = {}
         self._screen: Optional[pg.Surface] = None
         self._screen_rect: Optional[pg.Rect] = None
-        self._initialized = True
+        SimpleResourceManager._initialized = True
 
     @classmethod
     def get(cls) -> "SimpleResourceManager":
