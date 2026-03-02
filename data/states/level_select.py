@@ -324,6 +324,13 @@ class LevelSelect(tools._State):
             elif event.key == pg.K_UP:
                 self.selected_level = (self.selected_level - 1) % len(self.level_names)
                 self._update_cursor_position()
+            elif event.key == pg.K_RETURN or event.key == pg.K_a or event.key == pg.K_s:
+                # Play selection sound
+                if setup.SFX.get('bump'):
+                    setup.SFX['bump'].play()
+                self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
+                self.next = c.LOAD_SCREEN
+                self.done = True
             elif event.key == pg.K_ESCAPE:
                 self.next = c.MAIN_MENU
                 self.done = True

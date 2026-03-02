@@ -287,7 +287,7 @@ class BaseLevel(tools._State):
         """Set up Mario player sprite."""
         self.mario = mario_module.Mario()
 
-        if self.mario and self.mario.rect is not None and self.viewport is not None:
+        if self.mario and self.mario.rect is not None:
             mario_start = getattr(self.level_data, "mario_start", {"x": 110, "y": c.GROUND_HEIGHT})
             self.mario.rect.x = mario_start.get("x", 110)
             self.mario.rect.y = mario_start.get("y", c.GROUND_HEIGHT)
@@ -313,6 +313,11 @@ class BaseLevel(tools._State):
         """Update level state."""
         self.current_time = current_time
         self.game_info[c.CURRENT_TIME] = current_time
+
+        # Debug logging for level 2
+        if self.__class__.__name__ == "Level2" and not hasattr(self, '_logged_update'):
+            logger.info(f"Level2 update called: state={self.state}, mario={self.mario is not None}")
+            self._logged_update = True
 
         # Update music based on time remaining
         time_remaining = self.game_info.get(str(c.LEVEL_TIME), 400)

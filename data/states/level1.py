@@ -1543,7 +1543,8 @@ class Level1(tools._State):
             self.flag_timer = self.current_time
         elif (self.current_time - self.flag_timer) > 2000:
             self.set_game_info_values()
-            self.next = c.LEVEL2
+            # Set current level for load screen
+            self.game_info[c.CURRENT_LEVEL] = c.LEVEL2
             self.sound_manager.stop_music()
             self.done = True
 
