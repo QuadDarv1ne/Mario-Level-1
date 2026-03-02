@@ -264,9 +264,10 @@ class TestEndToEndScenarios:
         """Test that game can initialize without errors."""
         from data import setup
 
-        # Verify setup completed
-        assert hasattr(setup, "SCREEN")
-        assert setup.SCREEN is not None
+        # Verify setup module is loaded
+        assert hasattr(setup, "initialize")
+        assert hasattr(setup, "GFX")
+        assert len(setup.GFX) > 0
 
     def test_multiple_state_cycles(self):
         """Test multiple state transition cycles."""

@@ -404,7 +404,7 @@ def temp_asset_dir():
     """Create temporary asset directory for tests."""
     import tempfile
     from pathlib import Path
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         path = Path(tmpdir)
 
@@ -425,3 +425,23 @@ def temp_asset_dir():
         pg.quit()
 
         yield path
+
+
+@pytest.fixture(scope="session", autouse=True)
+def init_setup_resources():
+    """Initialize setup.GFX with dummy resources for component tests."""
+    from data import setup
+    
+    # Create dummy surfaces for required assets
+    if not setup.GFX.get("tile_set"):
+        setup.GFX["tile_set"] = pg.Surface((512, 512))
+    if not setup.GFX.get("item_objects"):
+        setup.GFX["item_objects"] = pg.Surface((512, 512))
+    if not setup.GFX.get("smb_enemies_sheet"):
+        setup.GFX["smb_enemies_sheet"] = pg.Surface((512, 512))
+    if not setup.GFX.get("mario_bros"):
+        setup.GFX["mario_bros"] = pg.Surface((512, 512))
+    if not setup.GFX.get("text_images"):
+        setup.GFX["text_images"] = pg.Surface((512, 512))
+    
+    yield

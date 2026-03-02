@@ -59,10 +59,10 @@ def get_resource_manager() -> SimpleResourceManager:
 # =============================================================================
 
 
-def _create_state(module_path: str, class_name: str) -> Optional[Any]:
+def _create_state(module_name: str, class_name: str) -> Optional[Any]:
     """Generic state factory."""
     try:
-        module = __import__(module_path, fromlist=[class_name])
+        module = __import__(f"data.{module_name}", fromlist=[class_name])
         cls = getattr(module, class_name)
         return cls()
     except Exception as e:
@@ -72,72 +72,72 @@ def _create_state(module_path: str, class_name: str) -> Optional[Any]:
 
 def create_main_menu() -> Optional[Any]:
     """Create main menu state."""
-    return _create_state(".states.main_menu", "Menu")
+    return _create_state("states.main_menu", "Menu")
 
 
 def create_level_select() -> Optional[Any]:
     """Create level select state."""
-    return _create_state(".states.level_select", "LevelSelect")
+    return _create_state("states.level_select", "LevelSelect")
 
 
 def create_settings() -> Optional[Any]:
     """Create settings state."""
-    return _create_state(".states.settings", "Settings")
+    return _create_state("states.settings", "Settings")
 
 
 def create_load_screen() -> Optional[Any]:
     """Create load screen state."""
-    return _create_state(".states.load_screen", "LoadScreen")
+    return _create_state("states.load_screen", "LoadScreen")
 
 
 def create_timeout_screen() -> Optional[Any]:
     """Create timeout screen state."""
-    return _create_state(".states.load_screen", "TimeOut")
+    return _create_state("states.load_screen", "TimeOut")
 
 
 def create_game_over() -> Optional[Any]:
     """Create game over state."""
-    return _create_state(".states.load_screen", "GameOver")
+    return _create_state("states.load_screen", "GameOver")
 
 
 def create_level1() -> Optional[Any]:
     """Create level 1 state."""
-    return _create_state(".states.level1", "Level1")
+    return _create_state("states.level1", "Level1")
 
 
 def create_level2() -> Optional[Any]:
     """Create level 2 state."""
-    return _create_state(".states.level2", "Level2")
+    return _create_state("states.level2", "Level2")
 
 
 def create_level3() -> Optional[Any]:
     """Create level 3 state."""
-    return _create_state(".states.level3", "Level3")
+    return _create_state("states.level3", "Level3")
 
 
 def create_level4() -> Optional[Any]:
     """Create level 4 state."""
-    return _create_state(".states.level4", "Level4")
+    return _create_state("states.level4", "Level4")
 
 
 def create_level5() -> Optional[Any]:
     """Create level 5 state."""
-    return _create_state(".states.level5", "Level5")
+    return _create_state("states.level5", "Level5")
 
 
 def create_level6() -> Optional[Any]:
     """Create level 6 state."""
-    return _create_state(".states.level6", "Level6")
+    return _create_state("states.level6", "Level6")
 
 
 def create_level7() -> Optional[Any]:
     """Create level 7 state."""
-    return _create_state(".states.level7", "Level7")
+    return _create_state("states.level7", "Level7")
 
 
 def create_level8() -> Optional[Any]:
     """Create level 8 state."""
-    return _create_state(".states.level8", "Level8")
+    return _create_state("states.level8", "Level8")
 
 
 # Auto-initialize on module import for backward compatibility
