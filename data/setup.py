@@ -5,98 +5,53 @@ This module initializes the display and creates dictionaries of resources.
 from __future__ import annotations
 
 import logging
-import os
 from typing import Any, Dict, Optional
 
 import pygame as pg
 
-from . import constants as c
-from . import tools
+from .resource_manager import SimpleResourceManager, get_simple_manager
 
-# Configure module logger
 logger = logging.getLogger(__name__)
 
-ORIGINAL_CAPTION: str = c.ORIGINAL_CAPTION
+ORIGINAL_CAPTION: str = "Super Mario Bros"
 
-# Global resources
+# Backward compatibility globals
 FONTS: Dict[str, str] = {}
 MUSIC: Dict[str, str] = {}
 GFX: Dict[str, pg.Surface] = {}
 SFX: Dict[str, pg.mixer.Sound] = {}
-
-# Display surfaces
 SCREEN: Optional[pg.Surface] = None
 SCREEN_RECT: Optional[pg.Rect] = None
 
 
 def initialize_display() -> None:
-    """
-    Initialize pygame display.
-
-    Sets up the main game window with centered positioning.
-    """
+    """Initialize pygame display."""
     global SCREEN, SCREEN_RECT
-
-    os.environ["SDL_VIDEO_CENTERED"] = "1"
-    pg.init()
-    pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT])
-    pg.display.set_caption(ORIGINAL_CAPTION)
-    SCREEN = pg.display.set_mode(c.SCREEN_SIZE)
-    SCREEN_RECT = SCREEN.get_rect()
-    logger.info(f"Display initialized: {c.SCREEN_SIZE}")
+    manager = get_simple_manager()
+    manager.initialize_display()
+    SCREEN = manager.screen
+    SCREEN_RECT = manager.screen_rect
 
 
-def load_resources() -> None:
-    """
-    Load all game resources (graphics, sound, music, fonts).
-
-    Handles missing resource directories gracefully.
-    """
+def load_resources(resources_dir: str = "resources") -> None:
+    """Load all game resources."""
     global FONTS, MUSIC, GFX, SFX
-
-    resources_dir = "resources"
-
-    # Load fonts
-    fonts_dir = os.path.join(resources_dir, "fonts")
-    if os.path.exists(fonts_dir):
-        FONTS = tools.load_all_fonts(fonts_dir)
-        logger.info(f"Loaded {len(FONTS)} fonts")
-    else:
-        logger.warning(f"Fonts directory not found: {fonts_dir}")
-
-    # Load music
-    music_dir = os.path.join(resources_dir, "music")
-    if os.path.exists(music_dir):
-        MUSIC = tools.load_all_music(music_dir)
-        logger.info(f"Loaded {len(MUSIC)} music tracks")
-    else:
-        logger.warning(f"Music directory not found: {music_dir}")
-
-    # Load graphics
-    graphics_dir = os.path.join(resources_dir, "graphics")
-    if os.path.exists(graphics_dir):
-        GFX = tools.load_all_gfx(graphics_dir)
-        logger.info(f"Loaded {len(GFX)} graphics")
-    else:
-        logger.warning(f"Graphics directory not found: {graphics_dir}")
-
-    # Load sound effects
-    sound_dir = os.path.join(resources_dir, "sound")
-    if os.path.exists(sound_dir):
-        SFX = tools.load_all_sfx(sound_dir)
-        logger.info(f"Loaded {len(SFX)} sound effects")
-    else:
-        logger.warning(f"Sound directory not found: {sound_dir}")
+    manager = get_simple_manager()
+    manager.load_resources(resources_dir)
+    FONTS = manager.fonts
+    MUSIC = manager.music
+    GFX = manager.gfx
+    SFX = manager.sfx
 
 
-def initialize() -> None:
-    """
-    Initialize the entire setup (display + resources).
+def initialize(resources_dir: str = "resources") -> None:
+    """Initialize the entire setup (display + resources)."""
+    get_simple_manager().initialize(resources_dir)
 
-    Call this once at game startup.
-    """
-    initialize_display()
-    load_resources()
+
+def get_resource_manager() -> SimpleResourceManager:
+    """Get the resource manager singleton."""
+    return get_simple_manager()
 
 
 # =============================================================================
@@ -104,171 +59,115 @@ def initialize() -> None:
 # =============================================================================
 
 
+def _create_state(module_path: str, class_name: str) -> Optional[Any]:
+    """Generic state factory."""
+    try:
+        module = __import__(module_path, fromlist=[class_name])
+        cls = getattr(module, class_name)
+        return cls()
+    except Exception as e:
+        logger.error(f"Failed to create {class_name}: {e}")
+        return None
+
+
 def create_main_menu() -> Optional[Any]:
     """Create main menu state."""
-    try:
-        from .states import main_menu
-
-        return main_menu.Menu()
-    except Exception as e:
-        logger.error(f"Failed to create main menu: {e}")
-        return None
+    return _create_state(".states.main_menu", "Menu")
 
 
 def create_level_select() -> Optional[Any]:
     """Create level select state."""
-    try:
-        from .states import level_select
+    return _create_state(".states.level_select", "LevelSelect")
 
-        return level_select.LevelSelect()
-    except Exception as e:
-        logger.error(f"Failed to create level select: {e}")
-        return None
+
 def create_settings() -> Optional[Any]:
     """Create settings state."""
-    try:
-        from .states import settings
-
-        return settings.Settings()
-    except Exception as e:
-        logger.error(f"Failed to create settings: {e}")
-        return None
-
+    return _create_state(".states.settings", "Settings")
 
 
 def create_load_screen() -> Optional[Any]:
     """Create load screen state."""
-    try:
-        from .states import load_screen
-
-        return load_screen.LoadScreen()
-    except Exception as e:
-        logger.error(f"Failed to create load screen: {e}")
-        return None
+    return _create_state(".states.load_screen", "LoadScreen")
 
 
 def create_timeout_screen() -> Optional[Any]:
     """Create timeout screen state."""
-    try:
-        from .states import load_screen
-
-        return load_screen.TimeOut()
-    except Exception as e:
-        logger.error(f"Failed to create timeout screen: {e}")
-        return None
+    return _create_state(".states.load_screen", "TimeOut")
 
 
 def create_game_over() -> Optional[Any]:
     """Create game over state."""
-    try:
-        from .states import load_screen
-
-        return load_screen.GameOver()
-    except Exception as e:
-        logger.error(f"Failed to create game over: {e}")
-        return None
+    return _create_state(".states.load_screen", "GameOver")
 
 
 def create_level1() -> Optional[Any]:
     """Create level 1 state."""
-    try:
-        from .states import level1
-
-        return level1.Level1()
-    except Exception as e:
-        logger.error(f"Failed to create level 1: {e}")
-        return None
+    return _create_state(".states.level1", "Level1")
 
 
 def create_level2() -> Optional[Any]:
     """Create level 2 state."""
-    try:
-        from .states import level2
-
-        return level2.Level2()
-    except Exception as e:
-        logger.error(f"Failed to create level 2: {e}")
-        return None
+    return _create_state(".states.level2", "Level2")
 
 
 def create_level3() -> Optional[Any]:
     """Create level 3 state."""
-    try:
-        from .states import level3
-
-        return level3.Level3()
-    except Exception as e:
-        logger.error(f"Failed to create level 3: {e}")
-        return None
+    return _create_state(".states.level3", "Level3")
 
 
 def create_level4() -> Optional[Any]:
     """Create level 4 state."""
-    try:
-        from .states import level4
-
-        return level4.Level4()
-    except Exception as e:
-        logger.error(f"Failed to create level 4: {e}")
-        return None
+    return _create_state(".states.level4", "Level4")
 
 
 def create_level5() -> Optional[Any]:
     """Create level 5 state."""
-    try:
-        from .states import level5
-
-        return level5.Level5()
-    except Exception as e:
-        logger.error(f"Failed to create level 5: {e}")
-        return None
+    return _create_state(".states.level5", "Level5")
 
 
 def create_level6() -> Optional[Any]:
     """Create level 6 state."""
-    try:
-        from .states import level6
-
-        return level6.Level6()
-    except Exception as e:
-        logger.error(f"Failed to create level 6: {e}")
-        return None
+    return _create_state(".states.level6", "Level6")
 
 
 def create_level7() -> Optional[Any]:
     """Create level 7 state."""
-    try:
-        from .states import level7
-
-        return level7.Level7()
-    except Exception as e:
-        logger.error(f"Failed to create level 7: {e}")
-        return None
+    return _create_state(".states.level7", "Level7")
 
 
 def create_level8() -> Optional[Any]:
     """Create level 8 state."""
-    try:
-        from .states import level8
-
-        return level8.Level8()
-    except Exception as e:
-        logger.error(f"Failed to create level 8: {e}")
-        return None
+    return _create_state(".states.level8", "Level8")
 
 
-# Initialize on module import for backward compatibility
+# Auto-initialize on module import for backward compatibility
 try:
     initialize()
-except Exception as e:
-    logger.error(f"Setup initialization failed: {e}")
-
-
-# Minimal fallback resources for tests/environments without assets
-try:
-    if "smb_enemies_sheet" not in GFX:
-        # Provide a dummy surface to prevent KeyError in tests
-        GFX["smb_enemies_sheet"] = pg.Surface((512, 512))
 except Exception:
-    # If pygame isn't fully functional, skip creating surfaces
-    pass
+    # If resources aren't available, just initialize display
+    try:
+        initialize_display()
+    except Exception:
+        # Create dummy surface for headless tests
+        try:
+            import pygame as pg
+            SCREEN = pg.Surface((800, 600))
+            SCREEN_RECT = SCREEN.get_rect()
+        except Exception:
+            pass
+
+    # Provide dummy resources for tests
+    try:
+        import pygame as pg
+        if not GFX.get("smb_enemies_sheet"):
+            GFX["smb_enemies_sheet"] = pg.Surface((512, 512))
+        if not GFX.get("mario_bros"):
+            GFX["mario_bros"] = pg.Surface((512, 512))
+        if not GFX.get("tile_set"):
+            GFX["tile_set"] = pg.Surface((512, 512))
+        if not GFX.get("item_objects"):
+            GFX["item_objects"] = pg.Surface((512, 512))
+        if not GFX.get("text_images"):
+            GFX["text_images"] = pg.Surface((512, 512))
+    except Exception:
+        pass
