@@ -8,6 +8,7 @@ import pygame as pg
 
 from data import constants as c
 from .. import setup
+from ..tools import sprite_utils
 
 
 class Powerup(pg.sprite.Sprite):
@@ -53,21 +54,9 @@ class Powerup(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Get the image frames from the sprite sheet"""
-
-        image = pg.Surface((width, height), pg.SRCALPHA)
-        rect = image.get_rect()
-
-        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
-        image.set_colorkey(c.BLACK)
-
-        image = pg.transform.scale(
-            image,
-            (
-                int(rect.width * c.SIZE_MULTIPLIER),
-                int(rect.height * c.SIZE_MULTIPLIER),
-            ),
+        return sprite_utils.extract_image(
+            self.sprite_sheet, x, y, width, height, c.SIZE_MULTIPLIER, c.BLACK
         )
-        return image
 
     def update(self, game_info: Dict[str, Any], *args: Any) -> None:
         """Updates powerup behavior"""
@@ -279,21 +268,9 @@ class FireBall(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Get the image frames from the sprite sheet"""
-
-        image = pg.Surface((width, height), pg.SRCALPHA)
-        rect = image.get_rect()
-
-        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
-        image.set_colorkey(c.BLACK)
-
-        image = pg.transform.scale(
-            image,
-            (
-                int(rect.width * c.SIZE_MULTIPLIER),
-                int(rect.height * c.SIZE_MULTIPLIER),
-            ),
+        return sprite_utils.extract_image(
+            self.sprite_sheet, x, y, width, height, c.SIZE_MULTIPLIER, c.BLACK
         )
-        return image
 
     def update(self, game_info: Dict[str, Any], viewport: pg.Rect) -> None:
         """Updates fireball behavior"""

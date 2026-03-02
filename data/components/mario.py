@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 import pygame as pg
 
 from .. import setup, tools
+from ..tools import sprite_utils
 from data import constants as c
 from ..constants_extended import (
     ANIMATION_FAST,
@@ -331,13 +332,9 @@ class Mario(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Extracts image from sprite sheet"""
-        image = pg.Surface([width, height])
-        rect = image.get_rect()
-
-        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
-        image.set_colorkey(c.BLACK)
-        image = pg.transform.scale(image, (int(rect.width * c.SIZE_MULTIPLIER), int(rect.height * c.SIZE_MULTIPLIER)))
-        return image
+        return sprite_utils.extract_image(
+            self.sprite_sheet, x, y, width, height, c.SIZE_MULTIPLIER, c.BLACK
+        )
 
     def update(self, keys: Tuple[bool, ...], game_info: Dict[str, Any], fire_group: pg.sprite.Group) -> None:
         """Updates Mario's states and animations once per frame"""

@@ -298,20 +298,22 @@ class LevelSelect(tools._State):
                     setup.SFX['coin'].play()
             self.input_timer = current_time
             
-        elif keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
+        elif can_input and (keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]):
             # Play selection sound
             if setup.SFX.get('bump'):
                 setup.SFX['bump'].play()
             self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
             self.next = c.LOAD_SCREEN
             self.done = True
-            
-        elif keys[pg.K_ESCAPE]:
+            self.input_timer = current_time
+
+        elif can_input and keys[pg.K_ESCAPE]:
             # Play back sound
             if setup.SFX.get('pipe'):
                 setup.SFX['pipe'].play()
             self.next = c.MAIN_MENU
             self.done = True
+            self.input_timer = current_time
 
     def get_event(self, event: pg.event.Event) -> None:
         """Handle events"""
@@ -322,10 +324,6 @@ class LevelSelect(tools._State):
             elif event.key == pg.K_UP:
                 self.selected_level = (self.selected_level - 1) % len(self.level_names)
                 self._update_cursor_position()
-            elif event.key in (pg.K_RETURN, pg.K_a, pg.K_s):
-                self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
-                self.next = c.LOAD_SCREEN
-                self.done = True
             elif event.key == pg.K_ESCAPE:
                 self.next = c.MAIN_MENU
                 self.done = True

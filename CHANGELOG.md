@@ -125,7 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resource loading error handling
 
 ### Technical
-- Updated version to 2.7.0 in `mario_level_1.py`
+- Updated version to 2.7.0 in `Mario.py`
 - Added comprehensive docstrings to new classes and functions
 - Formatted all new code with black and isort
 

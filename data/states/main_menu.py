@@ -270,11 +270,11 @@ class Menu(tools._State):
                 setup.SFX['coin'].play()
 
         # Handle selection
-        if keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]:
+        if can_input and (keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]):
             # Play selection sound
             if setup.SFX.get('bump'):
                 setup.SFX['bump'].play()
-                
+
             if self.selected_option == 0:  # PLAY
                 self.reset_game_info()
                 self.next = c.LOAD_SCREEN
@@ -289,9 +289,10 @@ class Menu(tools._State):
                 pg.quit()
                 import sys
                 sys.exit()
-                
+            self.input_timer = current_time
+
         # Handle ESC to exit
-        if keys[pg.K_ESCAPE]:
+        if can_input and keys[pg.K_ESCAPE]:
             pg.quit()
             import sys
             sys.exit()
