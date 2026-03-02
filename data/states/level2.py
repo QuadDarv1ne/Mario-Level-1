@@ -14,5 +14,8 @@ class Level2(BaseLevel):
     def get_level_music_key(self) -> str:
         return "level2"
 
+    def get_background_key(self) -> str:
+        return "level_1"  # Use level_1 background as fallback
+
     def get_next_level(self) -> str:
         return c.LEVEL3

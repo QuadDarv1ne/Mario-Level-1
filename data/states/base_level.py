@@ -109,9 +109,11 @@ class BaseLevel(tools._State):
         # Load level data if level_file is specified
         if self.level_file:
             try:
+                logger.info(f"Loading level: {self.level_file}")
                 self.level_data = level_loader.load_level_from_json(self.level_file)
+                logger.info(f"Level loaded: {self.level_data.name if self.level_data else 'None'}")
             except (FileNotFoundError, Exception) as e:
-                logger.error(f"Failed to load level {self.level_file}: {e}")
+                logger.error(f"Failed to load level {self.level_file}: {e}", exc_info=True)
                 self.next = c.GAME_OVER
                 self.done = True
                 return
@@ -120,6 +122,7 @@ class BaseLevel(tools._State):
         self._init_groups()
         self.create_overhead_display()
         self.setup_all()
+        logger.info(f"Level setup complete: {self.__class__.__name__}")
 
         # Start level music (override in subclass for specific music)
         self.music_manager.play_level_music(self.get_level_music_key(), fade_ms=1000)
@@ -182,7 +185,8 @@ class BaseLevel(tools._State):
         width = self.level_data.width
         height = self.level_data.height
 
-        self.background = setup.GFX.get("level_1", pg.Surface((width, height)))
+        bg_key = self.get_background_key()
+        self.background = setup.GFX.get(bg_key, pg.Surface((width, height)))
         if hasattr(self.level_data, "background_color"):
             self.background.fill(self.level_data.background_color)
         self.back_rect = self.background.get_rect()
@@ -193,6 +197,10 @@ class BaseLevel(tools._State):
         if setup.SCREEN is not None and self.level_rect:
             self.viewport = setup.SCREEN.get_rect(bottom=self.level_rect.bottom)
             self.viewport.x = self.game_info.get(str(c.CAMERA_START_X), 0)
+
+    def get_background_key(self) -> str:
+        """Return background key for this level. Override in subclass."""
+        return "level_1"
 
     def setup_ground(self) -> None:
         """Set up ground collision rectangles from level data."""
