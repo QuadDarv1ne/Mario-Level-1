@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 
 import pygame as pg
 
@@ -192,18 +192,18 @@ class AnimationCache:
     def get_or_create(
         self,
         key: str,
-        creator_func: callable,
+        creator_func: Callable[..., List[pg.Surface]],
         *args: Any,
         **kwargs: Any,
     ) -> List[pg.Surface]:
         """Get cached frames or create them if not cached.
-        
+
         Args:
             key: Cache key
             creator_func: Function to create frames
             *args: Positional arguments for creator function
             **kwargs: Keyword arguments for creator function
-            
+
         Returns:
             List of animation frames
         """

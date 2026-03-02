@@ -381,7 +381,7 @@ class QuestManager:
         # Callbacks
         self.on_quest_accepted: Optional[Callable[[Quest], None]] = None
         self.on_quest_completed: Optional[Callable[[Quest], None]] = None
-        self.on_quest_updated: Optional[Callable[[Quest], str], None] = None
+        self.on_quest_updated: Optional[Callable[[Quest], None]] = None
 
         # Load quests
         self._load_quests()
@@ -440,18 +440,18 @@ class QuestManager:
         try:
             with open(self.save_path, "r") as f:
                 data = json.load(f)
-                return data.get("last_daily_reset", 0)
+                return float(data.get("last_daily_reset", 0))
         except Exception:
-            return 0
+            return 0.0
 
     def _get_last_weekly_reset(self) -> float:
         """Get last weekly reset timestamp."""
         try:
             with open(self.save_path, "r") as f:
                 data = json.load(f)
-                return data.get("last_weekly_reset", 0)
+                return float(data.get("last_weekly_reset", 0))
         except Exception:
-            return 0
+            return 0.0
 
     def accept_quest(self, quest_id: str) -> bool:
         """
@@ -498,7 +498,7 @@ class QuestManager:
         Returns:
             List of (quest_id, objective_id) tuples that were updated
         """
-        updated = []
+        updated: List[Tuple[str, str]] = []
 
         for quest in self.quests.values():
             if quest.state != QuestState.ACTIVE:

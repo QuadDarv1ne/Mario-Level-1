@@ -49,9 +49,10 @@ class AnimatedButton:
 
         # Animation
         self.tween = TweenManager()
-        self.scale = 1.0
-        self.alpha = 255
-        self.y_offset = 0
+        self.scale: float = 1.0
+        self.alpha: int = 255
+        self.y_offset: int = 0
+        self.current_color: Tuple[int, int, int] = color
 
         # Pulse animation
         self.pulse_timer = 0
@@ -64,7 +65,7 @@ class AnimatedButton:
 
     def _lighten_color(self, color: Tuple[int, int, int], amount: int) -> Tuple[int, int, int]:
         """Lighten a color by a given amount."""
-        return tuple(min(255, max(0, c + amount)) for c in color)
+        return tuple(int(min(255, max(0, c + amount))) for c in color)
 
     def update(self, dt: int, mouse_pos: Tuple[int, int]) -> None:
         """Update button state."""

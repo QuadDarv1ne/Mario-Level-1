@@ -162,9 +162,10 @@ class EnemyAI:
 
         # Update target memory
         for target_id, target in list(self.known_targets.items()):
-            target.time_since_seen = (current_time - target.last_known_position[0]) / 1000
-            if target.time_since_seen > self.config.memory_time:
-                del self.known_targets[target_id]
+            if target.last_known_position is not None:
+                target.time_since_seen = (current_time - target.last_known_position[0]) / 1000
+                if target.time_since_seen > self.config.memory_time:
+                    del self.known_targets[target_id]
 
     def _detect_target(self, mario: Any, game_info: Dict[str, Any]) -> None:
         """Detect and track target."""
@@ -187,11 +188,12 @@ class EnemyAI:
 
         # Update target
         if visible:
+            current_time = float(game_info.get(c.CURRENT_TIME, 0))
             self.target = AITarget(
                 position=mario_pos,
                 distance=distance,
                 visible=True,
-                last_known_position=(game_info.get(c.CURRENT_TIME, 0), mario_pos),
+                last_known_position=(current_time, mario_pos),
             )
 
             # Update alert state
@@ -386,7 +388,11 @@ class EnemyAI:
             return
 
         # Move to last known position
-        last_pos = self.target.last_known_position[1]
+        last_pos = self.target.last_known_position[1] if self.target.last_known_position else None
+        if last_pos is None:
+            self.enemy.x_vel = 0
+            return
+            
         enemy_pos = (self.enemy.rect.centerx, self.enemy.rect.centery)
 
         distance = math.sqrt((last_pos[0] - enemy_pos[0]) ** 2 + (last_pos[1] - enemy_pos[1]) ** 2)

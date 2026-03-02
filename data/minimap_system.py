@@ -386,8 +386,8 @@ class Minimap:
             for i in range(10):
                 angle = math.pi * 2 * i / 10 - math.pi / 2
                 r = size if i % 2 == 0 else size // 2
-                px = map_x + math.cos(angle) * r
-                py = map_y + math.sin(angle) * r
+                px = int(map_x + math.cos(angle) * r)
+                py = int(map_y + math.sin(angle) * r)
                 points.append((px, py))
             pg.draw.polygon(self.surface, color, points)
 

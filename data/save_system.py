@@ -300,7 +300,7 @@ class SaveManager:
 
             return True
 
-        except (IOError, OSError, json.JSONEncodeError) as e:
+        except (IOError, OSError, ValueError) as e:
             print(f"Save error: {e}")
             return False
 
@@ -466,15 +466,16 @@ def save_game_file(save: GameSave) -> bool:
         return False
 
 
-def load_game_file() -> Optional[GameSave]:
+def load_game_file() -> Optional["GameSave"]:
     """Load a GameSave from module-level `SAVE_FILE` or return None."""
     if not os.path.exists(SAVE_FILE):
         return None
     try:
         with open(SAVE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-        return GameSave.from_dict(data)
-    except (IOError, json.JSONDecodeError):
+        result = GameSave.from_dict(data)
+        return result
+    except (IOError, OSError, ValueError):
         return None
 
 
@@ -594,25 +595,19 @@ def get_save_manager() -> SaveManager:
 # Backward compatibility functions
 def save_game(game_data: GameData, slot: int = 1) -> bool:
     """Save game (backward compatible)."""
-    # If a module-level SAVE_FILE is being used by tests or simple API,
-    # prefer the file-based API when callers supply a GameData instance
     try:
-        # If caller passed a GameData instance and the module-level SAVE_FILE is set,
-        # use the simple file-based save API.
-        if isinstance(game_data, GameData) and SAVE_FILE:
-            return save_game_file(game_data)  # type: ignore[name-defined]
+        if SAVE_FILE:
+            return save_game_file(game_data)
     except Exception:
         pass
-    # Fallback to slot-based manager
     return get_save_manager().save_game(slot, game_data)
 
 
 def load_game(slot: int = 1) -> Optional[GameData]:
     """Load game (backward compatible)."""
-    # Prefer file-based load if a module-level SAVE_FILE is defined
     try:
         if SAVE_FILE:
-            loaded = load_game_file()  # type: ignore[name-defined]
+            loaded = load_game_file()
             if loaded is not None:
                 return loaded
     except Exception:
@@ -624,7 +619,7 @@ def delete_save(slot: int = 1) -> bool:
     """Delete save (backward compatible)."""
     try:
         if SAVE_FILE:
-            return delete_save_file()  # type: ignore[name-defined]
+            return delete_save_file()
     except Exception:
         pass
     return get_save_manager().delete_save(slot)

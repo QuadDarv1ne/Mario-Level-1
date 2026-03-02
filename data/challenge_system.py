@@ -315,7 +315,7 @@ class ChallengeManager:
         try:
             with open(self.save_path, "r") as f:
                 data = json.load(f)
-                return data.get("last_daily", time.time())
+                return float(data.get("last_daily", time.time()))
         except Exception:
             return time.time()
 
@@ -324,7 +324,7 @@ class ChallengeManager:
         try:
             with open(self.save_path, "r") as f:
                 data = json.load(f)
-                return data.get("last_weekly", time.time())
+                return float(data.get("last_weekly", time.time()))
         except Exception:
             return time.time()
 
