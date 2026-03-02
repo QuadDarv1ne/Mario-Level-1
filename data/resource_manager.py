@@ -20,6 +20,7 @@ from typing import Dict, List, Optional, Any, Callable, Union
 import pygame as pg
 
 from . import constants as c
+from . import settings_manager
 from . import tools
 
 
@@ -1062,17 +1063,16 @@ class SimpleResourceManager:
         pg.init()
         pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT])
         pg.display.set_caption(c.ORIGINAL_CAPTION)
-        
+
         # Get fullscreen setting from settings manager
-        from .settings_manager import get_settings_manager
-        settings_mgr = get_settings_manager()
+        settings_mgr = settings_manager.get_settings_manager()
         fullscreen = settings_mgr.get("fullscreen", False)
-        
+
         if fullscreen:
             self._screen = pg.display.set_mode(c.SCREEN_SIZE, pg.FULLSCREEN)
         else:
             self._screen = pg.display.set_mode(c.SCREEN_SIZE)
-        
+
         self._screen_rect = self._screen.get_rect()
 
     def load_resources(self, resources_dir: str = "resources") -> None:
