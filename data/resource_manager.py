@@ -1004,3 +1004,156 @@ class ResourcePreloader:
     def get_current_asset(self) -> str:
         """Get currently loading asset name."""
         return self._current_asset
+
+
+# =============================================================================
+# Simple ResourceManager for backward compatibility with setup.py
+# =============================================================================
+
+
+class SimpleResourceManager:
+    """
+    Simple resource manager for game initialization.
+
+    Singleton pattern - provides centralized access to game resources.
+    """
+
+    _instance: Optional["SimpleResourceManager"] = None
+
+    def __new__(cls) -> "SimpleResourceManager":
+        """Singleton pattern."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self) -> None:
+        """Initialize."""
+        if self._initialized:
+            return
+
+        self._gfx: Dict[str, pg.Surface] = {}
+        self._sfx: Dict[str, pg.mixer.Sound] = {}
+        self._music: Dict[str, str] = {}
+        self._fonts: Dict[str, str] = {}
+        self._screen: Optional[pg.Surface] = None
+        self._screen_rect: Optional[pg.Rect] = None
+        self._initialized = True
+
+    @classmethod
+    def get(cls) -> "SimpleResourceManager":
+        """Get singleton instance."""
+        if cls._instance is None:
+            cls._instance = SimpleResourceManager()
+        return cls._instance
+
+    @classmethod
+    def reset(cls) -> None:
+        """Reset singleton for tests."""
+        cls._instance = None
+
+    def initialize_display(self) -> None:
+        """Initialize pygame display."""
+        os.environ["SDL_VIDEO_CENTERED"] = "1"
+        pg.init()
+        pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT])
+        pg.display.set_caption(c.ORIGINAL_CAPTION)
+        self._screen = pg.display.set_mode(c.SCREEN_SIZE)
+        self._screen_rect = self._screen.get_rect()
+
+    def load_resources(self, resources_dir: str = "resources") -> None:
+        """Load all resources."""
+        self._load_fonts(os.path.join(resources_dir, "fonts"))
+        self._load_music(os.path.join(resources_dir, "music"))
+        self._load_gfx(os.path.join(resources_dir, "graphics"))
+        self._load_sfx(os.path.join(resources_dir, "sound"))
+
+    def _load_fonts(self, fonts_dir: str) -> None:
+        """Load fonts."""
+        if os.path.exists(fonts_dir):
+            self._fonts = tools.load_all_fonts(fonts_dir)
+
+    def _load_music(self, music_dir: str) -> None:
+        """Load music."""
+        if os.path.exists(music_dir):
+            self._music = tools.load_all_music(music_dir)
+
+    def _load_gfx(self, graphics_dir: str) -> None:
+        """Load graphics."""
+        if os.path.exists(graphics_dir):
+            self._gfx = tools.load_all_gfx(graphics_dir)
+
+    def _load_sfx(self, sound_dir: str) -> None:
+        """Load sound effects."""
+        if os.path.exists(sound_dir):
+            self._sfx = tools.load_all_sfx(sound_dir)
+
+    def initialize(self, resources_dir: str = "resources") -> None:
+        """Full initialization."""
+        self.initialize_display()
+        self.load_resources(resources_dir)
+
+    @property
+    def screen(self) -> Optional[pg.Surface]:
+        """Get screen surface."""
+        return self._screen
+
+    @property
+    def screen_rect(self) -> Optional[pg.Rect]:
+        """Get screen rect."""
+        return self._screen_rect
+
+    @property
+    def gfx(self) -> Dict[str, pg.Surface]:
+        """Get graphics."""
+        return self._gfx
+
+    @property
+    def sfx(self) -> Dict[str, pg.mixer.Sound]:
+        """Get sound effects."""
+        return self._sfx
+
+    @property
+    def music(self) -> Dict[str, str]:
+        """Get music."""
+        return self._music
+
+    @property
+    def fonts(self) -> Dict[str, str]:
+        """Get fonts."""
+        return self._fonts
+
+    def get_gfx(self, name: str) -> pg.Surface:
+        """Get graphics by name."""
+        return self._gfx[name]
+
+    def get_sfx(self, name: str) -> pg.mixer.Sound:
+        """Get sound effect by name."""
+        return self._sfx[name]
+
+    def has_gfx(self, name: str) -> bool:
+        """Check if graphics exists."""
+        return name in self._gfx
+
+    def has_sfx(self, name: str) -> bool:
+        """Check if sfx exists."""
+        return name in self._sfx
+
+    def clear(self) -> None:
+        """Clear all resources."""
+        self._gfx.clear()
+        self._sfx.clear()
+        self._music.clear()
+        self._fonts.clear()
+
+
+# Module-level functions for backward compatibility
+_simple_manager: Optional[SimpleResourceManager] = None
+
+
+def get_simple_manager() -> SimpleResourceManager:
+    """Get simple manager instance."""
+    global _simple_manager
+    if _simple_manager is None:
+        _simple_manager = SimpleResourceManager()
+    return _simple_manager
