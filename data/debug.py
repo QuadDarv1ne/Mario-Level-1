@@ -11,6 +11,7 @@ Provides:
 
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Optional, Callable, Any, Tuple
@@ -18,6 +19,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Callable, Any, Tuple
 import pygame as pg
 
 from . import constants as c
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from pygame.font import Font
@@ -708,31 +711,31 @@ class DebugModeManager:
         """Toggle god mode (invincibility)."""
         self.god_mode = not self.god_mode
         self._update_active_modes()
-        print(f"God Mode: {'ON' if self.god_mode else 'OFF'}")
+        logger.info("God Mode: %s", "ON" if self.god_mode else "OFF")
 
     def toggle_teleport(self) -> None:
         """Toggle teleport on click."""
         self.teleport_on_click = not self.teleport_on_click
         self._update_active_modes()
-        print(f"Teleport on Click: {'ON' if self.teleport_on_click else 'OFF'}")
+        logger.info("Teleport on Click: %s", "ON" if self.teleport_on_click else "OFF")
 
     def toggle_no_clip(self) -> None:
         """Toggle no clip mode."""
         self.no_clip = not self.no_clip
         self._update_active_modes()
-        print(f"No Clip: {'ON' if self.no_clip else 'OFF'}")
+        logger.info("No Clip: %s", "ON" if self.no_clip else "OFF")
 
     def toggle_speed_hack(self) -> None:
         """Toggle speed hack (2x speed)."""
         self.speed_hack = not self.speed_hack
         self._update_active_modes()
-        print(f"Speed Hack: {'ON' if self.speed_hack else 'OFF'}")
+        logger.info("Speed Hack: %s", "ON" if self.speed_hack else "OFF")
 
     def toggle_super_jump(self) -> None:
         """Toggle super jump (2x jump height)."""
         self.super_jump = not self.super_jump
         self._update_active_modes()
-        print(f"Super Jump: {'ON' if self.super_jump else 'OFF'}")
+        logger.info("Super Jump: %s", "ON" if self.super_jump else "OFF")
 
     def _update_active_modes(self) -> None:
         """Update list of active modes for display."""
@@ -778,7 +781,7 @@ class DebugModeManager:
         mario.x_vel = 0
         mario.y_vel = 0
 
-        print(f"Teleported to ({world_x}, {world_y})")
+        logger.info("Teleported to (%d, %d)", world_x, world_y)
         return True
 
     def apply_debug_mode(self, mario: Optional[Any]) -> None:

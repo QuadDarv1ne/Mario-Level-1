@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 import pygame as pg
+
+logger = logging.getLogger(__name__)
 
 
 class LevelDataValidator:
@@ -98,11 +101,11 @@ class SpriteValidator:
             True if valid, False otherwise
         """
         if not hasattr(sprite, "rect"):
-            print(f"Warning: {sprite_name} missing rect attribute")
+            logger.warning("%s missing rect attribute", sprite_name)
             return False
 
         if sprite.rect is None:
-            print(f"Warning: {sprite_name} rect is None")
+            logger.warning("%s rect is None", sprite_name)
             return False
 
         return True
@@ -120,15 +123,15 @@ class SpriteValidator:
             Valid frame index (clamped to range)
         """
         if not frame_list:
-            print(f"Warning: {sprite_name} has empty frame list")
+            logger.warning("%s has empty frame list", sprite_name)
             return 0
 
         if frame_index < 0:
-            print(f"Warning: {sprite_name} frame_index {frame_index} < 0, clamping to 0")
+            logger.warning("%s frame_index %d < 0, clamping to 0", sprite_name, frame_index)
             return 0
 
         if frame_index >= len(frame_list):
-            print(f"Warning: {sprite_name} frame_index {frame_index} >= {len(frame_list)}, clamping")
+            logger.warning("%s frame_index %d >= %d, clamping", sprite_name, frame_index, len(frame_list))
             return len(frame_list) - 1
 
         return frame_index
@@ -174,10 +177,10 @@ class AudioErrorHandler:
             pg.mixer.music.load(music_path)
             return True
         except pg.error as e:
-            print(f"Could not load music {music_path}: {e}")
+            logger.error("Could not load music %s: %s", music_path, e)
             return False
         except FileNotFoundError:
-            print(f"Music file not found: {music_path}")
+            logger.error("Music file not found: %s", music_path)
             return False
 
     @staticmethod
@@ -195,7 +198,7 @@ class AudioErrorHandler:
             pg.mixer.music.play(loops, fade_ms=fade_ms)
             return True
         except pg.error as e:
-            print(f"Could not play music: {e}")
+            logger.error("Could not play music: %s", e)
             return False
 
     @staticmethod
@@ -211,10 +214,10 @@ class AudioErrorHandler:
         try:
             return pg.mixer.Sound(sound_path)
         except pg.error as e:
-            print(f"Could not load sound {sound_path}: {e}")
+            logger.error("Could not load sound %s: %s", sound_path, e)
             return None
         except FileNotFoundError:
-            print(f"Sound file not found: {sound_path}")
+            logger.error("Sound file not found: %s", sound_path)
             return None
 
 
@@ -235,7 +238,7 @@ class GameStateValidator:
 
         for key in required_keys:
             if key not in game_info:
-                print(f"Warning: game_info missing required key: {key}")
+                logger.warning("game_info missing required key: %s", key)
                 return False
 
         return True
