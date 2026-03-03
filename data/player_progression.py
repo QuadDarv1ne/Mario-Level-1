@@ -12,11 +12,14 @@ Features:
 from __future__ import annotations
 
 import json
+import logging
 import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import List, Optional, Tuple, Dict, Any, Callable
+
+logger = logging.getLogger(__name__)
 
 
 class PlayerRank(Enum):
@@ -279,7 +282,7 @@ class ProgressionManager:
                     self.profile.skills[skill_id] = skill
 
         except (json.JSONDecodeError, IOError) as e:
-            print(f"Error loading profile: {e}")
+            logger.warning("Error loading profile: %s", e)
             self._create_new_profile()
 
     def _save_profile(self) -> None:

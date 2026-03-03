@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Dict
 
 import pygame as pg
+
+logger = logging.getLogger(__name__)
 
 
 def load_new_music() -> Dict[str, str]:
@@ -68,7 +71,7 @@ def load_new_sounds() -> Dict[str, pg.mixer.Sound]:
             try:
                 sounds[name] = pg.mixer.Sound(filepath)
             except pg.error as e:
-                print(f"Could not load sound {name}: {e}")
+                logger.warning("Could not load sound %s: %s", name, e)
 
     return sounds
 

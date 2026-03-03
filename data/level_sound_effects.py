@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Dict, Optional
 
 import pygame as pg
 
 from .new_audio_loader import load_new_sounds
+
+logger = logging.getLogger(__name__)
 
 
 class LevelSoundEffects:
@@ -108,7 +111,7 @@ class LevelSoundEffects:
                 sound.play()
                 return True
             except pg.error as e:
-                print(f"Could not play sound {sound_name}: {e}")
+                logger.warning("Could not play sound %s: %s", sound_name, e)
         return False
 
     def set_volume(self, volume: float) -> None:

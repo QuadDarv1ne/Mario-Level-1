@@ -12,12 +12,15 @@ from __future__ import annotations
 
 import gzip
 import json
+import logging
 import os
 import shutil
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from . import constants as c
 
@@ -301,7 +304,7 @@ class SaveManager:
             return True
 
         except (IOError, OSError, ValueError) as e:
-            print(f"Save error: {e}")
+            logger.warning("Save error: %s", e)
             return False
 
     def load_game(self, slot: int) -> Optional[GameData]:
@@ -346,7 +349,7 @@ class SaveManager:
             return game_data
 
         except (IOError, OSError, json.JSONDecodeError, gzip.BadGzipFile) as e:
-            print(f"Load error: {e}")
+            logger.warning("Load error: %s", e)
             # Mark save as invalid
             if slot in self.metadata:
                 self.metadata[slot].is_valid = False

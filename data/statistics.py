@@ -12,11 +12,14 @@ Provides:
 from __future__ import annotations
 
 import json
+import logging
 import time
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, Any
+
+logger = logging.getLogger(__name__)
 
 from . import constants as c
 
@@ -279,7 +282,7 @@ class StatisticsManager:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             return True
         except IOError as e:
-            print(f"Warning: Could not save statistics: {e}")
+            logger.warning("Could not save statistics: %s", e)
             return False
 
     def load(self) -> bool:
@@ -317,7 +320,7 @@ class StatisticsManager:
             return True
 
         except (json.JSONDecodeError, KeyError) as e:
-            print(f"Warning: Could not load statistics: {e}")
+            logger.warning("Could not load statistics: %s", e)
             return False
 
     def get_session_summary(self) -> dict:

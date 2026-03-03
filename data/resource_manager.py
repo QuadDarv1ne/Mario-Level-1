@@ -11,6 +11,7 @@ Provides:
 """
 from __future__ import annotations
 
+import logging
 import os
 import threading
 from dataclasses import dataclass, field
@@ -20,6 +21,8 @@ from queue import PriorityQueue, Empty
 from typing import Dict, List, Optional, Any, Callable, Union, Tuple
 
 import pygame as pg
+
+logger = logging.getLogger(__name__)
 
 from . import constants as c
 from . import game_settings
@@ -891,7 +894,7 @@ class AsyncAssetLoader:
                         self._failed_count += 1
                         self._pending_count -= 1
 
-                    print(f"[AsyncLoader] Failed to load {request.name}: {e}")
+                    logger.warning("[AsyncLoader] Failed to load %s: %s", request.name, e)
 
                 finally:
                     self._queue.task_done()

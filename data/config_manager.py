@@ -182,10 +182,10 @@ class ConfigManager:
     Loads configuration from YAML file and provides
     type-safe access to configuration values.
 
-    Usage:
+    Example:
         config = ConfigManager()
         config.load()
-        print(config.display.screen_width)
+        width = config.display.screen_width
     """
 
     def __init__(self, config_path: Optional[str] = None) -> None:

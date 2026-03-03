@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 import pygame as pg
 
 from .new_audio_loader import get_level_music, load_new_music
+
+logger = logging.getLogger(__name__)
 
 
 class LevelMusicManager:
@@ -53,7 +56,7 @@ class LevelMusicManager:
 
             return True
         except pg.error as e:
-            print(f"Could not play music for {level_name}: {e}")
+            logger.warning("Could not play music for %s: %s", level_name, e)
             return False
 
     def switch_to_sped_up(self, fade_ms: int = 500) -> bool:
