@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, Optional
 
 import pygame as pg
@@ -11,6 +12,8 @@ from .error_handler import LevelDataValidator, GameStateValidator
 from .level_music_manager import get_level_music_manager
 from .level_sound_effects import get_level_sound_effects
 from .performance_optimizer import get_collision_optimizer
+
+logger = logging.getLogger(__name__)
 
 
 class LevelBase:
@@ -49,7 +52,7 @@ class LevelBase:
         data, error = LevelDataValidator.load_and_validate_level(self.level_file)
 
         if error:
-            print(f"Error loading level: {error}")
+            logger.error("Error loading level: %s", error)
             self.done = True
             return False
 
@@ -64,7 +67,7 @@ class LevelBase:
         """
         success = self.music_manager.play_level_music(self.level_name, fade_ms=fade_ms)
         if not success:
-            print(f"Warning: Could not start music for {self.level_name}")
+            logger.warning("Could not start music for %s", self.level_name)
 
     def update_audio(self) -> None:
         """Update audio based on game state."""
@@ -165,6 +168,6 @@ class LevelBase:
         """
         for group in groups:
             if group is None:
-                print("Warning: Sprite group is None")
+                logger.warning("Sprite group is None")
                 return False
         return True
