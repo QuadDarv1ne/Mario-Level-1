@@ -7,7 +7,6 @@ __author__ = "justinarmstrong"
 __version__ = "2.7.0"
 
 from . import level_loader
-from . import constants as c
 from . import tools
 from . import setup
 from . import achievements_v2 as achievements
