@@ -4,16 +4,17 @@ Tests for screenshot, debug, and statistics systems.
 Note: Dialogue system tests are in test_wave2_systems.py (DialogManager)
 """
 import tempfile
+import os
 from pathlib import Path
 
 import pytest
 import pygame as pg
 
-from data.screenshot import (
-    ScreenshotInfo,
+from data.screenshot_manager import (
     ScreenshotManager,
-    AutoScreenshot,
-    AUTO_TRIGGERS,
+    ScreenshotMetadata,
+    get_screenshot_manager,
+    capture_screenshot,
 )
 
 from data.debug import (
@@ -40,24 +41,44 @@ from data.statistics import (
 # Screenshot System Tests
 # =============================================================================
 
-class TestScreenshotInfo:
-    """Tests for ScreenshotInfo."""
+class TestScreenshotMetadata:
+    """Tests for ScreenshotMetadata."""
 
-    def test_screenshot_info_creation(self) -> None:
-        """Test screenshot info creation."""
-        info = ScreenshotInfo(
+    def test_metadata_creation(self) -> None:
+        """Test screenshot metadata creation."""
+        metadata = ScreenshotMetadata(
             filename="test.png",
-            filepath="screenshots/test.png",
-            timestamp="2026-02-28_12-00-00",
-            width=800,
-            height=600,
-            game_state={"level": "1-1"},
-            tags=["level_complete"]
+            timestamp="2026-02-28T12:00:00",
+            resolution=(800, 600),
+            game_state="level_1",
+            level="1-1",
+            score=1000,
+            coin_total=10,
+            fps=60.0,
+            notes="Test screenshot"
         )
 
-        assert info.filename == "test.png"
-        assert info.width == 800
-        assert info.height == 600
+        assert metadata.filename == "test.png"
+        assert metadata.resolution == (800, 600)
+        assert metadata.score == 1000
+
+    def test_metadata_to_dict(self) -> None:
+        """Test metadata to_dict."""
+        metadata = ScreenshotMetadata(
+            filename="test.png",
+            timestamp="2026-02-28T12:00:00",
+            resolution=(800, 600),
+            game_state="level_1",
+            level="1-1",
+            score=1000,
+            coin_total=10,
+            fps=60.0
+        )
+
+        data = metadata.to_dict()
+        assert data["filename"] == "test.png"
+        assert data["resolution"] == (800, 600)
+        assert data["score"] == 1000
 
 
 class TestScreenshotManager:
@@ -67,12 +88,12 @@ class TestScreenshotManager:
     def screenshot_manager(self) -> ScreenshotManager:
         """Create screenshot manager."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            yield ScreenshotManager(save_dir=tmpdir)
+            yield ScreenshotManager(output_dir=tmpdir)
 
     def test_manager_creation(self, screenshot_manager: ScreenshotManager) -> None:
         """Test screenshot manager initialization."""
-        assert screenshot_manager.screenshot_count == 0
-        assert screenshot_manager.max_screenshots == 1000
+        assert screenshot_manager.max_screenshots == 100
+        assert screenshot_manager.auto_cleanup is True
 
     def test_capture_screenshot(self, screenshot_manager: ScreenshotManager) -> None:
         """Test capturing screenshot."""
@@ -80,57 +101,125 @@ class TestScreenshotManager:
         screen = pg.display.set_mode((800, 600))
         screen.fill((255, 255, 255))
 
-        info = screenshot_manager.capture(screen, "test")
+        filename = screenshot_manager.capture(screen, {"level_state": "playing", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
 
-        assert info is not None
-        assert "test" in info.filename
+        assert filename is not None
+        assert filename.endswith(".png")
 
         pg.quit()
 
-    def test_capture_cooldown(self, screenshot_manager: ScreenshotManager) -> None:
-        """Test capture cooldown."""
+    def test_capture_with_metadata(self, screenshot_manager: ScreenshotManager) -> None:
+        """Test capturing screenshot with metadata."""
         pg.init()
         screen = pg.display.set_mode((800, 600))
 
-        # First capture
-        screenshot_manager.capture(screen)
+        game_info = {
+            "level_state": "playing",
+            "current_level": "1-1",
+            "score": 1500,
+            "coin_total": 25,
+            "fps": 59.5
+        }
 
-        # Immediate second capture should return None (cooldown)
-        info = screenshot_manager.capture(screen)
-        assert info is None
+        filename = screenshot_manager.capture(screen, game_info, "Test note")
+
+        assert filename is not None
+        screenshots = screenshot_manager.get_screenshots()
+        assert len(screenshots) == 1
+        assert screenshots[0]["score"] == 1500
+        assert screenshots[0]["coin_total"] == 25
 
         pg.quit()
 
-
-class TestAutoScreenshot:
-    """Tests for AutoScreenshot."""
-
-    def test_auto_screenshot_creation(self) -> None:
-        """Test auto screenshot creation."""
+    def test_get_screenshots(self, screenshot_manager: ScreenshotManager) -> None:
+        """Test getting screenshots."""
         pg.init()
-        manager = ScreenshotManager()
-        auto = AutoScreenshot(manager)
+        screen = pg.display.set_mode((100, 100))
 
-        assert auto.manager == manager
-        assert len(auto.triggers) == 0
+        screenshot_manager.capture(screen, {"level_state": "test", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
+        screenshot_manager.capture(screen, {"level_state": "test", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
+
+        screenshots = screenshot_manager.get_screenshots()
+        assert len(screenshots) == 2
 
         pg.quit()
 
-    def test_enable_trigger(self) -> None:
-        """Test enabling trigger."""
+    def test_delete_screenshot(self, screenshot_manager: ScreenshotManager) -> None:
+        """Test deleting screenshot."""
         pg.init()
-        manager = ScreenshotManager()
-        auto = AutoScreenshot(manager)
-        
-        auto.enable_trigger("level_complete")
+        screen = pg.display.set_mode((100, 100))
 
-        assert auto.triggers["level_complete"] is True
+        filename = screenshot_manager.capture(screen, {"level_state": "test", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
+        assert filename is not None
+
+        result = screenshot_manager.delete_screenshot(filename)
+        assert result is True
+
+        screenshots = screenshot_manager.get_screenshots()
+        assert len(screenshots) == 0
 
         pg.quit()
 
-    def test_auto_triggers_exist(self) -> None:
-        """Test auto triggers are defined."""
-        assert len(AUTO_TRIGGERS) > 0
+    def test_clear_all(self, screenshot_manager: ScreenshotManager) -> None:
+        """Test clearing all screenshots."""
+        pg.init()
+        screen = pg.display.set_mode((100, 100))
+
+        screenshot_manager.capture(screen, {"level_state": "test", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
+        screenshot_manager.capture(screen, {"level_state": "test", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
+
+        count = screenshot_manager.clear_all()
+        assert count == 2
+
+        screenshots = screenshot_manager.get_screenshots()
+        assert len(screenshots) == 0
+
+        pg.quit()
+
+    def test_get_stats(self, screenshot_manager: ScreenshotManager) -> None:
+        """Test getting stats."""
+        stats = screenshot_manager.get_stats()
+        assert stats["count"] == 0
+        assert stats["total_size"] == 0
+
+        pg.quit()
+
+    def test_cleanup(self, screenshot_manager: ScreenshotManager) -> None:
+        """Test auto cleanup."""
+        pg.init()
+        screen = pg.display.set_mode((100, 100))
+
+        screenshot_manager.max_screenshots = 3
+
+        for _ in range(5):
+            screenshot_manager.capture(screen, {"level_state": "test", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
+
+        screenshots = screenshot_manager.get_screenshots()
+        assert len(screenshots) <= 3
+
+        pg.quit()
+
+
+def test_global_screenshot_manager() -> None:
+    """Test global screenshot manager singleton."""
+    mgr1 = get_screenshot_manager()
+    mgr2 = get_screenshot_manager()
+    assert mgr1 is mgr2
+
+
+def test_capture_screenshot_function() -> None:
+    """Test global capture_screenshot function."""
+    pg.init()
+    screen = pg.display.set_mode((100, 100))
+
+    # Use temp dir for global manager
+    import data.screenshot_manager as sm
+    sm._screenshot_manager = ScreenshotManager(output_dir=tempfile.gettempdir())
+
+    filename = capture_screenshot(screen, {"level_state": "test", "current_level": "1-1", "score": 0, "coin_total": 0, "fps": 60.0})
+    assert filename is not None
+
+    pg.quit()
 
 
 # =============================================================================
