@@ -295,6 +295,9 @@ class InputBuffer:
 class InputManager:
     """
     Central input management system.
+    
+    Supports keyboard, gamepad, and mouse input.
+    Includes input recording/playback for testing.
 
     Usage:
         input_mgr = InputManager()
@@ -316,15 +319,30 @@ class InputManager:
         # Key bindings
         self.key_bindings: Dict[int, InputType] = {}
         self._pressed_keys: set[int] = set()
+        
+        # Gamepad state
+        self._gamepad_connected = False
+        self._gamepad_axes: dict[int, float] = {}
+        self._gamepad_buttons: dict[int, InputType] = {}
+        
+        # Mouse state
+        self._mouse_buttons: dict[int, InputType] = {}
+        self._mouse_position: tuple[int, int] = (0, 0)
 
         # State
         self.enabled = True
         self._current_time = 0.0
+        
+        # Input recording (for testing/replay)
+        self._recording: list[tuple[float, InputEvent]] = []
+        self._playback: list[tuple[float, InputEvent]] | None = None
+        self._playback_start: float = 0.0
 
         # Callbacks
         self._on_input: Optional[Callable[[InputEvent], None]] = None
 
         self._setup_default_bindings()
+        self._setup_gamepad_bindings()
 
     def _setup_default_bindings(self) -> None:
         """Setup default key bindings."""
@@ -339,6 +357,18 @@ class InputManager:
             pg.K_LSHIFT: InputType.ACTION,
             pg.K_ESCAPE: InputType.PAUSE,
         }
+        
+    def _setup_gamepad_bindings(self) -> None:
+        """Setup gamepad button bindings."""
+        # Xbox/PlayStation style layout
+        self._gamepad_buttons = {
+            0: InputType.JUMP,       # A / Cross
+            1: InputType.ACTION,     # B / Circle  
+            2: InputType.ACTION,     # X / Square
+            3: InputType.JUMP,       # Y / Triangle
+            6: InputType.PAUSE,      # Start
+            7: InputType.PAUSE,      # Back/Select
+        }
 
     def set_binding(self, key: int, input_type: InputType) -> None:
         """
@@ -349,6 +379,16 @@ class InputManager:
             input_type: Input type
         """
         self.key_bindings[key] = input_type
+        
+    def set_gamepad_binding(self, button: int, input_type: InputType) -> None:
+        """
+        Set gamepad button binding.
+        
+        Args:
+            button: Gamepad button index
+            input_type: Input type
+        """
+        self._gamepad_buttons[button] = input_type
 
     def get_binding(self, key: int) -> Optional[InputType]:
         """Get input type for key."""
@@ -384,6 +424,45 @@ class InputManager:
                 self.buffer.release(input_type)
                 self._pressed_keys.discard(event.key)
                 return True
+                
+        elif event.type == pg.JOYBUTTONDOWN:
+            if event.button in self._gamepad_buttons:
+                input_type = self._gamepad_buttons[event.button]
+                self.buffer.add(input_type)
+                if self._on_input:
+                    self._on_input(self.buffer.get_newest())  # type: ignore
+                return True
+                
+        elif event.type == pg.JOYBUTTONUP:
+            if event.button in self._gamepad_buttons:
+                input_type = self._gamepad_buttons[event.button]
+                self.buffer.release(input_type)
+                return True
+                
+        elif event.type == pg.JOYAXISMOTION:
+            self._gamepad_axes[event.axis] = event.value
+            # Handle axis-based movement
+            if event.axis in (0, 2):  # Left stick X or triggers
+                if event.value < -self.config.deadzone:
+                    self.buffer.add(InputType.MOVE_LEFT)
+                elif event.value > self.config.deadzone:
+                    self.buffer.add(InputType.MOVE_RIGHT)
+                return True
+                
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if event.button in self._mouse_buttons:
+                input_type = self._mouse_buttons[event.button]
+                self.buffer.add(input_type, position=event.pos)
+                return True
+                
+        elif event.type == pg.MOUSEBUTTONUP:
+            if event.button in self._mouse_buttons:
+                input_type = self._mouse_buttons[event.button]
+                self.buffer.release(input_type)
+                return True
+                
+        elif event.type == pg.MOUSEMOTION:
+            self._mouse_position = event.pos
 
         return False
 
@@ -393,6 +472,21 @@ class InputManager:
 
         # Clear old inputs
         self.buffer.clear_old(self.config.buffer_window * 2)
+        
+        # Check gamepad connection
+        if pg.joystick.get_count() > 0:
+            if not self._gamepad_connected:
+                try:
+                    joy = pg.joystick.Joystick(0)
+                    if not joy.get_init():
+                        joy.init()
+                    self._gamepad_connected = True
+                except pg.error:
+                    pass
+                    
+    def is_gamepad_connected(self) -> bool:
+        """Check if gamepad is connected."""
+        return self._gamepad_connected
 
     def is_action_pressed(self, input_type: InputType) -> bool:
         """
@@ -442,19 +536,29 @@ class InputManager:
         y = 0
 
         events = self.buffer.get_within_window(100)
+        
+        # Check gamepad axes first
+        if self._gamepad_connected:
+            for axis, value in self._gamepad_axes.items():
+                if axis == 0:  # Left stick X
+                    if abs(value) > self.config.deadzone:
+                        x = 1 if value > 0 else -1
+                        break
 
-        for event in events:
-            if event.consumed:
-                continue
+        # Fall back to keyboard
+        if x == 0 and y == 0:
+            for event in events:
+                if event.consumed:
+                    continue
 
-            if event.input_type == InputType.MOVE_LEFT:
-                x = -1
-            elif event.input_type == InputType.MOVE_RIGHT:
-                x = 1
-            elif event.input_type == InputType.MOVE_UP:
-                y = -1
-            elif event.input_type == InputType.MOVE_DOWN:
-                y = 1
+                if event.input_type == InputType.MOVE_LEFT:
+                    x = -1
+                elif event.input_type == InputType.MOVE_RIGHT:
+                    x = 1
+                elif event.input_type == InputType.MOVE_UP:
+                    y = -1
+                elif event.input_type == InputType.MOVE_DOWN:
+                    y = 1
 
         return (x, y)
 
@@ -474,6 +578,48 @@ class InputManager:
         """Reset input state."""
         self.buffer.clear()
         self._pressed_keys.clear()
+        self._gamepad_axes.clear()
+        
+    def start_recording(self) -> None:
+        """Start recording input sequence."""
+        self._recording.clear()
+        self._playback_start = time.time() * 1000
+        
+    def stop_recording(self) -> list[tuple[float, InputEvent]]:
+        """Stop recording and return sequence."""
+        return self._recording.copy()
+        
+    def enable_recording_mode(self) -> None:
+        """Enable automatic recording mode."""
+        def on_input(event: InputEvent) -> None:
+            current_time = time.time() * 1000
+            self._recording.append((current_time - self._playback_start, event))
+        self.set_on_input(on_input)
+        
+    def start_playback(self, recording: list[tuple[float, InputEvent]]) -> None:
+        """Start playback of recorded input."""
+        self._playback = recording.copy()
+        self._playback_index = 0
+        self._playback_start = time.time() * 1000
+        
+    def update_playback(self) -> None:
+        """Update playback state - call each frame."""
+        if self._playback is None:
+            return
+            
+        current_time = time.time() * 1000 - self._playback_start
+        
+        while self._playback_index < len(self._playback):
+            event_time, event = self._playback[self._playback_index]
+            if event_time <= current_time:
+                self.buffer.add(event.input_type)
+                self._playback_index += 1
+            else:
+                break
+                
+    def is_playback_complete(self) -> bool:
+        """Check if playback is complete."""
+        return self._playback is not None and self._playback_index >= len(self._playback)
 
 
 class ComboDetector:

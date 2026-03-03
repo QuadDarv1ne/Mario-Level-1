@@ -19,6 +19,8 @@ from . import constants as c
 class Particle:
     """
     Single particle for visual effects.
+    
+    Optimized for performance with surface caching and batch rendering.
 
     Attributes:
         x, y: Position
@@ -29,6 +31,10 @@ class Particle:
         gravity: Gravity effect on particle
         alpha: Transparency (0-255)
     """
+    
+    # Class-level surface cache for performance
+    _surface_cache: dict[tuple[int, int, int], dict[int, pg.Surface]] = {}
+    _cache_max_size = 1000
 
     def __init__(
         self,
@@ -54,11 +60,45 @@ class Particle:
         self.gravity = gravity
         self.alpha = alpha
         self.initial_alpha = alpha
-
-        # Create surface
-        self.image = pg.Surface((size, size), pg.SRCALPHA)
-        pg.draw.rect(self.image, (*color, alpha), (0, 0, size, size))
+        
+        # Cache key for surface lookup
+        self._cache_key = (color, size)
+        
+        # Get or create cached surface
+        self.image = self._get_cached_surface(color, size, alpha)
         self.rect = self.image.get_rect(center=(int(x), int(y)))
+        
+        # Pre-compute values
+        self._alpha_decay = alpha / lifetime if lifetime > 0 else 0
+        self._inv_lifetime = 1.0 / lifetime if lifetime > 0 else 0
+
+    @classmethod
+    def _get_cached_surface(cls, color: tuple[int, int, int], size: int, alpha: int) -> pg.Surface:
+        """Get cached surface or create new one."""
+        if color not in cls._surface_cache:
+            cls._surface_cache[color] = {}
+        
+        if size not in cls._surface_cache[color]:
+            surface = pg.Surface((size, size), pg.SRCALPHA)
+            pg.draw.rect(surface, (*color, alpha), (0, 0, size, size))
+            cls._surface_cache[color][size] = surface
+        
+        # Return copy to allow independent modification
+        return cls._surface_cache[color][size].copy()
+    
+    @classmethod
+    def clear_cache(cls) -> None:
+        """Clear surface cache to free memory."""
+        cls._surface_cache.clear()
+    
+    @classmethod
+    def get_cache_stats(cls) -> dict[str, int]:
+        """Get cache statistics."""
+        total = sum(len(sizes) for sizes in cls._surface_cache.values())
+        return {
+            "colors": len(cls._surface_cache),
+            "total_surfaces": total,
+        }
 
     def update(self, dt: float, viewport_x: int = 0) -> bool:
         """
@@ -81,17 +121,16 @@ class Particle:
         self.x += self.vx
         self.y += self.vy
 
-        # Update alpha (fade out)
-        life_remaining = 1.0 - (self.age / self.lifetime)
-        self.alpha = int(self.initial_alpha * life_remaining)
+        # Update alpha (linear fade out)
+        self.alpha = max(0, int(self.initial_alpha * (1.0 - self.age * self._inv_lifetime)))
 
         # Update rect
         self.rect.centerx = int(self.x) - viewport_x
         self.rect.centery = int(self.y)
 
-        # Recreate surface with new alpha
-        self.image = pg.Surface((self.size, self.size), pg.SRCALPHA)
-        pg.draw.rect(self.image, (*self.color, self.alpha), (0, 0, self.size, self.size))
+        # Update surface alpha if changed significantly
+        if self.alpha % 32 == 0:  # Only update on certain alpha values
+            self.image = self._get_cached_surface(self.color, self.size, self.alpha)
 
         return True
 
@@ -103,6 +142,8 @@ class Particle:
 class ParticleSystem:
     """
     Manages multiple particles for visual effects.
+    
+    Uses object pooling for better performance.
 
     Usage:
         particles = ParticleSystem()
@@ -120,18 +161,74 @@ class ParticleSystem:
             max_particles: Maximum number of particles to maintain
         """
         self.max_particles = max_particles
-        self.particles: List[Particle] = []
+        self.particles: list[Particle] = []
+        self._particle_pool: list[Particle] = []
+        self._pool_size = max_particles
+        
+        # Pre-allocate particle pool
+        self._initialize_pool()
+        
+        # Statistics
+        self._total_emitted = 0
+        self._peak_active = 0
+
+    def _initialize_pool(self) -> None:
+        """Pre-allocate particle objects."""
+        for _ in range(self._pool_size):
+            self._particle_pool.append(
+                Particle(0, 0, 0, 0, 1000)  # Dummy values, will be reused
+            )
+
+    def _acquire_particle(
+        self,
+        x: float,
+        y: float,
+        vx: float,
+        vy: float,
+        lifetime: float,
+        color: tuple[int, int, int],
+        size: int,
+        gravity: float,
+    ) -> Optional[Particle]:
+        """Get particle from pool or create new."""
+        if self._particle_pool:
+            particle = self._particle_pool.pop()
+            # Reset particle
+            particle.x = x
+            particle.y = y
+            particle.vx = vx
+            particle.vy = vy
+            particle.lifetime = lifetime
+            particle.age = 0
+            particle.color = color
+            particle.size = size
+            particle.gravity = gravity
+            particle.alpha = 255
+            particle.initial_alpha = 255
+            particle.alive = True
+            particle._inv_lifetime = 1.0 / lifetime if lifetime > 0 else 0
+            particle.image = particle._get_cached_surface(color, size, 255)
+            particle.rect = particle.image.get_rect(center=(int(x), int(y)))
+            return particle
+        elif len(self.particles) < self.max_particles:
+            return Particle(x, y, vx, vy, lifetime, color=color, size=size, gravity=gravity)
+        return None
+
+    def _release_particle(self, particle: Particle) -> None:
+        """Return particle to pool."""
+        if len(self._particle_pool) < self._pool_size:
+            self._particle_pool.append(particle)
 
     def emit(
         self,
         x: float,
         y: float,
         count: int,
-        vx_range: Tuple[float, float] = (-3, 3),
-        vy_range: Tuple[float, float] = (-5, -1),
-        lifetime_range: Tuple[int, int] = (300, 600),
+        vx_range: tuple[float, float] = (-3, 3),
+        vy_range: tuple[float, float] = (-5, -1),
+        lifetime_range: tuple[int, int] = (300, 600),
         color: tuple[int, int, int] = c.GOLD,
-        size_range: Tuple[int, int] = (3, 6),
+        size_range: tuple[int, int] = (3, 6),
         gravity: float = 0.5,
     ) -> None:
         """
@@ -150,10 +247,6 @@ class ParticleSystem:
         import random
 
         for _ in range(count):
-            if len(self.particles) >= self.max_particles:
-                # Remove oldest particle if at capacity
-                self.particles.pop(0)
-
             vx = random.uniform(*vx_range)
             vy = random.uniform(*vy_range)
             lifetime = random.randint(*lifetime_range)
@@ -167,8 +260,14 @@ class ParticleSystem:
                 max(0, min(255, color[2] + color_var)),
             )
 
-            particle = Particle(x, y, vx, vy, lifetime, color=particle_color, size=size, gravity=gravity)
-            self.particles.append(particle)
+            particle = self._acquire_particle(x, y, vx, vy, lifetime, particle_color, size, gravity)
+            if particle:
+                self.particles.append(particle)
+                self._total_emitted += 1
+
+        # Track peak
+        if len(self.particles) > self._peak_active:
+            self._peak_active = len(self.particles)
 
     def emit_brick_break(self, x: float, y: float) -> None:
         """Emit particles for brick break effect."""
@@ -198,7 +297,11 @@ class ParticleSystem:
             dt: Delta time in milliseconds
             viewport_x: Camera X offset
         """
-        self.particles = [p for p in self.particles if p.update(dt, viewport_x)]
+        for i in range(len(self.particles) - 1, -1, -1):
+            particle = self.particles[i]
+            if not particle.update(dt, viewport_x):
+                self._release_particle(particle)
+                self.particles.pop(i)
 
     def draw(self, surface: pg.Surface) -> None:
         """Draw all particles to surface."""
@@ -206,8 +309,19 @@ class ParticleSystem:
             particle.draw(surface)
 
     def clear(self) -> None:
-        """Clear all particles."""
+        """Clear all particles and return to pool."""
+        for particle in self.particles:
+            self._release_particle(particle)
         self.particles.clear()
+
+    def get_stats(self) -> dict[str, int]:
+        """Get particle system statistics."""
+        return {
+            "active": len(self.particles),
+            "in_pool": len(self._particle_pool),
+            "total_emitted": self._total_emitted,
+            "peak_active": self._peak_active,
+        }
 
 
 class ParallaxBackground:

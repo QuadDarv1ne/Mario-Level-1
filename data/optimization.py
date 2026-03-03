@@ -189,12 +189,21 @@ class SpriteBatch:
     Sprite batching for efficient rendering.
 
     Groups sprites by image/texture to reduce draw calls.
+    Uses dirty rect optimization to redraw only changed areas.
     """
 
-    def __init__(self) -> None:
-        """Initialize sprite batch."""
+    def __init__(self, use_dirty_rects: bool = True) -> None:
+        """
+        Initialize sprite batch.
+
+        Args:
+            use_dirty_rects: Enable dirty rectangle optimization
+        """
         self._batches: dict[str, pg.sprite.Group] = {}
         self._sprite_to_batch: dict[int, str] = {}
+        self._use_dirty_rects = use_dirty_rects
+        self._dirty_rects: list[pg.Rect] = []
+        self._last_positions: dict[int, pg.Rect] = {}
 
     def add(self, sprite: pg.sprite.Sprite, batch_name: str = "default") -> None:
         """
@@ -209,6 +218,7 @@ class SpriteBatch:
 
         self._batches[batch_name].add(sprite)
         self._sprite_to_batch[id(sprite)] = batch_name
+        self._last_positions[id(sprite)] = sprite.rect.copy()
 
     def remove(self, sprite: pg.sprite.Sprite) -> None:
         """
@@ -221,11 +231,28 @@ class SpriteBatch:
         if batch_name and batch_name in self._batches:
             self._batches[batch_name].remove(sprite)
             del self._sprite_to_batch[id(sprite)]
+            if id(sprite) in self._last_positions:
+                del self._last_positions[id(sprite)]
+
+    def mark_dirty(self, sprite: pg.sprite.Sprite) -> None:
+        """Mark sprite area as needing redraw."""
+        if not self._use_dirty_rects:
+            return
+        
+        sprite_id = id(sprite)
+        if sprite_id in self._last_positions:
+            old_rect = self._last_positions[sprite_id]
+            new_rect = sprite.rect
+            combined = old_rect.union(new_rect)
+            self._dirty_rects.append(combined)
+            self._last_positions[sprite_id] = new_rect.copy()
 
     def clear(self) -> None:
         """Clear all batches."""
         self._batches.clear()
         self._sprite_to_batch.clear()
+        self._dirty_rects.clear()
+        self._last_positions.clear()
 
     def draw(self, surface: pg.Surface) -> None:
         """
@@ -234,13 +261,164 @@ class SpriteBatch:
         Args:
             surface: Surface to draw to
         """
+        if self._use_dirty_rects and self._dirty_rects:
+            surface.set_clip(self._dirty_rects)
+        
         for batch in self._batches.values():
             batch.draw(surface)
+        
+        if self._use_dirty_rects:
+            surface.set_clip(None)
+            self._dirty_rects.clear()
 
     def update(self) -> None:
         """Update all sprites in all batches."""
         for batch in self._batches.values():
             batch.update()
+
+    def get_stats(self) -> dict[str, int]:
+        """Get batch statistics."""
+        return {
+            "batches": len(self._batches),
+            "total_sprites": sum(len(b) for b in self._batches.values()),
+            "dirty_rects": len(self._dirty_rects),
+        }
+
+
+class SpriteCache:
+    """
+    Cache for transformed sprites (scaled, rotated, flipped).
+    
+    Avoids redundant transformation operations by caching results.
+    Uses LRU eviction policy.
+    
+    Example:
+        cache = SpriteCache(max_size=100)
+        scaled = cache.get_scaled(original_sprite.image, 2, 2)
+        rotated = cache.get_rotated(original_sprite.image, 90)
+    """
+    
+    def __init__(self, max_size: int = 200) -> None:
+        """
+        Initialize sprite cache.
+        
+        Args:
+            max_size: Maximum number of cached surfaces
+        """
+        self.max_size = max_size
+        self._cache: dict[Hashable, pg.Surface] = {}
+        self._access_order: deque[Hashable] = deque()
+        self._hits = 0
+        self._misses = 0
+    
+    def _make_key(self, prefix: str, surface_id: int, *params: Any) -> Hashable:
+        """Create cache key."""
+        return (prefix, surface_id) + params
+    
+    def get_scaled(self, surface: pg.Surface, width: int, height: int) -> pg.Surface:
+        """
+        Get scaled surface from cache or create new.
+        
+        Args:
+            surface: Original surface
+            width: Target width
+            height: Target height
+            
+        Returns:
+            Scaled surface
+        """
+        key = self._make_key("scale", id(surface), width, height)
+        
+        if key in self._cache:
+            self._hits += 1
+            self._access_order.remove(key)
+            self._access_order.append(key)
+            return self._cache[key]
+        
+        self._misses += 1
+        scaled = pg.transform.scale(surface, (width, height))
+        self._put(key, scaled)
+        return scaled
+    
+    def get_rotated(self, surface: pg.Surface, angle: float) -> pg.Surface:
+        """
+        Get rotated surface from cache or create new.
+        
+        Args:
+            surface: Original surface
+            angle: Rotation angle in degrees
+            
+        Returns:
+            Rotated surface
+        """
+        key = self._make_key("rotate", id(surface), angle)
+        
+        if key in self._cache:
+            self._hits += 1
+            self._access_order.remove(key)
+            self._access_order.append(key)
+            return self._cache[key]
+        
+        self._misses += 1
+        rotated = pg.transform.rotate(surface, angle)
+        self._put(key, rotated)
+        return rotated
+    
+    def get_flipped(self, surface: pg.Surface, horizontal: bool, vertical: bool) -> pg.Surface:
+        """
+        Get flipped surface from cache or create new.
+        
+        Args:
+            surface: Original surface
+            horizontal: Flip horizontally
+            vertical: Flip vertically
+            
+        Returns:
+            Flipped surface
+        """
+        key = self._make_key("flip", id(surface), horizontal, vertical)
+        
+        if key in self._cache:
+            self._hits += 1
+            self._access_order.remove(key)
+            self._access_order.append(key)
+            return self._cache[key]
+        
+        self._misses += 1
+        flipped = pg.transform.flip(surface, horizontal, vertical)
+        self._put(key, flipped)
+        return flipped
+    
+    def _put(self, key: Hashable, surface: pg.Surface) -> None:
+        """Store surface in cache with LRU eviction."""
+        if key in self._cache:
+            self._access_order.remove(key)
+        elif len(self._cache) >= self.max_size:
+            lru_key = self._access_order.popleft()
+            del self._cache[lru_key]
+        
+        self._cache[key] = surface
+        self._access_order.append(key)
+    
+    def clear(self) -> None:
+        """Clear all cached surfaces."""
+        self._cache.clear()
+        self._access_order.clear()
+        self._hits = 0
+        self._misses = 0
+    
+    def get_stats(self) -> dict[str, Any]:
+        """Get cache statistics."""
+        total = self._hits + self._misses
+        hit_rate = (self._hits / total * 100) if total > 0 else 0
+        
+        return {
+            "size": len(self._cache),
+            "max_size": self.max_size,
+            "hits": self._hits,
+            "misses": self._misses,
+            "hit_rate": round(hit_rate, 2),
+        }
 
 
 class PerformanceTimer:
@@ -285,6 +463,7 @@ class FrameRateMonitor:
     Monitor and track frame rate over time.
 
     Useful for detecting performance issues.
+    Includes frame time histogram for profiling.
     """
 
     def __init__(self, window_size: int = 60) -> None:
@@ -297,6 +476,9 @@ class FrameRateMonitor:
         self.window_size = window_size
         self.frame_times: deque[float] = deque(maxlen=window_size)
         self.last_frame_time: float = 0.0
+        self.total_frames: int = 0
+        self.frame_count: int = 0
+        self._fps_history: deque[float] = deque(maxlen=window_size)
 
     def tick(self) -> float:
         """
@@ -310,12 +492,16 @@ class FrameRateMonitor:
         if self.last_frame_time > 0:
             frame_time = current_time - self.last_frame_time
             self.frame_times.append(frame_time)
+            self.total_frames += 1
 
         self.last_frame_time = current_time
+        self.frame_count += 1
 
         if self.frame_times:
             avg_time = sum(self.frame_times) / len(self.frame_times)
-            return 1.0 / avg_time if avg_time > 0 else 0.0
+            fps = 1.0 / avg_time if avg_time > 0 else 0.0
+            self._fps_history.append(fps)
+            return fps
 
         return 0.0
 
@@ -334,6 +520,36 @@ class FrameRateMonitor:
 
         return (sum(self.frame_times) / len(self.frame_times)) * 1000
 
+    def get_min_fps(self) -> float:
+        """Get minimum FPS in recent history."""
+        if not self._fps_history:
+            return 0.0
+        return min(self._fps_history)
+
+    def get_max_fps(self) -> float:
+        """Get maximum FPS in recent history."""
+        if not self._fps_history:
+            return 0.0
+        return max(self._fps_history)
+
+    def get_frame_time_percentile(self, percentile: float) -> float:
+        """
+        Get frame time at specified percentile.
+        
+        Args:
+            percentile: Percentile (0-100)
+            
+        Returns:
+            Frame time at percentile
+        """
+        if not self.frame_times:
+            return 0.0
+        
+        sorted_times = sorted(self.frame_times)
+        index = int(len(sorted_times) * percentile / 100)
+        index = min(index, len(sorted_times) - 1)
+        return sorted_times[index] * 1000
+
     def is_performance_acceptable(self, target_fps: float = 60.0, tolerance: float = 0.2) -> bool:
         """
         Check if performance is within acceptable range.
@@ -347,6 +563,27 @@ class FrameRateMonitor:
         """
         min_acceptable = target_fps * (1 - tolerance)
         return self.get_fps() >= min_acceptable
+
+    def get_stats(self) -> dict[str, Any]:
+        """Get comprehensive frame rate statistics."""
+        if not self.frame_times:
+            return {
+                "fps": 0,
+                "min_fps": 0,
+                "max_fps": 0,
+                "avg_frame_time": 0,
+                "total_frames": 0,
+            }
+        
+        return {
+            "fps": round(self.get_fps(), 2),
+            "min_fps": round(self.get_min_fps(), 2),
+            "max_fps": round(self.get_max_fps(), 2),
+            "avg_frame_time": round(self.get_frame_time(), 2),
+            "p95_frame_time": round(self.get_frame_time_percentile(95), 2),
+            "p99_frame_time": round(self.get_frame_time_percentile(99), 2),
+            "total_frames": self.total_frames,
+        }
 
 
 class ComputationCache:
