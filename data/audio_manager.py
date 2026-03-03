@@ -12,6 +12,7 @@ Provides:
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 from enum import Enum
@@ -19,6 +20,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Callable
 
 import pygame as pg
+
+logger = logging.getLogger(__name__)
 
 
 class AudioCategory(Enum):
@@ -117,7 +120,7 @@ class SoundPool:
             self.sounds[name] = sound
             return True
         except (pg.error, FileNotFoundError) as e:
-            print(f"Warning: Could not load sound {name}: {e}")
+            logger.warning(f"Could not load sound {name}: {e}")
             return False
 
     def play(self, name: str, volume: float = 1.0, loops: int = 0, priority: int = 5) -> bool:
@@ -276,7 +279,7 @@ class MusicManager:
             self.add_track(track)
             return True
         except Exception as e:
-            print(f"Warning: Could not load music {name}: {e}")
+            logger.warning(f"Could not load music {name}: {e}")
             return False
 
     def play(self, track_name: Optional[str] = None, fade_ms: int = 1000) -> bool:
@@ -314,7 +317,7 @@ class MusicManager:
             self.state = AudioState.PLAYING
             return True
         except pg.error as e:
-            print(f"Warning: Could not play music: {e}")
+            logger.warning(f"Could not play music: {e}")
             return False
 
     def play_next(self, fade_ms: int = 1000) -> bool:
@@ -472,7 +475,7 @@ class AudioManager:
             return True
 
         except pg.error as e:
-            print(f"Warning: Audio initialization failed: {e}")
+            logger.warning(f"Audio initialization failed: {e}")
             return False
 
     def shutdown(self) -> None:
