@@ -7,11 +7,15 @@ and dynamic music transitions based on game state.
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict
+
 import pygame as pg
 
 from . import setup
 from . import constants as c
+
+logger = logging.getLogger(__name__)
 
 __author__ = "justinarmstrong"
 
@@ -93,7 +97,7 @@ class Sound:
                     pg.mixer.music.play()
                     self.state = c.GAME_OVER
         except pg.error as e:
-            print(f"Audio error: {e}")
+            logger.error("Audio error: %s", e)
 
     def update(self, game_info: dict[str, Any], mario: Any) -> None:
         """
@@ -192,7 +196,7 @@ class Sound:
                 pg.mixer.music.play(loops=-1 if key.startswith("main_theme") else 0)
                 self.state = state
         except pg.error as e:
-            print(f"Music playback error: {e}")
+            logger.error("Music playback error: %s", e)
 
     def stop_music(self) -> None:
         """Stops background music playback."""

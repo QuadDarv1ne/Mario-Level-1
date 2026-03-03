@@ -10,10 +10,13 @@ Features:
 """
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional, TypeVar
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
@@ -130,7 +133,7 @@ class EventHandler:
             return not self.once
 
         except Exception as e:
-            print(f"Event handler error: {e}")
+            logger.error("Event handler error: %s", e)
             return not self.once
 
 

@@ -84,14 +84,13 @@ def main() -> int:
         return 0
 
     except pg.error as e:
-        logger.error(f"Pygame error: {e}", exc_info=True)
-        print(f"Error: Pygame failed - {e}")
+        logger.error("Pygame error: %s", e, exc_info=True)
+        logger.error("Pygame failed")
         return 2
 
     except FileNotFoundError as e:
-        logger.error(f"Missing game file: {e}", exc_info=True)
-        print(f"Error: Missing game file - {e}")
-        print("Please ensure all resources are installed correctly.")
+        logger.error("Missing game file: %s", e, exc_info=True)
+        logger.error("Missing game file. Please ensure all resources are installed correctly.")
         return 3
 
     except ImportError as e:

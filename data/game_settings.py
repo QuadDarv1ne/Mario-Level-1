@@ -11,14 +11,17 @@ Provides:
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 import pygame as pg
 
 from . import constants as c
+
+logger = logging.getLogger(__name__)
 
 
 class Difficulty(Enum):
@@ -387,7 +390,7 @@ class SettingsManager:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             return True
         except IOError as e:
-            print(f"Warning: Could not save settings: {e}")
+            logger.warning("Could not save settings: %s", e)
             return False
 
     def load(self) -> bool:
@@ -407,7 +410,7 @@ class SettingsManager:
             self.settings = GameSettings.from_dict(data)
             return True
         except (json.JSONDecodeError, KeyError, ValueError) as e:
-            print(f"Warning: Could not load settings: {e}")
+            logger.warning("Could not load settings: %s", e)
             return False
 
     def reset_to_defaults(self) -> None:

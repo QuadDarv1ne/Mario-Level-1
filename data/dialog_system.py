@@ -12,12 +12,15 @@ Features:
 from __future__ import annotations
 
 import json
+import logging
 import os
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pygame as pg
+
+logger = logging.getLogger(__name__)
 
 
 class DialogPosition(Enum):
@@ -271,7 +274,7 @@ class DialogManager:
             return True
 
         except (json.JSONDecodeError, IOError) as e:
-            print(f"Dialog load error: {e}")
+            logger.error("Dialog load error: %s", e)
             return False
 
     def load_from_dict(self, data: Dict[str, Any]) -> None:
