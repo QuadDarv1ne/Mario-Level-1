@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 import pygame as pg
 
@@ -17,13 +17,16 @@ from ..quadtree import CollisionDetector, get_collision_detector
 from ..components import mario
 from ..components import collider
 from ..components import bricks
-from ..components import coin_box
+from ..components import coin_box as coin_box_module
 from ..components import enemies
 from ..components import checkpoint
 from ..components import flagpole
 from ..components import info
 from ..components import score
 from ..components import castle_flag
+
+if TYPE_CHECKING:
+    from ..components.enemies import Enemy
 
 
 class Level1(tools._State):
@@ -93,7 +96,11 @@ class Level1(tools._State):
         self.setup_spritegroups()
 
         # Initialize sprite renderer for optimized rendering
+        if setup.SCREEN is None:
+            raise RuntimeError("Screen not initialized")
         self.render_manager = RenderManager(setup.SCREEN)
+        if self.viewport is None:
+            raise RuntimeError("Viewport not initialized")
         self.render_manager.renderer.set_viewport(self.viewport)
         
         # Initialize collision detector with QuadTree
@@ -290,18 +297,18 @@ class Level1(tools._State):
 
     def setup_coin_boxes(self) -> None:
         """Creates all the coin boxes and puts them in a sprite group"""
-        coin_box1 = coin_box.CoinBox(685, 365, c.COIN, self.coin_group)
-        coin_box2 = coin_box.CoinBox(901, 365, c.MUSHROOM, self.powerup_group)
-        coin_box3 = coin_box.CoinBox(987, 365, c.COIN, self.coin_group)
-        coin_box4 = coin_box.CoinBox(943, 193, c.COIN, self.coin_group)
-        coin_box5 = coin_box.CoinBox(3342, 365, c.MUSHROOM, self.powerup_group)
-        coin_box6 = coin_box.CoinBox(4030, 193, c.COIN, self.coin_group)
-        coin_box7 = coin_box.CoinBox(4544, 365, c.COIN, self.coin_group)
-        coin_box8 = coin_box.CoinBox(4672, 365, c.COIN, self.coin_group)
-        coin_box9 = coin_box.CoinBox(4672, 193, c.MUSHROOM, self.powerup_group)
-        coin_box10 = coin_box.CoinBox(4800, 365, c.COIN, self.coin_group)
-        coin_box11 = coin_box.CoinBox(5531, 193, c.COIN, self.coin_group)
-        coin_box12 = coin_box.CoinBox(7288, 365, c.COIN, self.coin_group)
+        coin_box1 = coin_box_module.CoinBox(685, 365, c.COIN, self.coin_group)
+        coin_box2 = coin_box_module.CoinBox(901, 365, c.MUSHROOM, self.powerup_group)
+        coin_box3 = coin_box_module.CoinBox(987, 365, c.COIN, self.coin_group)
+        coin_box4 = coin_box_module.CoinBox(943, 193, c.COIN, self.coin_group)
+        coin_box5 = coin_box_module.CoinBox(3342, 365, c.MUSHROOM, self.powerup_group)
+        coin_box6 = coin_box_module.CoinBox(4030, 193, c.COIN, self.coin_group)
+        coin_box7 = coin_box_module.CoinBox(4544, 365, c.COIN, self.coin_group)
+        coin_box8 = coin_box_module.CoinBox(4672, 365, c.COIN, self.coin_group)
+        coin_box9 = coin_box_module.CoinBox(4672, 193, c.MUSHROOM, self.powerup_group)
+        coin_box10 = coin_box_module.CoinBox(4800, 365, c.COIN, self.coin_group)
+        coin_box11 = coin_box_module.CoinBox(5531, 193, c.COIN, self.coin_group)
+        coin_box12 = coin_box_module.CoinBox(7288, 365, c.COIN, self.coin_group)
 
         self.coin_box_group = pg.sprite.Group(
             coin_box1,
@@ -420,7 +427,7 @@ class Level1(tools._State):
         if self.enemy_group is None:
             self.enemy_group = pg.sprite.Group()
 
-        self.ground_step_pipe_group = pg.sprite.Group()
+        self.ground_step_pipe_group: pg.sprite.Group = pg.sprite.Group()
         if self.ground_group is not None:
             for sprite in self.ground_group:
                 self.ground_step_pipe_group.add(sprite)
@@ -626,7 +633,7 @@ class Level1(tools._State):
 
             elif checkpoint.name == "secret_mushroom" and self.mario.y_vel < 0:
                 if checkpoint.rect is not None and self.powerup_group is not None:
-                    mushroom_box = coin_box.CoinBox(
+                    mushroom_box = coin_box_module.CoinBox(
                         int(checkpoint.rect.x), int(checkpoint.rect.bottom - 40), "1up_mushroom", self.powerup_group
                     )
                     temp_score_group: pg.sprite.Group = pg.sprite.Group()
@@ -705,9 +712,9 @@ class Level1(tools._State):
             all_colliders.extend(self.enemy_group.sprites())
         if self.shell_group:
             all_colliders.extend(self.shell_group.sprites())
-        
+
         # Rebuild QuadTree
-        self.collision_detector.rebuild(all_colliders)
+        self.collision_detector.rebuild(all_colliders)  # type: ignore[has-type]
 
     def adjust_mario_position(self):
         """Adjusts Mario's position based on his x, y velocities and
@@ -729,13 +736,13 @@ class Level1(tools._State):
         """Check for collisions after Mario is moved on the x axis using QuadTree"""
         if self.mario is None:
             return
-        
+
         # Use QuadTree for optimized collision detection
-        collider = self.collision_detector.check_collision(self.mario)
-        
+        collider = self.collision_detector.check_collision(self.mario)  # type: ignore[has-type]
+
         if collider:
             # Determine collider type and handle accordingly
-            if isinstance(collider, (collider.Collider, bricks.Brick, coin_box.CoinBox)):
+            if isinstance(collider, (collider.Collider, bricks.Brick, coin_box_module.CoinBox)):
                 self.adjust_mario_for_x_collisions(collider)
                 return
         
@@ -771,9 +778,6 @@ class Level1(tools._State):
             else:
                 self.mario.start_death_jump(self.game_info)
                 self.state = c.FROZEN
-
-        elif shell:
-            self.adjust_mario_for_x_shell_collisions(shell)
 
         elif powerup:
             if powerup.name == c.STAR:
@@ -899,30 +903,27 @@ class Level1(tools._State):
         """Checks for collisions when Mario moves along the y-axis using QuadTree"""
         if self.mario is None:
             return
-        
+
         # Use QuadTree for optimized collision detection
-        collider = self.collision_detector.check_collision(self.mario)
-        
+        collider = self.collision_detector.check_collision(self.mario)  # type: ignore[has-type]
+
         ground_step_or_pipe = None
         enemy = None
-        shell = None
         brick = None
         coin_box = None
         powerup = None
-        
+
         # Check QuadTree result first
         if collider:
             if isinstance(collider, collider.Collider):
                 ground_step_or_pipe = collider
             elif isinstance(collider, bricks.Brick):
                 brick = collider
-            elif isinstance(collider, coin_box.CoinBox):
+            elif isinstance(collider, coin_box_module.CoinBox):
                 coin_box = collider
             elif isinstance(collider, enemies.Enemy):
                 enemy = collider
-            elif isinstance(collider, enemies.Shell):
-                shell = collider
-        
+
         # Fallback to sprite groups if needed
         if not ground_step_or_pipe and self.ground_step_pipe_group is not None:
             ground_step_or_pipe = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
@@ -932,8 +933,6 @@ class Level1(tools._State):
             coin_box = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
         if not enemy and self.enemy_group is not None:
             enemy = pg.sprite.spritecollideany(self.mario, self.enemy_group)
-        if not shell and self.shell_group is not None:
-            shell = pg.sprite.spritecollideany(self.mario, self.shell_group)
         if not powerup and self.powerup_group is not None:
             powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
 
@@ -957,9 +956,6 @@ class Level1(tools._State):
                 enemy.start_death_jump(c.RIGHT)
             else:
                 self.adjust_mario_for_y_enemy_collisions(enemy)
-
-        elif shell:
-            self.adjust_mario_for_y_shell_collisions(shell)
 
         elif powerup:
             if powerup.name == c.STAR:
@@ -1268,11 +1264,13 @@ class Level1(tools._State):
         elif brick:
             if brick.state == c.BUMPED:
                 enemy.kill()
-                self.sprites_about_to_die_group.add(enemy)
-                if self.mario.rect.centerx > brick.rect.centerx:
-                    enemy.start_death_jump("right")
-                else:
-                    enemy.start_death_jump("left")
+                if self.sprites_about_to_die_group is not None:
+                    self.sprites_about_to_die_group.add(enemy)
+                if self.mario is not None and self.mario.rect is not None and brick.rect is not None:
+                    if self.mario.rect.centerx > brick.rect.centerx:
+                        enemy.start_death_jump("right")
+                    else:
+                        enemy.start_death_jump("left")
 
             elif enemy.rect.x > brick.rect.x:
                 enemy.y_vel = 7
@@ -1286,13 +1284,16 @@ class Level1(tools._State):
         elif coin_box:
             if coin_box.state == c.BUMPED:
                 self.game_info[c.SCORE] += 100
-                self.moving_score_list.append(score.Score(enemy.rect.centerx - self.viewport.x, enemy.rect.y, 100))
+                if self.viewport is not None and enemy.rect is not None:
+                    self.moving_score_list.append(score.Score(enemy.rect.centerx - self.viewport.x, enemy.rect.y, 100))
                 enemy.kill()
-                self.sprites_about_to_die_group.add(enemy)
-                if self.mario.rect.centerx > coin_box.rect.centerx:
-                    enemy.start_death_jump("right")
-                else:
-                    enemy.start_death_jump("left")
+                if self.sprites_about_to_die_group is not None:
+                    self.sprites_about_to_die_group.add(enemy)
+                if self.mario is not None and self.mario.rect is not None and coin_box.rect is not None:
+                    if self.mario.rect.centerx > coin_box.rect.centerx:
+                        enemy.start_death_jump("right")
+                    else:
+                        enemy.start_death_jump("left")
 
             elif enemy.rect.x > coin_box.rect.x:
                 enemy.y_vel = 7
@@ -1535,9 +1536,6 @@ class Level1(tools._State):
         elif enemy:
             self.fireball_kill(fireball, enemy)
 
-        elif shell:
-            self.fireball_kill(fireball, shell)
-
     def fireball_kill(self, fireball, enemy):
         """Kills enemy if hit with fireball"""
         setup.SFX["kick"].play()
@@ -1629,6 +1627,8 @@ class Level1(tools._State):
 
     def update_viewport(self) -> None:
         """Changes the view of the camera"""
+        if self.viewport is None or self.mario is None or self.mario.rect is None or self.level_rect is None:
+            return
         third = self.viewport.x + self.viewport.w // 3
         mario_center = self.mario.rect.centerx
         mario_right = self.mario.rect.right
@@ -1638,7 +1638,7 @@ class Level1(tools._State):
             new = self.viewport.x + mult * self.mario.x_vel
             highest = self.level_rect.w - self.viewport.w
             self.viewport.x = min(highest, new)
-        
+
         # Update renderer viewport for culling
         self.render_manager.renderer.set_viewport(self.viewport)
 
@@ -1681,12 +1681,13 @@ class Level1(tools._State):
     def blit_everything(self, surface: pg.Surface) -> None:
         """Blit all sprites to the main surface using optimized renderer"""
         renderer = self.render_manager.renderer
-        
+
         # Clear renderer for this frame
         renderer._sprites.clear()
-        
+
         # Draw background directly (not a sprite)
-        surface.blit(self.background, self.viewport, self.viewport)
+        if self.background is not None and self.viewport is not None:
+            surface.blit(self.background, self.viewport, self.viewport)
         
         # Add sprites to renderer by layer for proper z-ordering
         # Ground/pipe layer (background colliders - not rendered, but kept for compatibility)

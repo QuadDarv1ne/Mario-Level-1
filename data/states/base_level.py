@@ -359,7 +359,9 @@ class BaseLevel(tools._State):
 
     def _handle_flag_and_fireworks(self, current_time: float) -> None:
         """Handle reaching the flag pole."""
-        self.flag_timer = current_time - (self.flag_score.start_time if self.flag_score else current_time)
+        if not self.flag_score:
+            return
+        self.flag_timer = current_time
         if self.flag_timer >= 200:
             self.game_info["current_level"] = self.get_next_level()
             self.next = c.LOAD_SCREEN
@@ -480,7 +482,7 @@ class BaseLevel(tools._State):
 
     def update_viewport(self) -> None:
         """Update camera viewport based on Mario position."""
-        if not self.mario or not self.viewport or not self.level_rect:
+        if not self.mario or not self.viewport or not self.level_rect or not self.mario.rect:
             return
 
         if self.mario.rect.right > self.viewport.centerx:
@@ -494,7 +496,7 @@ class BaseLevel(tools._State):
 
     def draw(self, surface: pg.Surface) -> None:
         """Render the level."""
-        if self.level is None or self.background is None or self.viewport is None:
+        if self.level is None or self.background is None or self.viewport is None or self.back_rect is None:
             return
 
         self.level.blit(self.background, self.back_rect, self.viewport)
