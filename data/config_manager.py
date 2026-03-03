@@ -6,9 +6,12 @@ Provides type-safe access to configuration values.
 """
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, TYPE_CHECKING
+
+logger = logging.getLogger(__name__)
 
 try:
     import yaml  # type: ignore[import-untyped]
@@ -207,12 +210,11 @@ class ConfigManager:
             False if file not found or YAML unavailable.
         """
         if not YAML_AVAILABLE:
-            print("Warning: PyYAML not installed. Using default configuration.")
+            logger.warning("PyYAML not installed. Using default configuration.")
             return False
 
         if not os.path.exists(self.config_path):
-            print(f"Warning: Configuration file not found: {self.config_path}")
-            print("Using default configuration.")
+            logger.warning("Configuration file not found: %s. Using default configuration.", self.config_path)
             return False
 
         try:
@@ -224,8 +226,7 @@ class ConfigManager:
             return True
 
         except yaml.YAMLError as e:
-            print(f"Error parsing configuration file: {e}")
-            print("Using default configuration.")
+            logger.error("Error parsing configuration file: %s. Using default configuration.", e)
             return False
 
     def _apply_config(self) -> None:
@@ -297,7 +298,7 @@ class ConfigManager:
             return True
 
         except (IOError, OSError) as e:
-            print(f"Error saving configuration: {e}")
+            logger.error("Error saving configuration: %s", e)
             return False
 
     def reset_to_defaults(self) -> None:
