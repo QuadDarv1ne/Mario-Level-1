@@ -1064,7 +1064,7 @@ class SimpleResourceManager:
         pg.display.set_caption(c.ORIGINAL_CAPTION)
 
         # Get fullscreen setting from settings manager
-        settings_mgr = settings_manager.get_settings_manager()
+        settings_mgr = game_settings.get_settings_manager()
         fullscreen = settings_mgr.get("fullscreen", False)
 
         if fullscreen:
