@@ -74,7 +74,7 @@ class LevelBase:
         
         # Get time remaining
         time_remaining = GameStateValidator.safe_get_game_value(
-            self.game_info, c.LEVEL_TIME, 400
+            self.game_info, str(c.LEVEL_TIME), 400
         )
         
         # Update music (auto-switches to sped up version)
@@ -153,8 +153,8 @@ class LevelBase:
         """
         if not self.level_data:
             return []
-        
-        return self.level_data.get(section_name, [])
+
+        return self.level_data.get(section_name, [])  # type: ignore[no-any-return]
     
     def validate_sprite_groups(self, *groups: pg.sprite.Group) -> bool:
         """Validate that sprite groups exist and are not None.

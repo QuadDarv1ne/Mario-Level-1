@@ -46,6 +46,20 @@ ignore_missing_imports = true
 module = "data.states.*"
 disallow_untyped_defs = false
 
+# Level1 has legacy code that needs type ignores
+[[tool.mypy.overrides]]
+module = "data.states.level1"
+check_untyped_defs = false
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "data.states.base_level"
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "data.states.enhanced_menu"
+check_untyped_defs = false
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

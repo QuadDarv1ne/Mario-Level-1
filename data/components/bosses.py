@@ -19,7 +19,7 @@ import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 import pygame as pg
 
@@ -606,13 +606,13 @@ def create_boss(boss_type: str, x: int, y: int) -> Boss:
     Returns:
         Boss instance
     """
-    bosses = {
+    bosses: Dict[str, type] = {
         "bowser": Bowser,
         "mega_goomba": MegaGoomba,
         "koopa_boss": KoopaTroopaBoss,
     }
 
-    if boss_type.lower() in bosses:
-        return bosses[boss_type.lower()](x, y)  # type: ignore[return-value, misc]
-    else:
+    boss_class = bosses.get(boss_type.lower())
+    if boss_class is None:
         raise ValueError(f"Unknown boss type: {boss_type}")
+    return boss_class(x, y)  # type: ignore[no-any-return]
