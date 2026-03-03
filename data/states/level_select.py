@@ -167,7 +167,7 @@ class LevelSelect(tools._State):
         surface.fill(c.BLACK)
         if self.background:
             surface.blit(self.background, (0, 0))
-        
+
         # Draw very light semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
         overlay.set_alpha(60)  # Very light
@@ -176,7 +176,7 @@ class LevelSelect(tools._State):
 
         # Draw title
         self._draw_text(surface, "SELECT LEVEL", 400, 80, c.YELLOW, 50)
-        
+
         # Draw level descriptions
         level_descriptions = [
             "Classic overworld - Goombas & Koopas",
@@ -194,14 +194,14 @@ class LevelSelect(tools._State):
         column_width = 350
         start_x = 150
         start_y = 180
-        
+
         for i, level_name in enumerate(self.level_names):
             col = i // levels_per_column
             row = i % levels_per_column
-            
+
             x_pos = start_x + (col * column_width)
             y_pos = start_y + (row * 100)
-            
+
             # Highlight selected level
             if i == self.selected_level:
                 color = c.YELLOW
@@ -213,7 +213,7 @@ class LevelSelect(tools._State):
                 box_bg.set_alpha(120)
                 box_bg.fill((60, 60, 80))
                 surface.blit(box_bg, (x_pos - 10, y_pos - 15))
-                
+
                 pg.draw.rect(surface, c.GOLD, box_rect, 4, border_radius=8)
             else:
                 color = c.WHITE
@@ -225,10 +225,10 @@ class LevelSelect(tools._State):
                 box_bg.fill((40, 40, 50))
                 surface.blit(box_bg, (x_pos - 10, y_pos - 15))
                 pg.draw.rect(surface, (120, 120, 120), box_rect, 2, border_radius=8)
-            
+
             # Draw level name
             self._draw_text(surface, level_name, x_pos + 150, y_pos, color, size)
-            
+
             # Draw description
             desc_color = c.YELLOW if i == self.selected_level else (210, 210, 210)
             self._draw_text(surface, level_descriptions[i], x_pos + 150, y_pos + 30, desc_color, 17)
@@ -243,12 +243,12 @@ class LevelSelect(tools._State):
     ) -> None:
         """Draw text on surface with shadow"""
         font = pg.font.Font(None, size)
-        
+
         # Draw shadow
         shadow_surface = font.render(text, True, c.BLACK)
         shadow_rect = shadow_surface.get_rect(center=(x + 2, y + 2))
         surface.blit(shadow_surface, shadow_rect)
-        
+
         # Draw text
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=(x, y))
@@ -259,49 +259,49 @@ class LevelSelect(tools._State):
         # Check if enough time has passed since last input
         current_time = pg.time.get_ticks()
         can_input = current_time - self.input_timer > self.input_delay
-        
+
         levels_per_column = 4
-        
+
         if can_input and keys[pg.K_DOWN]:
             # Move down in current column
             if self.selected_level % levels_per_column < levels_per_column - 1:
                 self.selected_level += 1
                 # Play navigation sound
-                if setup.SFX.get('coin'):
-                    setup.SFX['coin'].play()
+                if setup.SFX.get("coin"):
+                    setup.SFX["coin"].play()
             self.input_timer = current_time
-            
+
         elif can_input and keys[pg.K_UP]:
             # Move up in current column
             if self.selected_level % levels_per_column > 0:
                 self.selected_level -= 1
                 # Play navigation sound
-                if setup.SFX.get('coin'):
-                    setup.SFX['coin'].play()
+                if setup.SFX.get("coin"):
+                    setup.SFX["coin"].play()
             self.input_timer = current_time
-            
+
         elif can_input and keys[pg.K_RIGHT]:
             # Move to next column
             if self.selected_level < levels_per_column:
                 self.selected_level += levels_per_column
                 # Play navigation sound
-                if setup.SFX.get('coin'):
-                    setup.SFX['coin'].play()
+                if setup.SFX.get("coin"):
+                    setup.SFX["coin"].play()
             self.input_timer = current_time
-            
+
         elif can_input and keys[pg.K_LEFT]:
             # Move to previous column
             if self.selected_level >= levels_per_column:
                 self.selected_level -= levels_per_column
                 # Play navigation sound
-                if setup.SFX.get('coin'):
-                    setup.SFX['coin'].play()
+                if setup.SFX.get("coin"):
+                    setup.SFX["coin"].play()
             self.input_timer = current_time
-            
+
         elif can_input and (keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]):
             # Play selection sound
-            if setup.SFX.get('bump'):
-                setup.SFX['bump'].play()
+            if setup.SFX.get("bump"):
+                setup.SFX["bump"].play()
             self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
             self.next = c.LOAD_SCREEN
             self.done = True
@@ -309,8 +309,8 @@ class LevelSelect(tools._State):
 
         elif can_input and keys[pg.K_ESCAPE]:
             # Play back sound
-            if setup.SFX.get('pipe'):
-                setup.SFX['pipe'].play()
+            if setup.SFX.get("pipe"):
+                setup.SFX["pipe"].play()
             self.next = c.MAIN_MENU
             self.done = True
             self.input_timer = current_time
@@ -326,8 +326,8 @@ class LevelSelect(tools._State):
                 self._update_cursor_position()
             elif event.key == pg.K_RETURN or event.key == pg.K_a or event.key == pg.K_s:
                 # Play selection sound
-                if setup.SFX.get('bump'):
-                    setup.SFX['bump'].play()
+                if setup.SFX.get("bump"):
+                    setup.SFX["bump"].play()
                 self.game_info[c.CURRENT_LEVEL] = self.level_constants[self.selected_level]
                 self.next = c.LOAD_SCREEN
                 self.done = True

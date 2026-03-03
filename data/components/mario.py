@@ -10,11 +10,9 @@ from .. import setup, tools
 from ..tools import sprite_utils
 from data import constants as c
 from ..constants_extended import (
-    ANIMATION_FAST,
     ANIMATION_NORMAL,
     TRANSITION_ANIMATION_SPEED,
     INVINCIBILITY_DURATION,
-    FIREBALL_COOLDOWN,
 )
 
 if TYPE_CHECKING:

@@ -14,7 +14,7 @@ import math
 import random
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import pygame as pg
 
@@ -313,7 +313,13 @@ class WeatherEffect:
         count = int(self.config.rain_drop_count * self.intensity)
 
         for drop in self.rain_drops[:count]:
-            pg.draw.line(surface, self.config.rain_color, (int(drop.x), int(drop.y)), (int(drop.x), int(drop.y) + int(drop.length)), int(drop.width))
+            pg.draw.line(
+                surface,
+                self.config.rain_color,
+                (int(drop.x), int(drop.y)),
+                (int(drop.x), int(drop.y) + int(drop.length)),
+                int(drop.width),
+            )
 
     def _draw_snow(self, surface: pg.Surface) -> None:
         """Draw snowflakes."""

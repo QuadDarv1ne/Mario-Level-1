@@ -249,7 +249,7 @@ class Profiler:
         Returns:
             Decorated function
         """
-        from typing import TypeVar, cast
+        from typing import TypeVar
 
         T = TypeVar("T", bound=Callable[..., Any])
 

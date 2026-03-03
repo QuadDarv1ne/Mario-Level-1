@@ -135,7 +135,7 @@ class Menu(tools._State):
         self.game_info[c.CURRENT_TIME] = self.current_time
         self.update_cursor(keys)
         self.overhead_info.update(self.game_info)
-        
+
         # Animate title
         self.animation_timer += 1
         self.title_y_offset = int(5 * pg.math.Vector2(0, 1).rotate(self.animation_timer * 2).y)
@@ -144,20 +144,20 @@ class Menu(tools._State):
         surface.fill(c.BLACK)
         if self.background:
             surface.blit(self.background, (0, 0))
-        
+
         # Draw very light semi-transparent overlay
         overlay = pg.Surface((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
         overlay.set_alpha(50)  # Very light overlay
         overlay.fill((0, 0, 0))
         surface.blit(overlay, (0, 0))
-        
+
         # Draw decorative top bar (very light)
         top_bar = pg.Surface((c.SCREEN_WIDTH, 220))
         top_bar.set_alpha(100)  # Very transparent
         top_bar.fill((30, 30, 50))  # Dark blue tint
         surface.blit(top_bar, (0, 0))
         pg.draw.line(surface, c.GOLD, (0, 220), (c.SCREEN_WIDTH, 220), 4)
-        
+
         # Draw title with animation
         if "GAME_NAME_BOX" in self.image_dict:
             game_box = self.image_dict["GAME_NAME_BOX"]
@@ -167,7 +167,7 @@ class Menu(tools._State):
 
         # Draw version info and subtitle
         self._draw_text(surface, "v2.7.0 - Enhanced Edition", 400, 185, c.YELLOW, 22)
-        
+
         # Draw much lighter decorative menu panel
         menu_panel = pg.Surface((420, 280))
         menu_panel.set_alpha(120)  # More transparent
@@ -184,10 +184,10 @@ class Menu(tools._State):
             "Adjust game settings",
             "Quit game",
         ]
-        
+
         for i, option in enumerate(self.menu_options):
             y_pos = menu_start_y + (i * 60)
-            
+
             # Highlight selected option
             if i == self.selected_option:
                 color = c.YELLOW
@@ -197,17 +197,17 @@ class Menu(tools._State):
                 highlight.set_alpha(60)
                 highlight.fill((255, 215, 0))
                 surface.blit(highlight, (210, y_pos - 24))
-                
+
                 highlight_rect = pg.Rect(210, y_pos - 24, 380, 52)
                 pg.draw.rect(surface, c.GOLD, highlight_rect, 4, border_radius=10)
-                
+
                 # Draw description
                 desc_color = (220, 220, 220)
                 self._draw_text(surface, menu_descriptions[i], 400, y_pos + 22, desc_color, 17)
             else:
                 color = c.WHITE
                 size = 34
-            
+
             self._draw_text(surface, option, 400, y_pos, color, size)
 
         # Draw instructions bar at bottom
@@ -225,7 +225,7 @@ class Menu(tools._State):
             mario_rect = self.mario.rect.copy()
             mario_rect.y += mario_y_offset
             surface.blit(self.mario.image, mario_rect)
-        
+
         # DON'T draw overhead_info on main menu - it shows old menu elements
 
     def _draw_text(
@@ -233,12 +233,12 @@ class Menu(tools._State):
     ) -> None:
         """Draw text on surface with shadow for better visibility"""
         font = pg.font.Font(None, size)
-        
+
         # Draw shadow
         shadow_surface = font.render(text, True, c.BLACK)
         shadow_rect = shadow_surface.get_rect(center=(x + 2, y + 2))
         surface.blit(shadow_surface, shadow_rect)
-        
+
         # Draw text
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect(center=(x, y))
@@ -249,7 +249,7 @@ class Menu(tools._State):
         # Check if enough time has passed since last input
         current_time = pg.time.get_ticks()
         can_input = current_time - self.input_timer > self.input_delay
-        
+
         # Handle navigation
         if can_input and keys[pg.K_DOWN]:
             self.selected_option = (self.selected_option + 1) % len(self.menu_options)
@@ -257,23 +257,23 @@ class Menu(tools._State):
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
             self.input_timer = current_time
             # Play navigation sound
-            if setup.SFX.get('coin'):
-                setup.SFX['coin'].play()
-                
+            if setup.SFX.get("coin"):
+                setup.SFX["coin"].play()
+
         elif can_input and keys[pg.K_UP]:
             self.selected_option = (self.selected_option - 1) % len(self.menu_options)
             if self.cursor and self.cursor.rect:
                 self.cursor.rect.y = 313 + (self.selected_option * 50)
             self.input_timer = current_time
             # Play navigation sound
-            if setup.SFX.get('coin'):
-                setup.SFX['coin'].play()
+            if setup.SFX.get("coin"):
+                setup.SFX["coin"].play()
 
         # Handle selection
         if can_input and (keys[pg.K_RETURN] or keys[pg.K_a] or keys[pg.K_s]):
             # Play selection sound
-            if setup.SFX.get('bump'):
-                setup.SFX['bump'].play()
+            if setup.SFX.get("bump"):
+                setup.SFX["bump"].play()
 
             if self.selected_option == 0:  # PLAY
                 self.reset_game_info()
@@ -288,6 +288,7 @@ class Menu(tools._State):
             elif self.selected_option == 3:  # EXIT
                 pg.quit()
                 import sys
+
                 sys.exit()
             self.input_timer = current_time
 
@@ -295,6 +296,7 @@ class Menu(tools._State):
         if can_input and keys[pg.K_ESCAPE]:
             pg.quit()
             import sys
+
             sys.exit()
 
     def reset_game_info(self) -> None:

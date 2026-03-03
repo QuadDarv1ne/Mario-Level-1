@@ -150,7 +150,6 @@ except Exception:
     except Exception:
         # Create dummy surface for headless tests
         try:
-            import pygame as pg
             SCREEN = pg.Surface((800, 600))
             SCREEN_RECT = SCREEN.get_rect()
         except Exception:
@@ -158,7 +157,6 @@ except Exception:
 
     # Provide dummy resources for tests
     try:
-        import pygame as pg
         if not GFX.get("smb_enemies_sheet"):
             GFX["smb_enemies_sheet"] = pg.Surface((512, 512))
         if not GFX.get("mario_bros"):

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple
 
 import pygame as pg
 
@@ -12,8 +12,8 @@ from .. import game_sound
 from ..event_system import get_event_manager, EventType
 from ..level_music_manager import get_level_music_manager
 from ..level_sound_effects import get_level_sound_effects
-from ..render_system import SpriteRenderer, RenderLayer, RenderManager
-from ..quadtree import CollisionDetector, get_collision_detector
+from ..render_system import RenderLayer, RenderManager
+from ..quadtree import CollisionDetector
 from ..components import mario
 from ..components import collider
 from ..components import bricks
@@ -24,9 +24,6 @@ from ..components import flagpole
 from ..components import info
 from ..components import score
 from ..components import castle_flag
-
-if TYPE_CHECKING:
-    from ..components.enemies import Enemy
 
 
 class Level1(tools._State):
@@ -102,7 +99,7 @@ class Level1(tools._State):
         if self.viewport is None:
             raise RuntimeError("Viewport not initialized")
         self.render_manager.renderer.set_viewport(self.viewport)
-        
+
         # Initialize collision detector with QuadTree
         # World size matches level dimensions
         world_width = int(self.level_rect.width) if self.level_rect else 10000
@@ -110,7 +107,7 @@ class Level1(tools._State):
         self.collision_detector = CollisionDetector(world_width, world_height, capacity=8)
 
         # Start level music
-        self.music_manager.play_level_music('level1', fade_ms=1000)
+        self.music_manager.play_level_music("level1", fade_ms=1000)
 
     def setup_background(self) -> None:
         """Sets the background image, rect and scales it to the correct
@@ -452,12 +449,12 @@ class Level1(tools._State):
         # Update music based on time remaining
         time_remaining = self.game_info.get(str(c.LEVEL_TIME), 400)
         self.music_manager.update(time_remaining)
-        
+
         # Play time warning sound
         if time_remaining == 100 and not self.time_warning_played:
             self.sound_effects.play_time_warning()
             self.time_warning_played = True
-        
+
         self.handle_states(keys)
         self.check_if_time_out()
         self.blit_everything(surface)
@@ -517,7 +514,7 @@ class Level1(tools._State):
         if self.flag_pole_group is not None:
             self.flag_pole_group.update()
         self.check_points_check()
-        
+
         # LOD: Only update visible enemies
         if self.enemy_group is not None:
             self._update_enemies_with_lod()
@@ -541,52 +538,52 @@ class Level1(tools._State):
         self.check_for_mario_death()
         self.update_viewport()
         self.overhead_info_display.update(self.game_info, self.mario)
-    
+
     def _is_sprite_visible(self, sprite, margin: int = 100) -> bool:
         """
         Check if sprite is within viewport + margin.
-        
+
         Args:
             sprite: Sprite to check
             margin: Extra margin around viewport
-            
+
         Returns:
             True if sprite should be updated
         """
-        if self.viewport is None or not hasattr(sprite, 'rect'):
+        if self.viewport is None or not hasattr(sprite, "rect"):
             return True
-        
+
         expanded_viewport = self.viewport.inflate(margin * 2, margin * 2)
         return sprite.rect.colliderect(expanded_viewport)
-    
+
     def _update_enemies_with_lod(self) -> None:
         """Update enemies with LOD - only visible ones get full update."""
         if self.enemy_group is None or self.viewport is None:
             return
-        
+
         for enemy in self.enemy_group.sprites():
             if self._is_sprite_visible(enemy, margin=150):
                 # Full update for visible enemies
                 enemy.update(self.game_info)
             else:
                 # Minimal update for off-screen enemies (just track position)
-                if hasattr(enemy, 'state') and enemy.state in ['walk', 'jump']:
+                if hasattr(enemy, "state") and enemy.state in ["walk", "jump"]:
                     # Keep moving but skip expensive calculations
-                    enemy.rect.x += getattr(enemy, 'x_vel', 0)
-                    enemy.rect.y += getattr(enemy, 'y_vel', 0)
-    
+                    enemy.rect.x += getattr(enemy, "x_vel", 0)
+                    enemy.rect.y += getattr(enemy, "y_vel", 0)
+
     def _update_shells_with_lod(self) -> None:
         """Update shells with LOD - only visible ones get full update."""
         if self.shell_group is None or self.viewport is None:
             return
-        
+
         for shell in self.shell_group.sprites():
             if self._is_sprite_visible(shell, margin=200):
                 shell.update(self.game_info)
             else:
                 # Keep sliding shells moving even off-screen
-                if hasattr(shell, 'state') and shell.state == 'shell_slide':
-                    shell.rect.x += getattr(shell, 'x_vel', 0)
+                if hasattr(shell, "state") and shell.state == "shell_slide":
+                    shell.rect.x += getattr(shell, "x_vel", 0)
 
     def check_points_check(self):
         """Detect if checkpoint collision occurs, delete checkpoint,
@@ -657,10 +654,10 @@ class Level1(tools._State):
         flag pole"""
         x = 8518
         y = c.GROUND_HEIGHT - 60
-        
+
         if self.mario is None or self.mario.rect is None:
             return
-            
+
         mario_bottom = self.mario.rect.bottom
 
         if mario_bottom > (c.GROUND_HEIGHT - 40 - 40):
@@ -683,16 +680,16 @@ class Level1(tools._State):
         """Adjusts sprites by their x and y velocities and collisions"""
         # Rebuild QuadTree for optimized collision detection
         self._rebuild_collision_tree()
-        
+
         self.adjust_mario_position()
         self.adjust_enemy_position()
         self.adjust_shell_position()
         self.adjust_powerup_position()
-    
+
     def _rebuild_collision_tree(self) -> None:
         """Rebuild QuadTree with current sprite positions."""
         all_colliders = []
-        
+
         # Add static colliders
         if self.ground_group:
             all_colliders.extend(self.ground_group.sprites())
@@ -700,13 +697,13 @@ class Level1(tools._State):
             all_colliders.extend(self.pipe_group.sprites())
         if self.step_group:
             all_colliders.extend(self.step_group.sprites())
-        
+
         # Add interactive colliders
         if self.brick_group:
             all_colliders.extend(self.brick_group.sprites())
         if self.coin_box_group:
             all_colliders.extend(self.coin_box_group.sprites())
-        
+
         # Add enemies
         if self.enemy_group:
             all_colliders.extend(self.enemy_group.sprites())
@@ -745,13 +742,11 @@ class Level1(tools._State):
             if isinstance(collider, (collider.Collider, bricks.Brick, coin_box_module.CoinBox)):
                 self.adjust_mario_for_x_collisions(collider)
                 return
-        
+
         # Fallback to sprite group checks for powerups and enemies
-        enemy = shell = powerup = None
+        enemy = powerup = None
         if self.enemy_group is not None:
             enemy = pg.sprite.spritecollideany(self.mario, self.enemy_group)
-        if self.shell_group is not None:
-            shell = pg.sprite.spritecollideany(self.mario, self.shell_group)
         if self.powerup_group is not None:
             powerup = pg.sprite.spritecollideany(self.mario, self.powerup_group)
 
@@ -870,7 +865,9 @@ class Level1(tools._State):
         if shell.state == c.JUMPED_ON:
             if self.mario.rect.x < shell.rect.x:
                 self.game_info[c.SCORE] += 400
-                self.moving_score_list.append(score.Score(int(shell.rect.centerx - self.viewport.x), int(shell.rect.y), 400))
+                self.moving_score_list.append(
+                    score.Score(int(shell.rect.centerx - self.viewport.x), int(shell.rect.y), 400)
+                )
                 self.mario.rect.right = shell.rect.left
                 shell.direction = c.RIGHT
                 shell.x_vel = 5
@@ -889,7 +886,9 @@ class Level1(tools._State):
                 self.mario.state = c.BIG_TO_SMALL
             elif self.mario.invincible:
                 self.game_info[c.SCORE] += 200
-                self.moving_score_list.append(score.Score(int(shell.rect.right - self.viewport.x), int(shell.rect.y), 200))
+                self.moving_score_list.append(
+                    score.Score(int(shell.rect.right - self.viewport.x), int(shell.rect.y), 200)
+                )
                 shell.kill()
                 if self.sprites_about_to_die_group is not None:
                     self.sprites_about_to_die_group.add(shell)
@@ -1074,7 +1073,9 @@ class Level1(tools._State):
         if enemy:
             setup.SFX["kick"].play()
             self.game_info[c.SCORE] += 100
-            self.moving_score_list.append(score.Score(int(enemy.rect.centerx - self.viewport.x), int(enemy.rect.y), 100))
+            self.moving_score_list.append(
+                score.Score(int(enemy.rect.centerx - self.viewport.x), int(enemy.rect.y), 100)
+            )
             enemy.kill()
             if self.sprites_about_to_die_group is not None:
                 self.sprites_about_to_die_group.add(enemy)
@@ -1142,7 +1143,9 @@ class Level1(tools._State):
         if self.mario.y_vel > 0:
             setup.SFX["stomp"].play()
             self.game_info[c.SCORE] += 100
-            self.moving_score_list.append(score.Score(int(enemy.rect.centerx - self.viewport.x), int(enemy.rect.y), 100))
+            self.moving_score_list.append(
+                score.Score(int(enemy.rect.centerx - self.viewport.x), int(enemy.rect.y), 100)
+            )
             enemy.state = c.JUMPED_ON
             enemy.kill()
             if enemy.name == c.GOOMBA:
@@ -1388,7 +1391,7 @@ class Level1(tools._State):
         collider = None
         brick = None
         coin_box = None
-        
+
         if self.ground_step_pipe_group is not None:
             collider = pg.sprite.spritecollideany(mushroom, self.ground_step_pipe_group)
         if self.brick_group is not None:
@@ -1410,7 +1413,7 @@ class Level1(tools._State):
         collider = None
         brick = None
         coin_box = None
-        
+
         if self.ground_step_pipe_group is not None:
             collider = pg.sprite.spritecollideany(mushroom, self.ground_step_pipe_group)
         if self.brick_group is not None:
@@ -1527,7 +1530,6 @@ class Level1(tools._State):
 
         collider = pg.sprite.spritecollideany(fireball, collide_group)
         enemy = pg.sprite.spritecollideany(fireball, self.enemy_group)
-        shell = pg.sprite.spritecollideany(fireball, self.shell_group)
 
         if collider and (fireball in self.powerup_group):
             fireball.rect.bottom = collider.rect.y
@@ -1647,7 +1649,9 @@ class Level1(tools._State):
         if self.mario is not None and self.mario.state == c.STAND:
             self.mario.state = c.WALKING_TO_CASTLE
         if self.mario is not None:
-            self.mario.update({}, self.game_info, self.powerup_group if self.powerup_group is not None else pg.sprite.Group())
+            self.mario.update(
+                {}, self.game_info, self.powerup_group if self.powerup_group is not None else pg.sprite.Group()
+            )
             self.mario.rect.x += round(self.mario.x_vel)
             self.check_points_check()
         for moving_score in self.moving_score_list:
@@ -1688,7 +1692,7 @@ class Level1(tools._State):
         # Draw background directly (not a sprite)
         if self.background is not None and self.viewport is not None:
             surface.blit(self.background, self.viewport, self.viewport)
-        
+
         # Add sprites to renderer by layer for proper z-ordering
         # Ground/pipe layer (background colliders - not rendered, but kept for compatibility)
         # Brick and coin box layer
@@ -1696,7 +1700,7 @@ class Level1(tools._State):
             renderer.add_sprite_group(self.brick_group, RenderLayer.BRICKS)
         if self.coin_box_group:
             renderer.add_sprite_group(self.coin_box_group, RenderLayer.BRICKS)
-        
+
         # Item layer
         if self.powerup_group:
             renderer.add_sprite_group(self.powerup_group, RenderLayer.ITEMS)
@@ -1704,7 +1708,7 @@ class Level1(tools._State):
             renderer.add_sprite_group(self.coin_group, RenderLayer.ITEMS)
         if self.brick_pieces_group:
             renderer.add_sprite_group(self.brick_pieces_group, RenderLayer.ITEMS)
-        
+
         # Enemy layer
         if self.enemy_group:
             renderer.add_sprite_group(self.enemy_group, RenderLayer.ENEMIES)
@@ -1712,26 +1716,26 @@ class Level1(tools._State):
             renderer.add_sprite_group(self.shell_group, RenderLayer.ENEMIES)
         if self.sprites_about_to_die_group:
             renderer.add_sprite_group(self.sprites_about_to_die_group, RenderLayer.ENEMIES)
-        
+
         # Player layer
         if self.mario:
             renderer.add_sprite_object(self.mario, RenderLayer.PLAYER)
-        
+
         # Flag layer
         if self.flag_pole_group:
             renderer.add_sprite_group(self.flag_pole_group, RenderLayer.ITEMS)
-        
+
         # Render all sprites with viewport offset
         offset = (self.viewport.x, self.viewport.y) if self.viewport else (0, 0)
         renderer.render(offset, clear=False)  # Don't clear - we drew background already
-        
+
         # Draw flag score on top if exists
         if self.flag_score:
             self.flag_score.draw(surface)
-        
+
         # Draw overhead info
         self.overhead_info_display.draw(surface)
-        
+
         # Draw moving scores
         for moving_score in self.moving_score_list:
             moving_score.draw(surface)

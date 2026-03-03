@@ -188,7 +188,6 @@ class EnemyAI:
 
         # Update target
         if visible:
-            current_time = float(game_info.get(c.CURRENT_TIME, 0))
             self.target = AITarget(
                 position=mario_pos,
                 distance=distance,
