@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Any, Callable, Union, Tuple
 import pygame as pg
 
 from . import constants as c
-from . import settings_manager
+from . import game_settings
 from . import tools
 
 

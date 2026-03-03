@@ -9,7 +9,7 @@ import pygame as pg
 from .. import setup, tools
 from .. import constants as c
 from ..components import info
-from ..settings_manager import get_settings_manager
+from ..game_settings import get_settings_manager
 
 
 class Settings(tools._State):
