@@ -21,7 +21,7 @@ from . import weather_system
 from . import audio_manager
 from . import hint_system
 from . import dialog_system as dialogue_system  # Alias for backwards compatibility
-from . import screenshot
+from . import screenshot_manager as screenshot
 from . import debug
 from . import statistics
 from . import input_system
