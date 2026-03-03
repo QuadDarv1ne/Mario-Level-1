@@ -352,7 +352,7 @@ class FrameRateMonitor:
 class ComputationCache:
     """
     LRU cache for expensive computations.
-    
+
     Caches results of expensive operations to avoid recomputation.
     Automatically evicts least recently used entries when full.
     """
@@ -386,7 +386,7 @@ class ComputationCache:
             self._access_order.remove(key)
             self._access_order.append(key)
             return self._cache[key]
-        
+
         self._misses += 1
         return None
 
@@ -447,6 +447,7 @@ def memoize(max_size: int = 128):
         def expensive_calculation(x, y):
             return x ** y
     """
+
     def decorator(func: Callable) -> Callable:
         cache = ComputationCache(max_size=max_size)
 
@@ -454,7 +455,7 @@ def memoize(max_size: int = 128):
         def wrapper(*args, **kwargs):
             # Create cache key from args and kwargs
             key = (args, tuple(sorted(kwargs.items())))
-            
+
             result = cache.get(key)
             if result is not None:
                 return result
@@ -472,7 +473,7 @@ def memoize(max_size: int = 128):
 class SpatialHash:
     """
     Spatial hashing for efficient collision detection.
-    
+
     Divides space into grid cells for fast proximity queries.
     """
 

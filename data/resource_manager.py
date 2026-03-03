@@ -12,10 +12,12 @@ Provides:
 from __future__ import annotations
 
 import os
+import threading
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable, Union
+from queue import PriorityQueue, Empty
+from typing import Dict, List, Optional, Any, Callable, Union, Tuple
 
 import pygame as pg
 
@@ -732,9 +734,6 @@ def create_asset_manager(preset: str = "production", base_path: Optional[Union[s
 
 
 # Async loading support
-import threading
-from queue import PriorityQueue, Empty
-from typing import Tuple
 
 
 class LoadPriority(Enum):

@@ -16,9 +16,21 @@ class Enemy(pg.sprite.Sprite):
     """Base class for all enemies (Goombas, Koopas, etc.)"""
 
     __slots__ = [
-        'sprite_sheet', 'frames', 'frame_index', 'animate_timer', 'death_timer',
-        'gravity', 'state', 'name', 'direction', 'x_vel', 'y_vel',
-        'current_time', 'mario', 'image', 'rect'
+        "sprite_sheet",
+        "frames",
+        "frame_index",
+        "animate_timer",
+        "death_timer",
+        "gravity",
+        "state",
+        "name",
+        "direction",
+        "x_vel",
+        "y_vel",
+        "current_time",
+        "mario",
+        "image",
+        "rect",
     ]
 
     rect: pg.Rect
@@ -69,9 +81,7 @@ class Enemy(pg.sprite.Sprite):
 
     def get_image(self, x: int, y: int, width: int, height: int) -> pg.Surface:
         """Get the image frames from the sprite sheet"""
-        return sprite_utils.extract_image(
-            self.sprite_sheet, x, y, width, height, c.SIZE_MULTIPLIER, c.BLACK
-        )
+        return sprite_utils.extract_image(self.sprite_sheet, x, y, width, height, c.SIZE_MULTIPLIER, c.BLACK)
 
     def handle_state(self) -> None:
         """Enemy behavior based on state"""
@@ -155,10 +165,10 @@ class Goomba(Enemy):
     def jumped_on(self) -> None:
         """When Mario squishes him - dies after 500ms"""
         self.frame_index = 2
-        
+
         if self.death_timer == 0:
             self.death_timer = self.current_time
-        
+
         if (self.current_time - self.death_timer) > 500:
             self.kill()
 

@@ -754,7 +754,6 @@ class GameAudioPreset:
         return self.audio.play_sound(SOUND_NAMES["menu_move"], category=AudioCategory.UI)
 
 
-
 class AudioEffect(Enum):
     """Audio effect types."""
 
@@ -779,7 +778,7 @@ class EffectConfig:
 class AudioEffectProcessor:
     """
     Audio effects processor.
-    
+
     Applies real-time audio effects to sounds.
     Note: This is a simplified implementation. For production,
     consider using external audio libraries like pydub or sounddevice.
@@ -850,11 +849,7 @@ class AudioEffectProcessor:
         Returns:
             List of active effect names
         """
-        return [
-            name
-            for name, config in self.effects.items()
-            if config.enabled
-        ]
+        return [name for name, config in self.effects.items() if config.enabled]
 
     def clear_effects(self) -> None:
         """Clear all effects."""
@@ -884,17 +879,12 @@ class AudioMixer:
         self.ducking_amount = 0.5  # How much to reduce volume
         self.ducking_duration_ms = 500
         self.crossfade_duration_ms = 1000
-        
+
         # Track volumes for ducking
         self._original_volumes: Dict[AudioCategory, float] = {}
         self._ducked = False
 
-    def enable_ducking(
-        self,
-        enable: bool = True,
-        amount: float = 0.5,
-        duration_ms: int = 500
-    ) -> None:
+    def enable_ducking(self, enable: bool = True, amount: float = 0.5, duration_ms: int = 500) -> None:
         """
         Enable audio ducking (reduce music when SFX plays).
 

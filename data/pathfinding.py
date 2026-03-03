@@ -221,8 +221,8 @@ class AStarPathfinder:
 
         # Reset nodes
         for node in self.grid.nodes.values():
-            node.g_cost = float('inf')
-            node.h_cost = float('inf')
+            node.g_cost = float("inf")
+            node.h_cost = float("inf")
             node.parent = None
 
         start_node.g_cost = 0
@@ -243,13 +243,7 @@ class AStarPathfinder:
             # Check if reached goal
             if current == goal_node:
                 path = self._reconstruct_path(current)
-                result = PathResult(
-                    path,
-                    True,
-                    len(path),
-                    current.g_cost,
-                    "Path found"
-                )
+                result = PathResult(path, True, len(path), current.g_cost, "Path found")
                 self._add_to_cache(cache_key, result)
                 return result
 
@@ -399,7 +393,6 @@ class AStarPathfinder:
         return True
 
 
-
 class JumpPathfinder:
     """
     Jump trajectory pathfinding.
@@ -489,7 +482,7 @@ class JumpPathfinder:
         dy = platform_y - start_y  # Positive = higher
 
         # Calculate max jump height
-        max_height = (self.jump_velocity ** 2) / (2 * self.gravity)
+        max_height = (self.jump_velocity**2) / (2 * self.gravity)
 
         # Calculate time to reach platform horizontally
         if dx == 0:
@@ -533,9 +526,7 @@ class JumpPathfinder:
 
         if result.success:
             # Convert to world coords
-            world_path: List[Tuple[float, float]] = [
-                (float(x), float(y)) for x, y in result.path
-            ]
+            world_path: List[Tuple[float, float]] = [(float(x), float(y)) for x, y in result.path]
             return world_path
 
         # Try with jumps
@@ -549,11 +540,7 @@ class JumpPathfinder:
         """Find path with jumps."""
         # Simplified: just check if goal is reachable with jump
         if self.can_reach_platform(start[0], start[1], goal[0], goal[1]):
-            arc = self.calculate_jump_arc(
-                start[0],
-                start[1],
-                (goal[0] - start[0]) / 0.5
-            )
+            arc = self.calculate_jump_arc(start[0], start[1], (goal[0] - start[0]) / 0.5)
             return arc
 
         return None
