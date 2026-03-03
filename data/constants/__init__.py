@@ -251,6 +251,12 @@ __all__ = [
     "TIME_WARNING",
     "SPED_UP_NORMAL",
     "MARIO_INVINCIBLE",
+    "HIDDEN",
+    "EMERGING",
+    "EMERGED",
+    "RETRACTING",
+    "LEVEL_SELECT",
+    "SETTINGS",
     # Items
     "MUSHROOM",
     "STAR",
