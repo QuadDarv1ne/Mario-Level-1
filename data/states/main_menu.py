@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, Optional, Tuple
 
 import pygame as pg
@@ -9,6 +10,8 @@ import pygame as pg
 from .. import setup, tools
 from .. import constants as c
 from ..components import info, mario
+
+logger = logging.getLogger(__name__)
 
 
 class Menu(tools._State):
@@ -78,7 +81,7 @@ class Menu(tools._State):
             self.background_rect = self.background.get_rect()
             self.viewport = pg.Rect(0, 0, c.SCREEN_WIDTH, c.SCREEN_HEIGHT)
         except (pg.error, FileNotFoundError) as e:
-            print(f"Could not load background image: {e}")
+            logger.warning("Could not load background image: %s", e)
             # Fallback to level_1 image
             level_1_img = setup.GFX.get("level_1")
             if level_1_img is None:

@@ -11,12 +11,15 @@ Features:
 from __future__ import annotations
 
 import json
+import logging
 import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import pygame as pg
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -163,7 +166,7 @@ class ScreenshotManager:
             return filename
 
         except (pg.error, IOError) as e:
-            print(f"Screenshot error: {e}")
+            logger.warning("Screenshot error: %s", e)
             return None
 
     def _cleanup(self) -> None:

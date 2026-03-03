@@ -95,12 +95,10 @@ def main() -> int:
 
     except ImportError as e:
         logger.error(f"Import error: {e}", exc_info=True)
-        print(f"Error: Failed to import module - {e}")
         return 4
 
     except Exception as e:
         logger.error(f"Unexpected error: {e}", exc_info=True)
-        print(f"Error: Unexpected error - {e}")
         return 5
 
     finally:
