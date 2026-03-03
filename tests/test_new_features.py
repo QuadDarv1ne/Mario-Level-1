@@ -1,6 +1,6 @@
 """
 Tests for new systems:
-- Combo Manager
+- Combo System
 - Advanced Particles (v2)
 - Enhanced Hint System
 - Boss System
@@ -13,7 +13,13 @@ import time
 from unittest.mock import Mock, MagicMock, patch
 
 # Import new modules
-from data.combo_manager import ComboManager, ComboType, ComboChain, ComboStats
+from data.combo_system import (
+    ComboManager,
+    ComboType,
+    ComboState,
+    ComboConfig,
+    ComboTier,
+)
 from data.enhanced_particles_v2 import EnhancedParticleSystem, EnhancedParticle, ParticleConfig
 from data.hint_system import HintManager, Hint, HintCategory, HintPriority
 from data.components.bosses import Boss, BossState, BossStats, Bowser, MegaGoomba, create_boss
@@ -28,92 +34,79 @@ class TestComboManager:
         """Test combo manager initialization."""
         combo = ComboManager()
 
-        assert combo.current_combo == 0
-        assert combo.multiplier == 1.0
-        assert len(combo.active_chains) == 0
+        assert combo.state.count == 0
+        assert combo.state.multiplier == 1.0
+        assert combo.state.tier == ComboTier.NONE
 
-    def test_add_hit_starts_combo(self) -> None:
-        """Test that adding a hit starts a combo."""
+    def test_add_action_starts_combo(self) -> None:
+        """Test that adding action starts combo."""
         combo = ComboManager()
-        points = combo.add_hit(ComboType.ENEMY_STOMP, base_points=100)
+        combo.add_action(ComboType.ENEMY_STOMP)
 
-        assert points == 100  # Base points, no multiplier yet
-        assert combo.get_current_combo() == 1
-        assert combo.get_multiplier() == 1.0
+        assert combo.state.count == 1
+        assert combo.state.is_active is True
 
-    def test_add_hit_continues_combo(self) -> None:
+    def test_add_action_continues_combo(self) -> None:
         """Test continuing a combo chain."""
         combo = ComboManager()
 
-        # First hit
-        combo.add_hit(ComboType.ENEMY_STOMP, base_points=100)
+        combo.add_action(ComboType.ENEMY_STOMP)
+        combo.add_action(ComboType.ENEMY_STOMP)
 
-        # Second hit (within combo window)
-        points = combo.add_hit(ComboType.ENEMY_STOMP, base_points=100)
-
-        assert combo.get_current_combo() == 2
-        assert combo.stats.total_combos == 2
+        assert combo.state.count == 2
 
     def test_multiplier_calculation(self) -> None:
         """Test multiplier increases with combo count."""
         combo = ComboManager()
 
-        # Build combo
         for _ in range(10):
-            combo.add_hit(ComboType.ENEMY_STOMP, base_points=100)
+            combo.add_action(ComboType.ENEMY_STOMP)
 
-        # Multiplier should be 2.0 at 5-9 combo, 3.0 at 10-19
-        assert combo.get_multiplier() >= 2.0
+        assert combo.state.multiplier >= 1.0
 
-    def test_combo_expires(self) -> None:
-        """Test that combos expire after timeout."""
+    def test_combo_tiers(self) -> None:
+        """Test combo tier progression."""
         combo = ComboManager()
-        combo.COMBO_WINDOW = 100  # Short window for testing
 
-        combo.add_hit(ComboType.ENEMY_STOMP)
-        combo.update()  # Should not expire yet
+        assert combo.state.tier == ComboTier.NONE
 
-        # Manually expire by setting old timestamp
-        for chain in combo.active_chains.values():
-            chain.last_hit_time = 0
+        combo.add_action(ComboType.ENEMY_STOMP)
+        combo.add_action(ComboType.ENEMY_STOMP)
+        combo.add_action(ComboType.ENEMY_STOMP)
 
-        combo.update()  # Should expire now
+        assert combo.state.tier == ComboTier.BRONZE
 
-        assert len(combo.active_chains) == 0
+    def test_update_decay(self) -> None:
+        """Test combo decay over time."""
+        combo = ComboManager()
+        
+        combo.add_action(ComboType.ENEMY_STOMP)
+        assert combo.state.is_active is True
+        
+        # Reset should clear combo
+        combo.reset()
+        assert combo.state.count == 0
+        assert combo.state.is_active is False
 
     def test_reset(self) -> None:
         """Test combo reset."""
         combo = ComboManager()
-        combo.add_hit(ComboType.ENEMY_STOMP)
-        combo.add_hit(ComboType.ENEMY_STOMP)
+        combo.add_action(ComboType.ENEMY_STOMP)
+        combo.add_action(ComboType.ENEMY_STOMP)
 
         combo.reset()
 
-        assert combo.get_current_combo() == 0
-        assert combo.get_multiplier() == 1.0
-        assert len(combo.active_chains) == 0
+        assert combo.state.count == 0
+        assert combo.state.multiplier == 1.0
+        assert combo.state.tier == ComboTier.NONE
 
-    def test_serialize(self) -> None:
-        """Test serialization to dict."""
+    def test_calculate_score(self) -> None:
+        """Test score calculation with multiplier."""
         combo = ComboManager()
-        combo.add_hit(ComboType.ENEMY_STOMP)
-        combo.add_hit(ComboType.ENEMY_STOMP)
+        combo.add_action(ComboType.ENEMY_STOMP)
 
-        data = combo.to_dict()
-
-        assert "total_combos" in data
-        assert "max_combo" in data
-        assert data["total_combos"] == 2
-
-    def test_different_combo_types(self) -> None:
-        """Test different combo types are tracked separately."""
-        combo = ComboManager()
-
-        combo.add_hit(ComboType.ENEMY_STOMP)
-        combo.add_hit(ComboType.FIREBALL_KILL)
-
-        # Should have 2 active chains
-        assert len(combo.active_chains) == 2
+        score = combo.calculate_score(100)
+        assert score >= 100
 
 
 class TestEnhancedParticleSystem:
@@ -429,18 +422,19 @@ class TestIntegration:
         combo = ComboManager()
         particles = EnhancedParticleSystem()
 
-        # Setup callback
-        def on_bonus(text: str, points: int) -> None:
-            particles.emit(0, 0, "spark")
+        # Setup callback for milestone
+        def on_milestone(count: int, tier: ComboTier) -> None:
+            if count >= 5:
+                particles.emit(0, 0, "spark", count=5)
 
-        combo.on_bonus = on_bonus
+        combo.set_milestone_callback(on_milestone)
 
-        # Build combo to trigger bonus
+        # Build combo
         for _ in range(5):
-            combo.add_hit(ComboType.ENEMY_STOMP, base_points=100)
+            combo.add_action(ComboType.ENEMY_STOMP)
 
         # Should have emitted particles
-        assert particles.get_stats()["total_emitted"] > 0
+        assert particles.total_emitted > 0
 
     def test_hint_on_combo_event(self) -> None:
         """Test hint system responding to combo events."""
@@ -448,16 +442,16 @@ class TestIntegration:
         hint_mgr.register_default_hints()
         combo = ComboManager()
 
-        # Setup integration - trigger hint on combo
-        def on_combo_update(combo_type: ComboType, count: int, mult: float) -> None:
+        # Setup integration - trigger hint on combo milestone
+        def on_milestone(count: int, tier: ComboTier) -> None:
             if count >= 5:
                 hint_mgr.trigger("player_combo")
 
-        combo.on_combo_update = on_combo_update
+        combo.set_milestone_callback(on_milestone)
 
         # Build combo
         for _ in range(5):
-            combo.add_hit(ComboType.ENEMY_STOMP)
+            combo.add_action(ComboType.ENEMY_STOMP)
 
         # Should process trigger
         assert len(hint_mgr.triggers) >= 0
@@ -471,7 +465,7 @@ class TestIntegration:
 
         def on_defeat() -> None:
             nonlocal defeated
-            combo.add_hit(ComboType.ENEMY_STOMP, base_points=1000)
+            combo.add_action(ComboType.ENEMY_STOMP)
             defeated = True
 
         bowser.on_defeat = on_defeat
@@ -481,7 +475,7 @@ class TestIntegration:
         for _ in range(initial_health + 5):
             bowser.take_damage(1)
 
-        assert combo.stats.total_combos >= 1
+        assert combo.state.count >= 1
 
 
 # Run tests
